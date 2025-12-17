@@ -39,7 +39,8 @@ dev = [
   "pre-commit",
   "ruff",
   "tbump",
-  "build"
+  "build",
+  "twine",
 ]
 docs = [
   "sphinx",
@@ -52,6 +53,11 @@ path = "e2x_course_hub/__about__.py"
 [tool.hatch.build.targets.wheel.shared-data]
 "share/e2x_course_hub" = "share/e2x_course_hub"
 
+[tool.hatch.build]
+artifacts = [
+  "share/e2x_course_hub/static/course-service-ui/*",
+]
+
 [tool.hatch.build.hooks.jupyter-builder]
 dependencies = ["hatch-jupyter-builder"]
 build-function = "hatch_jupyter_builder.npm_builder"
@@ -63,7 +69,7 @@ path = "course-service-ui"
 github_url = "https://github.com/Digiklausur/e2x-course-hub"
 
 [tool.tbump.version]
-current = "0.1.1rc0"
+current = "0.1.0"
 regex = '''
   (?P<major>\d+)
   \.
@@ -80,6 +86,9 @@ tag_template = "v{new_version}"
 # Files with the version to update
 [[tool.tbump.file]]
 src = "e2x_course_hub/__about__.py"
+
+[[tool.tbump.file]]
+src = "course-service-ui/package.json"
 
 [[tool.tbump.before_commit]]
 name = "Build"
