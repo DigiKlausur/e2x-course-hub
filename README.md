@@ -197,6 +197,13 @@ Define reusable mount patterns:
 ```yaml
 # mount_definitions.yaml
 student_home:
+  inputs: 
+    username:
+      required: true
+      type: string
+    course_id:
+      required: true
+      type: string
   description: "Student home directory"
   name: "home-${{args.username}}"
   mountPath: "/home/jovyan"
