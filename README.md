@@ -201,8 +201,6 @@ student_home:
   name: "home-${{args.username}}"
   mountPath: "/home/jovyan"
   subPath: "${{args.course_id}}/${{args.username}}"
-  pvc:
-    claimName: "student-homes-pvc"
 ```
 
 ## Usage
