@@ -311,7 +311,7 @@ api = API(
 )
 
 # Get user's courses
-user = User(username="alice", groups=["AMR-WS25-graders"])
+user = User(username="alice", groups=["AMR.WS25.graders"])
 courses = api.course_api.list_courses(user)
 
 # Get resolved profile
