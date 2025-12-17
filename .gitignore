@@ -6,7 +6,7 @@ node_modules
 ui/meta.json
 
 # Build static files
-share/e2x_course_service/static/
+share/e2x_course_hub/static/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
