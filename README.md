@@ -205,9 +205,9 @@ student_home:
       required: true
       type: string
   description: "Student home directory"
-  name: "home-${{args.username}}"
+  name: "home-${{inputs.username}}"
   mountPath: "/home/jovyan"
-  subPath: "${{args.course_id}}/${{args.username}}"
+  subPath: "${{inputs.course_id}}/${{inputs.username}}"
 ```
 
 ## Usage
