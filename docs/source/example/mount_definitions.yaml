@@ -1,0 +1,111 @@
+# ============================================================================
+# Mount Definitions Example File
+# ============================================================================
+# This file contains example mount definitions for student home directories,
+# grader home directories, and shared course materials.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Student Home Directory
+# ----------------------------------------------------------------------------
+# A student home directory is defined based on course ID, term ID, and 
+# username. For each course and term, students have separate home directories.
+# ----------------------------------------------------------------------------
+student_home:
+  description: "The home directory for the student."
+  name: disk2
+  mountPath: "/home/${{inputs.username}}"
+  subPath: "homes/teaching/students/${{inputs.course_id}}-${{inputs.term_id}}/${{inputs.username}}"
+  readOnly: false
+  
+  inputs:
+    course_id:
+      type: string
+      required: true
+    term_id:
+      type: string
+      required: true
+    username:
+      type: string
+      required: true
+
+# ----------------------------------------------------------------------------
+# Grader Home Directory
+# ----------------------------------------------------------------------------
+# A grader home directory is defined based on username only. Graders have a 
+# common home directory across all courses and terms.
+# ----------------------------------------------------------------------------
+grader_home:
+  description: "The home directory for the grader."
+  name: disk2
+  mountPath: "/home/${{inputs.username}}"
+  subPath: "homes/teaching/graders/${{inputs.username}}"
+  readOnly: false
+  
+  inputs:
+    username:
+      type: string
+      required: true
+
+# ----------------------------------------------------------------------------
+# Course Materials Directory
+# ----------------------------------------------------------------------------
+# A course materials directory is defined based on course ID and username. 
+# Each grader has access to the course materials directory for the courses 
+# they are grading.
+# ----------------------------------------------------------------------------
+grader_course_directory:
+  description: "The course directory, shared between all graders of the course."
+  name: disk2
+  mountPath: "/home/${{inputs.username}}/courses/${{inputs.course_id}}/"
+  subPath: "courses/${{inputs.course_id}}/"
+  readOnly: false
+  
+  inputs:
+    course_id:
+      type: string
+      required: true
+    username:
+      type: string
+      required: true
+
+# ----------------------------------------------------------------------------
+# JupyterHub and Course Config Directory
+# ----------------------------------------------------------------------------
+# This mount definition points to the directory where JupyterHub and course
+# configuration files are stored.
+# ----------------------------------------------------------------------------
+course_config:
+  description: "The directory where the hub and course config reside."
+  name: disk1
+  subPath: "jupyterhub"
+  mountPath: "/srv/disk-01/jupyterhub"
+  readOnly: false
+
+# ----------------------------------------------------------------------------
+# NBGrader Exchange Directory
+# ----------------------------------------------------------------------------
+# This mount definition provides access to the NBGrader exchange directory,
+# which is used for exchanging assignments and feedback between students and
+# graders.
+# ----------------------------------------------------------------------------
+nbgrader_exchange_mount:
+  description: "The NBGrader exchange directory for assignment exchange."
+  name: disk3
+  mountPath: "/srv/nbgrader/exchange/${{inputs.course_id}}-${{inputs.term_id}}/${{inputs.step}}"
+  subPath: "nbgrader/exchanges/${{inputs.course_id}}/${{inputs.course_id}}-${{inputs.term_id}}/${{inputs.step}}"
+  readOnly: "${{inputs.readonly}}"
+  inputs:
+    course_id:
+      type: string
+      required: true
+    term_id:
+      type: string
+      required: true
+    step:
+      type: string
+      required: true
+    readonly:
+      type: boolean
+      required: false
+      default: true

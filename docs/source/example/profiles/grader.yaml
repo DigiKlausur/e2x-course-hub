@@ -1,0 +1,47 @@
+name: grader_profile
+inherits: base_profile
+display_name: "Grader Profile"
+description: "The base grader profile using a file based exchange."
+inputs:
+  username:
+    required: true
+    type: string
+  course_id:
+    required: true
+    type: string
+  term_id:
+    required: true
+    type: string
+runtime:
+  image:
+    name: ghcr.io/digiklausur/docker-stacks/datascience-notebook-teacher
+    tag: staging
+    pullPolicy: IfNotPresent
+  resources:
+    cpu_guarantee: 0.001
+    cpu_limit: 4.0
+    mem_guarantee: 1.0G
+    mem_limit: 8.0G
+  environment:
+    NBGRADER_COURSE_ID: "${{ inputs.course_id}}-${{inputs.term_id}}"
+    NBGRADER_COURSE_DIR: "~/courses/${{ inputs.course_id}}/${{ inputs.course_id}}-${{inputs.term_id}}"
+    CHOWN_HOME: "no"
+    NB_GID: 2000
+    NB_UID: 2000
+mount_requests:
+  home:
+    id: grader_home
+    args:
+      username: "${{ inputs.username }}"
+  grader_course_directory:
+    id: course
+    args:
+      username: "${{ inputs.username }}"
+      course_id: "${{ inputs.course_id }}"
+  grader_writable_exchange:
+    id: nbgrader_exchange_mount
+    args:
+      course_id: "${{ inputs.course_id }}"
+      term_id: "${{ inputs.term_id }}"
+      step: ""
+      readonly: false

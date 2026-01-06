@@ -1,0 +1,16 @@
+metadata:
+  course_id: ML101
+  course_name: "Machine Learning"
+  description: "An introductory course to Machine Learning."
+profile_runtime_overrides:
+  grader_profile:
+    image:
+      name: ghcr.io/digiklausur/docker-stacks/ml-notebook-teacher
+  student_profile:
+    image:
+      name: ghcr.io/digiklausur/docker-stacks/ml-notebook-student
+terms:
+  WS25:
+    allowed_profiles:
+    - grader_profile
+    - student_profile
