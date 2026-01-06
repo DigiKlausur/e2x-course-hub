@@ -28,7 +28,7 @@ def render_obj(obj: Any, namespace: str, ctx: Dict[str, Any]) -> Any:
 
 class Parameter(BaseModel):
     """
-    Parameter definition for profile configuration.
+    Parameter definition for profile and mount configuration.
     """
 
     required: bool = Field(..., description="Whether this parameter is required.")
