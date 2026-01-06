@@ -46,6 +46,11 @@ class Image(MergeableModel[ImagePartial]):
 
     @property
     def full_image_name(self):
+        """
+        Get the full image name including tag.
+        Returns:
+            str: The full image name as "name:tag".
+        """
         return f"{self.name}:{self.tag}"
 
 
