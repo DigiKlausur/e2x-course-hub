@@ -16,52 +16,73 @@ from .handlers import apihandlers, handlers
 
 class CourseServiceApp(Application):
     data_files_path = Unicode(
-        DATA_FILES_PATH, help="Path to the data files for the application"
+        DATA_FILES_PATH,
+        help="Path to the data files for the application. Defaults to the package data files.",
     ).tag(config=True)
 
-    tornado_settings = Dict(help="Tornado settings for the application").tag(config=True)
+    tornado_settings = Dict(help="Tornado settings for the application")
 
     template_path = Unicode(
         os.path.join(DATA_FILES_PATH, "templates", "course_service"),
-        help="Path to the Jinja2 templates for the application",
+        help="Path to the Jinja2 templates for the application. Defaults to the package templates.",
     )
 
     static_path = Unicode(
         os.path.join(DATA_FILES_PATH, "static"),
-        help="Path to the static files for the application",
+        help="Path to the static files for the application. Defaults to the package static files.",
     )
 
     handlers = List(
-        help="List of (url, handler) tuples for the application",
+        help="List of (url, handler) tuples for the application.",
     )
 
     service_prefix = Unicode(
-        os.environ.get("JUPYTERHUB_SERVICE_PREFIX"), help="The URL prefix for the service"
+        os.environ.get("JUPYTERHUB_SERVICE_PREFIX"),
+        help=(
+            "The URL prefix for the service. Defaults to the "
+            "JUPYTERHUB_SERVICE_PREFIX environment variable."
+        ),
     ).tag(config=True)
 
     api_token = Unicode(
         os.environ.get("JUPYTERHUB_API_TOKEN"),
-        help="The API token for the service to authenticate with JupyterHub",
+        help=(
+            "The API token for the service to authenticate with JupyterHub. "
+            "Defaults to the JUPYTERHUB_API_TOKEN environment variable."
+        ),
     )
 
     api_url = Unicode(
         os.environ.get("JUPYTERHUB_API_URL"),
-        help="The base URL of the JupyterHub API",
+        help=(
+            "The base URL of the JupyterHub API. Defaults to the "
+            "JUPYTERHUB_API_URL environment variable."
+        ),
     ).tag(config=True)
 
     add_users_to_hub = Bool(
-        False, help="Whether to add users to JupyterHub when they are created in the course service"
+        False,
+        help=(
+            "Whether to add users to JupyterHub when they are added to a course in the "
+            "course service. Defaults to False."
+        ),
     ).tag(config=True)
 
     refresh_interval = Integer(
-        300, help="Interval in seconds to refresh server config from disk"
+        300, help="Interval in seconds to refresh server config from disk. Defaults to 300 seconds."
     ).tag(config=True)
 
-    port = Integer(10101, help="The port for the service to listen on").tag(config=True)
+    port = Integer(10101, help="The port for the service to listen on. Defaults to 10101.").tag(
+        config=True
+    )
 
     server_config_file = Unicode(
         os.environ.get("E2X_COURSE_HUB_CONFIG", "config.yml"),
-        help="Path to the e2x-course-hub server configuration file",
+        help=(
+            "Path to the e2x-course-hub server configuration file. "
+            "Defaults to 'config.yml' or the E2X_COURSE_HUB_CONFIG "
+            "environment variable."
+        ),
     ).tag(config=True)
 
     def init_tornado_settings(self):
