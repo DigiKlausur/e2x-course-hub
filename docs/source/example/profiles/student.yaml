@@ -1,0 +1,55 @@
+# ============================================================================
+# Student profile
+# ============================================================================
+# This profile is designed for students and inherits from the base profile. It
+# specifies a different Docker image optimized for student use and includes
+# a mount request for the student's home directory, which is organized by
+# course and term.
+# ============================================================================
+name: student_profile
+inherits: base_profile
+display_name: "Student Profile"
+description: "The base student profile using a file based exchange."
+inputs:
+  username:
+    required: true
+    type: string
+  course_id:
+    required: true
+    type: string
+  term_id:
+    required: true
+    type: string
+runtime:
+  image:
+    name: ghcr.io/digiklausur/docker-stacks/datascience-notebook-student
+    tag: staging
+    pullPolicy: IfNotPresent
+  environment:
+    NBGRADER_COURSE_ID: "${{inputs.course_id}}-${{inputs.term_id}}"
+mount_requests:
+  home:
+    id: student_home
+    args:
+      username: "${{ inputs.username }}"
+      course_id: "${{ inputs.course_id }}"
+      term_id: "${{ inputs.term_id }}"
+  personalized_feedback:
+    id: nbgrader_exchange_mount
+    args:
+      course_id: "${{ inputs.course_id }}"
+      term_id: "${{ inputs.term_id }}"
+      step: "personalized-feedback/${{inputs.username}}"
+  personalized_inbound:
+    id: nbgrader_exchange_mount
+    args:
+      course_id: "${{ inputs.course_id }}"
+      term_id: "${{ inputs.term_id }}"
+      step: "personalized-inbound/${{inputs.username}}"
+      readonly: false
+  outbound:
+    id: nbgrader_exchange_mount
+    args:
+      course_id: "${{ inputs.course_id }}"
+      term_id: "${{ inputs.term_id }}"
+      step: "outbound"

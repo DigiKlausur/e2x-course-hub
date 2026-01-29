@@ -1,0 +1,5 @@
+autodoc-traits
+autodoc-pydantic
+myst-parser
+sphinx>=4
+pydata-sphinx-theme

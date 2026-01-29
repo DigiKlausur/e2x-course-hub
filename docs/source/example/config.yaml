@@ -1,0 +1,20 @@
+profile_dir: "profiles"
+course_config_dir: "course_configs"
+mount_definitions_file: "mount_definitions.yaml"
+
+roles:
+  student:
+    priority: 100
+    scopes:
+      - spawn:profile!profile=student_profile
+  grader:
+    priority: 200
+    scopes:
+      - spawn:profile!profile=grader_profile
+      - add:course-members!role=student
+      - remove:course-members!role=student
+  course_admin:
+    priority: 300
+    scopes:
+      - add:course-members
+      - remove:course-members

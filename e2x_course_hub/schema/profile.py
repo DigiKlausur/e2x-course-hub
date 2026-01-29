@@ -49,10 +49,10 @@ class BaseProfile(MergeableModel[InheritedProfile], ResolveableModel):
     )
     runtime: Runtime = Field(..., description="Runtime configuration for the profile.")
     mount_requests: Dict[str, MountRequest] = Field(
-        default_factory=dict, description="Mount configurations for the profile."
+        default_factory=dict, description="Mount requests for the profile."
     )
     admin_mount_requests: Dict[str, MountRequest] = Field(
-        default_factory=dict, description="Admin-only mount configurations for the profile."
+        default_factory=dict, description="Admin-only mount requests for the profile."
     )
 
     def merge(self, partial: InheritedProfile | None) -> "BaseProfile":

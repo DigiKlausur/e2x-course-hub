@@ -117,7 +117,7 @@ class ServerConfig(BaseModel):
     course_config_dir: str = Field(..., description="The base dir where course configs are stored.")
     profile_dir: str = Field(..., description="The dir where profile configs are stored.")
     mount_definitions_file: str = Field(
-        ..., description="The YAML file defining mount definitions."
+        ..., description="The YAML file containing mount definitions."
     )
     roles: Roles = Field(..., description="The global role and permission config.")
     modification_times: Dict[str, float] = Field(

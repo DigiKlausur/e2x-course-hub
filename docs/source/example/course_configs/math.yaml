@@ -1,0 +1,13 @@
+metadata:
+  course_id: Math101
+  course_name: Mathematics
+  description: "An introductory course to Mathematics."
+terms:
+  SS25:
+    allowed_profiles:
+    - grader_profile
+    - student_profile
+  WS25:
+    allowed_profiles:
+    - grader_profile
+    - student_profile

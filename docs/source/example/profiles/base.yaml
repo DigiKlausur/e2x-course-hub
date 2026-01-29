@@ -1,0 +1,33 @@
+# ============================================================================
+# Base profile
+# ============================================================================
+# This profile serves as a minimal example and template for creating new profiles.
+# It defines essential runtime settings and an admin mount request for course
+# configuration.
+# ============================================================================
+
+name: base_profile
+display_name: "Base"
+inputs:
+  username:
+    required: true
+    type: string
+runtime:
+  image:
+    name: ghcr.io/digiklausur/docker-stacks/minimal-notebook
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    cpu_guarantee: 0.001
+    cpu_limit: 2.0
+    mem_guarantee: 1.0G
+    mem_limit: 2.0G
+  environment:
+    NB_USER: "${{inputs.username}}"
+    CHOWN_HOME: "no"
+    NB_GID: 1000
+    NB_UID: 1000
+admin_mount_requests:
+  jupyterhub_config_mount:
+    id: course_config
+    args: {}
