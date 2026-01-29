@@ -98,13 +98,13 @@ class BaseTemplateHandler(BaseHandler):
         else:
             kwargs["user"] = None
         # Add any common template variables here
+        service_prefix = self.settings.get("service_prefix", "/").rstrip("/")
         kwargs.update(
             {
                 "base_url": self.settings.get("base_url", "/"),
-                "service_prefix": self.settings.get("service_prefix", "/"),
-                "api_url": ujoin(self.settings.get("service_prefix", "/"), "api"),
+                "service_prefix": service_prefix,
+                "api_url": ujoin(service_prefix, "api"),
                 "static_url": self.settings.get("static_url"),
-                "hub_url": self.settings.get("hub_url", "/hub/"),
                 "user": {
                     "name": user_model.get("name") if user_model else None,
                     "admin": user_model.get("admin", False) if user_model else False,

@@ -37,7 +37,7 @@ class CourseServiceApp(Application):
     )
 
     service_prefix = Unicode(
-        os.environ.get("JUPYTERHUB_SERVICE_PREFIX"),
+        os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "/"),
         help=(
             "The URL prefix for the service. Defaults to the "
             "JUPYTERHUB_SERVICE_PREFIX environment variable."
@@ -102,7 +102,7 @@ class CourseServiceApp(Application):
             "logger": self.log,
             "jinja_env": jinja_env,
             "cookie_secret": os.urandom(32),
-            "service_prefix": self.service_prefix,
+            "service_prefix": self.service_prefix.rstrip("/"),
         }
         self.tornado_settings = settings
 
