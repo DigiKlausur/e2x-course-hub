@@ -25,5 +25,7 @@
   {{ super() }}
   <script>
       window.url = "{{ url }}";
+      window.autoSpawnSingleCourse = {{ auto_spawn_single_course | default(false) | tojson }};
+      window.autoSpawnCountdown = {{ auto_spawn_countdown | default(5) | tojson }};
   </script>
 {% endblock script %}

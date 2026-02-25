@@ -253,8 +253,11 @@ c.JupyterHub.load_roles = [
 # jupyterhub_config.py
 from e2x_course_hub.kubespawner_hooks import (
     get_profile_list_hook,
-    get_pre_spawn_hook
+    get_pre_spawn_hook,
+    configure_autospawn
 )
+
+from e2x_course_hub.course_service._data import KUBESPAWNER_TEMPLATE_PATH, JUPYTERHUB_TEMPLATE_PATH
 
 # Configure KubeSpawner
 c.JupyterHub.spawner_class = 'kubespawner.KubeSpawner'
@@ -266,7 +269,31 @@ c.KubeSpawner.profile_list = get_profile_list_hook(
 c.KubeSpawner.pre_spawn_hook = get_pre_spawn_hook(
     server_config_file='/etc/jupyterhub/config.yml'
 )
+
+# Configure JupyterHub and the KubeSpawner to use the templates from e2x_course_hub
+c.KubeSpawner.additional_profile_form_template_paths = [KUBESPAWNER_TEMPLATE_PATH]
+
+c.JupyterHub.template_paths = [JUPYTERHUB_TEMPLATE_PATH]
+
+# Optional: Configure autospawn behavior
+# Automatically spawns the server if only one course/profile is available
+configure_autospawn(
+    c,
+    auto_spawn_single_course=True,  # Enable auto-spawn for single course
+    auto_spawn_countdown=5           # Countdown in seconds before spawning
+)
 ```
+
+#### Autospawn Configuration
+
+The `configure_autospawn` function adds template variables to control automatic server spawning behavior:
+
+- **`auto_spawn_single_course`** (bool): When `True`, automatically spawns the server if the user has access to only one course/profile. Default: `False`
+- **`auto_spawn_countdown`** (int): Number of seconds to show a countdown before auto-spawning. Gives users time to cancel if needed. Default: `5`
+
+This function safely merges with any existing `template_vars` in your configuration, preserving other template variables you may have set.
+
+**Note**: For autospawn to work, you need custom JupyterHub templates that implement the autospawn logic using these template variables.
 
 ### Standalone Course Service
 
