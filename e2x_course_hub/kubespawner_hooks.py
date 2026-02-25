@@ -206,7 +206,7 @@ def get_pre_spawn_hook(server_config_file: str) -> Callable:
 
 
 def configure_autospawn(
-    config: Config, auto_spawn_single_course: bool = True, auto_spawn_countdown: int = 5
+    config: Config, auto_spawn_single_course: bool = False, auto_spawn_countdown: int = 5
 ):
     """
     Configures the autospawn hooks in the given JupyterHub config.
