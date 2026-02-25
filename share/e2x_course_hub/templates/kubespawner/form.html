@@ -407,6 +407,61 @@ Create a card for a profile, complete with launch buttons and overrides
           urlInputs.forEach(input => input.value = window.url);
       });
 
+      // Only auto-spawn if enabled and there is exactly one profile with one role option
+      if (window.autoSpawnSingleCourse) {
+          const launchButtons = document.querySelectorAll(".js-launch-role");
+          if (launchButtons.length === 1) {
+              const singleForm = launchButtons[0].closest("form") || launchButtons[0].closest(".spawner-form");
+              if (singleForm) {
+                  const countdown = window.autoSpawnCountdown ?? 5;
+                  const courseName = document.querySelector(".course-card h5")?.textContent?.trim() || "your course";
+
+                  if (countdown <= 0) {
+                      singleForm.submit();
+                      return;
+                  }
+
+                  document.querySelector(".view-toggle-container").style.display = "none";
+                  document.getElementById("semesterAccordion").style.display = "none";
+
+                  const overlay = document.createElement("div");
+                  overlay.innerHTML = `
+                      <div style="text-align:center; padding:3rem 1rem; color:#333;">
+                          <i class="fa fa-rocket" style="font-size:3rem; color:#079dde; margin-bottom:1rem; display:block;"></i>
+                          <h4 style="margin-bottom:0.5rem;">Launching <strong>${courseName}</strong></h4>
+                          <p style="font-size:1.1rem;">Automatically spawning in <strong id="countdown-seconds">${countdown}</strong> seconds&hellip;</p>
+                          <button id="cancel-autolaunch" class="btn btn-outline-secondary btn-sm" style="margin-top:1rem;">
+                              <i class="fa fa-times"></i> Cancel
+                          </button>
+                      </div>
+                  `;
+                  document.getElementById("semesterAccordion").parentNode.insertBefore(
+                      overlay, document.getElementById("semesterAccordion")
+                  );
+
+                  let remaining = countdown;
+                  const countdownEl = document.getElementById("countdown-seconds");
+                  const timer = setInterval(() => {
+                      remaining--;
+                      countdownEl.textContent = remaining;
+                      if (remaining <= 0) {
+                          clearInterval(timer);
+                          singleForm.submit();
+                      }
+                  }, 1000);
+
+                  document.getElementById("cancel-autolaunch").addEventListener("click", () => {
+                      clearInterval(timer);
+                      overlay.remove();
+                      document.querySelector(".view-toggle-container").style.display = "";
+                      document.getElementById("semesterAccordion").style.display = "";
+                  });
+
+                  return; // Skip rest of UI setup while countdown is active
+              }
+          }
+      }
+
       // View toggle functionality
       const detailedViewBtn = document.getElementById("detailedViewBtn");
       const compactViewBtn = document.getElementById("compactViewBtn");
