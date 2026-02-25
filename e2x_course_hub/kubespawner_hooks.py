@@ -1,6 +1,8 @@
 import re
 from typing import Callable, Dict, List, Optional
 
+from traitlets.config import Config
+
 from .api.profile_api import ProfileAPI
 from .schema.profile import ResolvedProfile
 from .schema.server import Server
@@ -201,3 +203,26 @@ def get_pre_spawn_hook(server_config_file: str) -> Callable:
         # spawner.volume_mounts = []
 
     return hook
+
+
+def configure_autospawn(
+    config: Config, auto_spawn_single_course: bool = True, auto_spawn_countdown: int = 5
+):
+    """
+    Configures the autospawn hooks in the given JupyterHub config.
+
+    Args:
+        config (Config): The JupyterHub configuration object to modify.
+        auto_spawn_single_course (bool): Whether to auto-spawn a single course if only
+            one profile is available.
+        auto_spawn_countdown (int): The countdown time in seconds before auto-spawning.
+    """
+    if config.JupyterHub.template_vars is None:
+        config.JupyterHub.template_vars = {}
+
+    config.JupyterHub.template_vars.update(
+        {
+            "auto_spawn_single_course": auto_spawn_single_course,
+            "auto_spawn_countdown": auto_spawn_countdown,
+        }
+    )
