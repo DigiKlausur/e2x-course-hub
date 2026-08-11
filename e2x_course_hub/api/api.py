@@ -1,9 +1,12 @@
 from logging import Logger, getLogger
 from typing import Optional
 
-from ..schema.server import Server
+from e2x_hub_rbac.backend.jupyterhub import HubAPI
+
+from ..context import AppContext
 from .course_api import CourseAPI
-from .hub_api import HubAPI
+from .infrastructure_api import InfrastructureAPI
+from .membership_api import MembershipAPI
 from .profile_api import ProfileAPI
 
 
@@ -17,27 +20,31 @@ class API:
         add_users_to_hub: bool = False,
         logger: Optional[Logger] = None,
     ):
-        """Initialize the API with the given server configuration file.
-
-        Args:
-            server_config_file: Path to the server configuration YAML file
-            hub_api: Instance of the HubAPI class
-            add_users_to_hub: Whether to add users to JupyterHub when they are created in the course
-                service
-            logger: Optional logger for logging purposes
-        """
         if logger is None:
             logger = getLogger(__name__)
         self.server_config_file = server_config_file
-        self.server = Server.from_config_file(server_config_file)
-        self.course_api = CourseAPI(
-            server=self.server,
-            hub_api=hub_api,
+        self.context = AppContext.from_config_file(server_config_file)
+
+        self.courses = CourseAPI(
+            context=self.context,
+            logger=logger,
+        )
+        self.profiles = ProfileAPI(
+            context=self.context,
+            logger=logger,
+        )
+        self.memberships = MembershipAPI(
+            group_backend=hub_api,
             add_users_to_hub=add_users_to_hub,
             logger=logger,
         )
-        self.profile_api = ProfileAPI(server=self.server, logger=logger)
+        self.infrastructure = InfrastructureAPI(
+            context=self.context,
+            logger=logger,
+        )
 
     def reload_server_config(self) -> None:
-        """Reload the server configuration from the configuration file."""
-        self.server = Server.from_config_file(self.server_config_file)
+        """Reload the server configuration from the configuration file.
+        Note: courses are in the database and do not need reloading.
+        """
+        self.context = AppContext.from_config_file(self.server_config_file)
