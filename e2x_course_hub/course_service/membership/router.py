@@ -10,41 +10,41 @@ router = APIRouter(
     tags=["Courses"],
 )
 
-hub_prefix = "/hub"
+lms_prefix = "/lms"
 course_prefix = "/courses/{course_id}"
 term_prefix = course_prefix + "/terms/{term_id}"
 
 
-@router.get(hub_prefix + "/admins", response_model=MembershipCollectionResponse)
-async def list_hub_admins(
+@router.get(lms_prefix + "/admins", response_model=MembershipCollectionResponse)
+async def list_lms_admins(
     user: CurrentUser,
     membership_api: MembershipAPIDep,
     membership_assembler: MembershipAssemblerDep,
 ):
     return membership_assembler.collection(
-        usernames=await membership_api.list_hub_admins(user),
-        view_permission=MembershipPermission.LIST_HUB_ADMINS,
+        usernames=await membership_api.list_lms_admins(user),
+        view_permission=MembershipPermission.LIST_LMS_ADMINS,
         manage_permission=(
-            MembershipPermission.ADD_HUB_ADMIN,
-            MembershipPermission.REMOVE_HUB_ADMIN,
+            MembershipPermission.ADD_LMS_ADMIN,
+            MembershipPermission.REMOVE_LMS_ADMIN,
         ),
     )
 
 
-@router.patch(hub_prefix + "/admins", status_code=204)
-async def patch_hub_admins(
+@router.patch(lms_prefix + "/admins", status_code=204)
+async def patch_lms_admins(
     body: MembershipPatch,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
 ):
     if body.add:
-        await membership_api.add_hub_admins(user, body.add)
+        await membership_api.add_lms_admins(user, body.add)
     if body.remove:
-        await membership_api.remove_hub_admins(user, body.remove)
+        await membership_api.remove_lms_admins(user, body.remove)
 
 
-@router.get(hub_prefix + "/course-creators", response_model=MembershipCollectionResponse)
-async def list_hub_course_creators(
+@router.get(lms_prefix + "/course-creators", response_model=MembershipCollectionResponse)
+async def list_lms_course_creators(
     user: CurrentUser,
     membership_api: MembershipAPIDep,
     membership_assembler: MembershipAssemblerDep,
@@ -59,8 +59,8 @@ async def list_hub_course_creators(
     )
 
 
-@router.patch(hub_prefix + "/course-creators", status_code=204)
-async def patch_hub_course_creators(
+@router.patch(lms_prefix + "/course-creators", status_code=204)
+async def patch_lms_course_creators(
     body: MembershipPatch,
     user: CurrentUser,
     membership_api: MembershipAPIDep,

@@ -21,30 +21,30 @@ class InfrastructureAssembler:
     def _image_catalog_capabilities(self) -> InfrastructureCapabilities:
         return InfrastructureCapabilities(
             manage=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.HUB_MANAGE_IMAGE_CATALOG
+                InfrastructurePermission.LMS_MANAGE_IMAGE_CATALOG
             ),
             view=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.HUB_VIEW_IMAGE_CATALOG
+                InfrastructurePermission.LMS_VIEW_IMAGE_CATALOG
             ),
         )
 
     def _resource_catalog_capabilities(self) -> InfrastructureCapabilities:
         return InfrastructureCapabilities(
             manage=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.HUB_MANAGE_RESOURCE_CATALOG
+                InfrastructurePermission.LMS_MANAGE_RESOURCE_CATALOG
             ),
             view=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.HUB_VIEW_RESOURCE_CATALOG
+                InfrastructurePermission.LMS_VIEW_RESOURCE_CATALOG
             ),
         )
 
     def _profile_catalog_capabilities(self) -> InfrastructureCapabilities:
         return InfrastructureCapabilities(
             manage=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.HUB_MANAGE_PROFILE_CATALOG
+                InfrastructurePermission.LMS_MANAGE_PROFILE_CATALOG
             ),
             view=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.HUB_VIEW_PROFILE_CATALOG
+                InfrastructurePermission.LMS_VIEW_PROFILE_CATALOG
             ),
         )
 

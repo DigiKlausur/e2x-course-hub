@@ -4,7 +4,7 @@ from e2x_hub_rbac.auth.rbac import PermissionEnum, Role, RolePermissions, Scope
 class CoursePermission(PermissionEnum):
     """Permissions related to course management."""
 
-    ADD_COURSE = ("course.add", Scope.HUB)
+    ADD_COURSE = ("course.add", Scope.LMS)
 
     COURSE_VIEW = ("course.view", Scope.COURSE)
     COURSE_REMOVE = ("course.remove", Scope.COURSE)
@@ -76,7 +76,7 @@ class CoursePermissionSets:
 
 
 COURSE_ROLE_PERMISSIONS: RolePermissions = {
-    Role.HUB_ADMIN: CoursePermissionSets.ALL_PERMISSIONS,
+    Role.LMS_ADMIN: CoursePermissionSets.ALL_PERMISSIONS,
     Role.COURSE_CREATOR: frozenset(
         [
             CoursePermission.ADD_COURSE,

@@ -14,18 +14,18 @@ class InfrastructureAPI(APIWithContext):
             context=context, role_permissions=INFRASTRUCTURE_ROLE_PERMISSIONS, logger=logger
         )
 
-    @require_permission(InfrastructurePermission.HUB_VIEW_IMAGE_CATALOG)
+    @require_permission(InfrastructurePermission.LMS_VIEW_IMAGE_CATALOG)
     def list_images(self, user: UserLike) -> ImageCatalog:
         return self.context.infrastructure_catalog.image_catalog
 
-    @require_permission(InfrastructurePermission.HUB_VIEW_RESOURCE_CATALOG)
+    @require_permission(InfrastructurePermission.LMS_VIEW_RESOURCE_CATALOG)
     def list_resources(self, user: UserLike) -> ResourceTiersByRole:
         return self.context.infrastructure_catalog.resource_tiers
 
-    @require_permission(InfrastructurePermission.HUB_VIEW_PROFILE_CATALOG)
+    @require_permission(InfrastructurePermission.LMS_VIEW_PROFILE_CATALOG)
     def list_profiles(self, user: UserLike) -> AvailableProfiles:
         return self.context.profile_catalog.list_available_profiles()
 
-    @require_permission(InfrastructurePermission.HUB_VIEW_PROFILE_CATALOG)
+    @require_permission(InfrastructurePermission.LMS_VIEW_PROFILE_CATALOG)
     def list_profiles_details(self, user: UserLike) -> AvailableProfileDetails:
         return self.context.profile_catalog.list_available_profile_details()

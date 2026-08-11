@@ -7,8 +7,6 @@ class SpawnProfilePermission(PermissionEnum):
     SPAWN_GRADER_PROFILE = ("spawn.grader_profile", Scope.TERM)
     SPAWN_STUDENT_PROFILE = ("spawn.student_profile", Scope.TERM)
     SPAWN_OBSERVER_PROFILE = ("spawn.observer_profile", Scope.TERM)
-    HUB_VIEW_PROFILE_CATALOG = ("hub.view_profile_catalog", Scope.HUB)
-    HUB_MANAGE_PROFILE_CATALOG = ("hub.manage_profile_catalog", Scope.HUB)
 
 
 class SpawnProfilePermissionSets:
@@ -24,13 +22,7 @@ class SpawnProfilePermissionSets:
 
 
 SPAWN_PROFILE_ROLE_PERMISSIONS: RolePermissions = {
-    Role.HUB_ADMIN: frozenset(
-        SpawnProfilePermissionSets.SPAWN_ALL_PROFILES
-        | {
-            SpawnProfilePermission.HUB_VIEW_PROFILE_CATALOG,
-            SpawnProfilePermission.HUB_MANAGE_PROFILE_CATALOG,
-        }
-    ),
+    Role.LMS_ADMIN: frozenset(SpawnProfilePermissionSets.SPAWN_ALL_PROFILES),
     Role.COURSE_CREATOR: frozenset([SpawnProfilePermission.SPAWN_OBSERVER_PROFILE]),
     Role.COURSE_OWNER: frozenset(
         frozenset(
