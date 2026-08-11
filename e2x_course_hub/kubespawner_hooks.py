@@ -1,12 +1,20 @@
 import re
+from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional
 
 from traitlets.config import Config
 
 from .api.profile_api import ProfileAPI
-from .schema.profile import ResolvedProfile
-from .schema.server import Server
-from .schema.user import User
+from .context import AppContext
+from .errors import CourseNotFoundError
+from .schema.profile import SpawnProfile
+
+
+@dataclass
+class User:
+    username: str
+    admin: bool
+    groups: List[str]
 
 
 def parse_term_for_sorting(term):
@@ -34,12 +42,25 @@ def parse_term_for_sorting(term):
 
 
 class KubespawnerProfileAPI(ProfileAPI):
-    def __init__(self, server: Server, sorter: Optional[Callable[[str], str]] = None):
-        super().__init__(server)
+    def __init__(
+        self,
+        context: AppContext,
+        sorter: Optional[Callable[[str], str]] = None,
+    ):
+        super().__init__(context)
         self.sorter = sorter or parse_term_for_sorting
 
+    @classmethod
+    def from_config_file(
+        cls,
+        server_config_file: str,
+        sorter: Optional[Callable[[str], str]] = None,
+    ) -> "KubespawnerProfileAPI":
+        context = AppContext.from_config_file(server_config_file)
+        return cls(context, sorter=sorter)
+
     def _build_kubespawner_profile_choices(
-        self, course_id: str, term_id: str, profiles: List[ResolvedProfile]
+        self, course_id: str, term_id: str, profiles: List[SpawnProfile]
     ) -> Dict[str, Dict]:
         """
         Converts a list of resolved BaseProfile objects into the 'choices' dictionary
@@ -54,7 +75,7 @@ class KubespawnerProfileAPI(ProfileAPI):
         """
         choices = {}
         for profile in profiles:
-            choice_name = f"{course_id}.{term_id}.{profile.name}"
+            choice_name = f"{course_id}.{term_id}.{profile.spawn_role}"
             choices[choice_name] = {
                 "display_name": profile.display_name,
                 "kubespawner_override": profile.runtime.to_kubespawner_override(),
@@ -62,7 +83,7 @@ class KubespawnerProfileAPI(ProfileAPI):
         return choices
 
     def _build_kubespawner_profile_entry(
-        self, course_id: str, term_id: str, profiles: List[ResolvedProfile]
+        self, course_id: str, term_id: str, profiles: List[SpawnProfile]
     ) -> Dict:
         """
         Build a single entry for the Kubespawner profile list. This includes metadata
@@ -75,9 +96,10 @@ class KubespawnerProfileAPI(ProfileAPI):
         Returns:
             Dict: The Kubespawner profile entry.
         """
-        course_metadata = self.server.courses[course_id].metadata.model_dump(
-            exclude_unset=True, exclude_none=True
-        )
+        course = self.context.get_course(course_id)
+        if course is None:
+            raise CourseNotFoundError(course_id)
+        course_metadata = course.metadata.model_dump(exclude_unset=True, exclude_none=True)
         choices = self._build_kubespawner_profile_choices(course_id, term_id, profiles)
         return {
             "display_name": f"{course_id} - {term_id}",
@@ -106,7 +128,7 @@ class KubespawnerProfileAPI(ProfileAPI):
                 profile_list.append(kubespawner_profile)
         return profile_list
 
-    def get_profile_from_choice(self, user: User, choice_slug: str) -> ResolvedProfile:
+    def get_profile_from_choice(self, user: User, choice_slug: str) -> SpawnProfile:
         """
         Given a choice slug from Kubespawner profile options, return the resolved profile.
         The choice slug is expected to be in the format: course_id.term_id.profile_id
@@ -115,14 +137,14 @@ class KubespawnerProfileAPI(ProfileAPI):
             user (User): The user requesting the profile.
             choice_slug (str): The choice slug from Kubespawner.
         Returns:
-            ResolvedProfile: The resolved profile.
+            SpawnProfile: The resolved profile.
         """
         try:
-            course_id, term_id, profile_id = choice_slug.split(".")
+            course_id, term_id, spawn_role = choice_slug.split(".")
         except ValueError:
             raise ValueError(f"Invalid choice slug format: {choice_slug}")
 
-        return self.get_profile(user, course_id, term_id, profile_id)
+        return self.get_profile(user, course_id, term_id, spawn_role)
 
     def get_profile_mounts_from_choice(self, user: User, choice_slug: str) -> List[Dict]:
         """
@@ -137,7 +159,7 @@ class KubespawnerProfileAPI(ProfileAPI):
         """
         profile = self.get_profile_from_choice(user, choice_slug)
 
-        resolved_mounts = profile.resolve_mount_requests(self.server.mount_definitions)
+        resolved_mounts = profile.mounts
         return [
             mount.model_dump(exclude_unset=True, exclude_none=True, exclude=set(["description"]))
             for mount in resolved_mounts
@@ -165,8 +187,7 @@ def get_profile_list_hook(
             admin=getattr(spawner.user, "admin", False),
             groups=[g.name for g in spawner.user.groups],
         )
-        server = Server.from_config_file(server_config_file)
-        api = KubespawnerProfileAPI(server, sorter=sorter)
+        api = KubespawnerProfileAPI.from_config_file(server_config_file, sorter=sorter)
         return api.get_kubespawner_profile_list(user)
 
     return hook
@@ -190,8 +211,7 @@ def get_pre_spawn_hook(server_config_file: str) -> Callable:
             groups=[g.name for g in spawner.user.groups],
         )
         # Sorter not needed for pre_spawn_hook since we're only looking up a specific profile
-        server = Server.from_config_file(server_config_file)
-        api = KubespawnerProfileAPI(server)
+        api = KubespawnerProfileAPI.from_config_file(server_config_file)
         spawner.log.debug(f"User options are: {spawner.user_options}")
         choice_slug = spawner.user_options.get("profile-slug")
         mounts = api.get_profile_mounts_from_choice(user, choice_slug)
