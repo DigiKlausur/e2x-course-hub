@@ -26,7 +26,14 @@ classifiers = [
 dependencies = [
   "pydantic>=2.0",
   "jinja2",
-  "PyYAML"
+  "PyYAML",
+  "sqlalchemy>=2.0",
+  "fastapi",
+  "uvicorn",
+  "httpx",
+  "python-multipart",
+  "jupyterhub-fastapi-adapter>=0.1.0",
+  "e2x-hub-rbac>=0.1.2",
 ]
 
 [project.urls]
