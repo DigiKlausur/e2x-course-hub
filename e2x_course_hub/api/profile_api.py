@@ -7,7 +7,7 @@ from ..errors import CourseNotFoundError, RoleNotFoundError, TermNotFoundError
 from ..schema.course import CourseConfig
 from ..schema.enums import SpawnRole
 from ..schema.infrastructure import Runtime
-from ..schema.profile import AvailableProfiles, SpawnProfile
+from ..schema.profile import SpawnProfile
 from ..schema.user import UserCourseContext
 from ..utils import resolve_placeholders
 from .base import APIWithContext
@@ -226,7 +226,3 @@ class ProfileAPI(APIWithContext):
             if course_profiles:
                 profiles[course_id] = course_profiles
         return profiles
-
-    @require_permission(SpawnProfilePermission.HUB_VIEW_PROFILE_CATALOG)
-    def list_catalog_profiles(self, user: UserLike) -> AvailableProfiles:
-        return self.context.profile_catalog.list_available_profiles()
