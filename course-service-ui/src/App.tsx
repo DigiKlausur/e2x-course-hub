@@ -1,29 +1,17 @@
-import { Routes, Route } from "react-router-dom";
-import CoursesPage from "./components/CoursesPage";
-import CourseDetailPage from "./components/CourseDetailPage";
-import ProfileDetailsPage from "./components/ProfileDetailsPage";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { CoursesPage } from "./components/courses/CoursesPage";
+import { CoursePage } from "./components/course/CoursePage";
+import { TermPage } from "./components/term/TermPage";
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-hbrs-dark-blue text-primary-foreground p-4 px-8 shadow-md">
-        <h1 className="text-2xl font-semibold m-0 text-neutral-100">
-          e²x Course Management
-        </h1>
-      </header>
-      <main className="flex-1 p-8 bg-muted/30">
-        <Routes>
-          <Route path="/" element={<CoursesPage />} />
-          <Route
-            path="/course/:courseId/:termId"
-            element={<CourseDetailPage />}
-          />
-          <Route
-            path="/course/:courseId/:termId/profiles"
-            element={<ProfileDetailsPage />}
-          />
-        </Routes>
-      </main>
+    <div className="min-h-screen flex flex-col bg-[#f5f7fb]">
+      <Routes>
+        <Route path="/" element={<CoursesPage />} />
+        <Route path="/course/:courseId/*" element={<CoursePage />} />
+        <Route path="/course/:courseId/term/:termId/*" element={<TermPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
   );
 }

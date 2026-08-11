@@ -73,6 +73,10 @@ export const requests = {
     const settings: RequestInit = {
       ...baseSettings,
       method: "POST",
+      headers: {
+        ...baseSettings.headers,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(data),
     };
     const response = await fetch(url, settings);
@@ -82,16 +86,34 @@ export const requests = {
     const settings: RequestInit = {
       ...baseSettings,
       method: "PUT",
+      headers: {
+        ...baseSettings.headers,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(data),
     };
+    console.log(`PUT ${url} with data:`, data);
     const response = await fetch(url, settings);
     return handleResponse(response);
   },
-  del: async (url: string, data: unknown): Promise<unknown> => {
+  patch: async (url: string, data: unknown): Promise<unknown> => {
+    const settings: RequestInit = {
+      ...baseSettings,
+      method: "PATCH",
+      headers: {
+        ...baseSettings.headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+    console.log(`PATCH ${url} with data:`, data);
+    const response = await fetch(url, settings);
+    return handleResponse(response);
+  },
+  delete: async (url: string): Promise<unknown> => {
     const settings: RequestInit = {
       ...baseSettings,
       method: "DELETE",
-      body: JSON.stringify(data),
     };
     const response = await fetch(url, settings);
     return handleResponse(response);
