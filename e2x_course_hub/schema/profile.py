@@ -1,183 +1,274 @@
-from typing import Any, Dict, List, Optional, Union
+import glob
+import os
+from typing import Annotated, Dict, List, Literal, Mapping, Optional, Union
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import (
+    BaseModel,
+    Discriminator,
+    TypeAdapter,
+    ValidationError,
+    model_validator,
+)
 
-from .base import MergeableModel, Parameter, ResolveableModel
-from .mount import Mount, MountDefinition, MountRequest
-from .runtime import Runtime, RuntimePartial
-from .user import User
+from ..errors import ProfileNotFoundError
+from ..utils import load_yaml, resolve_placeholders
+from .enums import SpawnRole
+from .infrastructure import Image, Resources, Runtime
+from .mount import Mount, MountCatalog
+from .user import UserCourseContext
 
-
-class InheritedProfile(MergeableModel["InheritedProfile"]):
-    """
-    Partial profile model for merging into a full Profile.
-    """
-
-    name: str = Field(..., description="Human-readable name for the profile.")
-    display_name: str = Field(..., description="Optional display name for the profile.")
-    inherits: str = Field(..., description="The profile this one inherits from.")
-    description: Optional[str] = Field(
-        default=None, description="Detailed description of the profile."
-    )
-    inputs: Dict[str, Parameter] = Field(
-        default_factory=dict, description="Input parameter definitions for the profile."
-    )
-    runtime: Optional[RuntimePartial] = Field(
-        default=None, description="Runtime configuration for the profile."
-    )
-    mount_requests: Dict[str, MountRequest] = Field(
-        default_factory=dict, description="Mount configurations for the profile."
-    )
-    admin_mount_requests: Dict[str, MountRequest] = Field(
-        default_factory=dict, description="Admin-only mount configurations for the profile."
-    )
+# ── Resolved spawn profile ──────────────────────────────────────────
 
 
-class BaseProfile(MergeableModel[InheritedProfile], ResolveableModel):
-    """
-    Full profile model.
-    """
+class SpawnProfile(BaseModel):
+    """A fully resolved profile ready for spawning."""
 
-    name: str = Field(..., description="Human-readable name for the profile.")
-    display_name: str = Field(..., description="Optional display name for the profile.")
-    inherits: None = Field(default=None, description="Base profile, cannot inherit further.")
-    description: Optional[str] = Field(
-        default=None, description="Detailed description of the profile."
-    )
-    inputs: Dict[str, Parameter] = Field(
-        default_factory=dict, description="Input parameter definitions for the profile."
-    )
-    runtime: Runtime = Field(..., description="Runtime configuration for the profile.")
-    mount_requests: Dict[str, MountRequest] = Field(
-        default_factory=dict, description="Mount requests for the profile."
-    )
-    admin_mount_requests: Dict[str, MountRequest] = Field(
-        default_factory=dict, description="Admin-only mount requests for the profile."
-    )
-
-    def merge(self, partial: InheritedProfile | None) -> "BaseProfile":
-        profile = BaseProfile(**self.model_dump())
-        if partial is None:
-            return profile
-        profile.name = partial.name
-        profile.display_name = partial.display_name
-        profile.description = partial.description
-        profile.inputs.update(partial.inputs)
-        profile.runtime = profile.runtime.merge(partial.runtime)
-        profile.mount_requests.update(partial.mount_requests)
-        profile.admin_mount_requests.update(partial.admin_mount_requests)
-        return profile
+    spawn_role: str
+    display_name: str
+    runtime: Runtime
+    mounts: List[Mount] = []
 
 
-class ResolvedProfile(BaseModel):
-    """
-    A profile with all placeholders and mount requests resolved.
-    """
+# ── Profile definitions (loaded from YAML) ──────────────────────────
 
-    name: str = Field(..., description="Human-readable name for the profile.")
-    display_name: str = Field(..., description="Optional display name for the profile.")
-    description: Optional[str] = Field(
-        default=None, description="Detailed description of the profile."
-    )
-    runtime: Runtime = Field(..., description="Runtime configuration for the profile.")
-    mount_requests: List[MountRequest] = Field(
-        default_factory=list, description="The mount requests for the profile."
-    )
 
-    @classmethod
-    def from_profile(
-        cls,
-        profile: BaseProfile,
-        user: User,
-        context: Dict[str, Any],
-    ) -> "ResolvedProfile":
-        context["username"] = user.username
-        # Remove everything from the context that is not a parameter
-        context = {k: v for k, v in context.items() if k in profile.inputs}
-        resolved_profile = profile.resolve_placeholders(context)
-        mount_requests = resolved_profile.mount_requests.copy()
-        if user.admin:
-            mount_requests.update(resolved_profile.admin_mount_requests)
+class _BaseProfile(BaseModel):
+    """Common fields shared by student and grader profiles."""
 
-        return ResolvedProfile(
-            name=resolved_profile.name,
-            display_name=resolved_profile.display_name,
-            description=resolved_profile.description,
-            runtime=resolved_profile.runtime,
-            mount_requests=list(mount_requests.values()),
+    name: str
+    display_name: str
+    environment: Dict[str, Union[str, float, int, bool]] = {}
+    mounts: List[str] = []
+
+
+class StudentProfile(_BaseProfile):
+    kind: Literal["student"] = "student"
+
+    @model_validator(mode="after")
+    def _check_required_mounts(self) -> "StudentProfile":
+        missing = {"student_home"} - set(self.mounts)
+        if missing:
+            raise ValueError(f"Student profile '{self.name}' missing required mounts: {missing}")
+        return self
+
+    def resolve(
+        self,
+        image: Image,
+        resources: Resources,
+        mount_catalog: MountCatalog,
+        ctx: UserCourseContext,
+    ) -> SpawnProfile:
+        return SpawnProfile(
+            spawn_role=SpawnRole.STUDENT.value,
+            display_name=self.display_name,
+            runtime=Runtime(
+                image=image,
+                resources=resources,
+                environment=resolve_placeholders(self.environment, ctx=ctx.model_dump()),
+            ),
+            mounts=mount_catalog.resolve_many(self.mounts, ctx),
         )
 
-    def resolve_mount_requests(self, mount_definitions: Dict[str, MountDefinition]) -> List[Mount]:
-        """
-        Resolve the mount requests of this profile using the provided mount definitions.
 
-        Args:
-            mount_definitions (Dict[str, MountDefinition]): The mount definitions to use
-                for resolution.
+class GraderProfile(_BaseProfile):
+    kind: Literal["grader"] = "grader"
+    additional_role_mounts: Dict[str, List[str]] = {}
 
-        Returns:
-            List[Mount]: The resolved mounts.
-        """
-        return [
-            mount_definitions[request.id].get_mount_from_request(request)
-            for request in self.mount_requests
-        ]
+    @model_validator(mode="after")
+    def _check_required_mounts(self) -> "GraderProfile":
+        missing = {"grader_home", "course_term"} - set(self.mounts)
+        if missing:
+            raise ValueError(f"Grader profile '{self.name}' missing required mounts: {missing}")
+        return self
+
+    def get_all_mounts(self, roles: List[str] | None = None) -> List[str]:
+        """Return profile mounts + any role-based additional mounts."""
+        all_mounts = list(self.mounts)
+        if roles:
+            seen = set(all_mounts)
+            for role in roles:
+                for m in self.additional_role_mounts.get(role, []):
+                    if m not in seen:
+                        all_mounts.append(m)
+                        seen.add(m)
+        return all_mounts
+
+    def resolve(
+        self,
+        image: Image,
+        resources: Resources,
+        mount_catalog: MountCatalog,
+        ctx: UserCourseContext,
+        roles: List[str] | None = None,
+        archive_term_ids: List[str] | None = None,
+    ) -> SpawnProfile:
+        mounts = mount_catalog.resolve_many(self.get_all_mounts(roles), ctx)
+        if archive_term_ids:
+            mounts.extend(
+                mount_catalog.resolve_archive_mounts(
+                    username=ctx.username,
+                    course_id=ctx.course_id,
+                    term_ids=archive_term_ids,
+                )
+            )
+        return SpawnProfile(
+            spawn_role=SpawnRole.GRADER.value,
+            display_name=self.display_name,
+            runtime=Runtime(
+                image=image,
+                resources=resources,
+                environment=resolve_placeholders(self.environment, ctx=ctx.model_dump()),
+            ),
+            mounts=mounts,
+        )
 
 
-Profile = Union[BaseProfile, InheritedProfile]
+_Profile = Annotated[Union[StudentProfile, GraderProfile], Discriminator("kind")]
 
 
-class ProfileLoader(BaseModel):
-    """
-    A dispatcher that loads either BaseProfile or InheritedProfile depending
-    on whether the `inherits` key is present and non-null.
+# ── Selection & config ──────────────────────────────────────────────
 
-    Profile.model will always contain the concrete profile instance.
-    """
 
-    model: Profile
+class ProfileSelection(BaseModel):
+    student: Optional[str] = None
+    grader: Optional[str] = None
 
-    @model_validator(mode="before")
+    def with_fallback(self, fallback: "ProfileSelection") -> "ProfileSelection":
+        return ProfileSelection(
+            student=self.student if self.student is not None else fallback.student,
+            grader=self.grader if self.grader is not None else fallback.grader,
+        )
+
+
+class ProfilesConfig(BaseModel):
+    """Loaded from the server config YAML."""
+
+    profile_dir: str
+    default_student: str
+    default_grader: str
+
+
+# ── Catalog ─────────────────────────────────────────────────────────
+
+
+class StudentRoleProfiles(BaseModel):
+    default: str
+    profiles: Dict[str, StudentProfile] = {}
+
+
+class GraderRoleProfiles(BaseModel):
+    default: str
+    profiles: Dict[str, GraderProfile] = {}
+
+
+class AvailableRoleProfiles(BaseModel):
+    default: str
+    profiles: List[str] = []
+
+
+class AvailableProfiles(BaseModel):
+    student: AvailableRoleProfiles
+    grader: AvailableRoleProfiles
+
+
+class AvailableRoleProfileDetails(BaseModel):
+    default: str
+    profiles: Mapping[str, _Profile] = {}
+
+
+class AvailableProfileDetails(BaseModel):
+    student: AvailableRoleProfileDetails
+    grader: AvailableRoleProfileDetails
+
+
+class ProfileCatalog(BaseModel):
+    student: StudentRoleProfiles
+    grader: GraderRoleProfiles
+
     @classmethod
-    def dispatch(cls, data: Any):
-        """
-        Decide which profile class to use based solely on the presence and
-        value of the `inherits` field.
-        """
-        if not isinstance(data, dict):
-            raise TypeError("Profile must be built from a mapping/dict")
+    def from_profiles_config(cls, config: ProfilesConfig) -> "ProfileCatalog":
+        adapter = TypeAdapter(_Profile)
+        students: Dict[str, StudentProfile] = {}
+        graders: Dict[str, GraderProfile] = {}
+        for path in glob.glob(os.path.join(config.profile_dir, "*.yaml")):
+            data = load_yaml(path)
+            try:
+                profile = adapter.validate_python(data)
+            except ValidationError as e:
+                raise ValueError(f"Error validating profile in {path}: {e}") from e
+            if isinstance(profile, StudentProfile):
+                if profile.name in students:
+                    raise ValueError(f"Duplicate student profile '{profile.name}' in {path}")
+                students[profile.name] = profile
+            else:
+                if profile.name in graders:
+                    raise ValueError(f"Duplicate grader profile '{profile.name}' in {path}")
+                graders[profile.name] = profile
+        return cls(
+            student=StudentRoleProfiles(default=config.default_student, profiles=students),
+            grader=GraderRoleProfiles(default=config.default_grader, profiles=graders),
+        )
 
-        inherits_value = data.get("inherits", None)
+    @model_validator(mode="after")
+    def _validate_defaults(self) -> "ProfileCatalog":
+        if self.student.default not in self.student.profiles:
+            raise ValueError(
+                f"Default student profile '{self.student.default}' not found. "
+                f"Available: {list(self.student.profiles.keys())}"
+            )
+        if self.grader.default not in self.grader.profiles:
+            raise ValueError(
+                f"Default grader profile '{self.grader.default}' not found. "
+                f"Available: {list(self.grader.profiles.keys())}"
+            )
+        return self
 
-        # Case A: inherited profile
-        if isinstance(inherits_value, str) and inherits_value.strip() != "":
-            return {"model": InheritedProfile(**data)}
+    def get_student_profile(self, selection: ProfileSelection) -> StudentProfile:
+        name = selection.student or self.student.default
+        profile = self.student.profiles.get(name)
+        if profile is None:
+            raise ProfileNotFoundError(profile_name=name, spawn_role=SpawnRole.STUDENT)
+        return profile
 
-        # Case B: base profile
-        return {"model": BaseProfile(**data)}
+    def get_grader_profile(self, selection: ProfileSelection) -> GraderProfile:
+        name = selection.grader or self.grader.default
+        profile = self.grader.profiles.get(name)
+        if profile is None:
+            raise ProfileNotFoundError(profile_name=name, spawn_role=SpawnRole.GRADER)
+        return profile
 
-    @classmethod
-    def parse_profile(cls, data: Any) -> Union[BaseProfile, InheritedProfile]:
-        loader = cls.model_validate(data)
-        return loader.model
+    def assert_profile_selection_exists(self, selection: ProfileSelection):
+        if selection.student and selection.student not in self.student.profiles:
+            raise ProfileNotFoundError(profile_name=selection.student, spawn_role=SpawnRole.STUDENT)
+        if selection.grader and selection.grader not in self.grader.profiles:
+            raise ProfileNotFoundError(profile_name=selection.grader, spawn_role=SpawnRole.GRADER)
 
+    def get_default_profile_selection(self) -> ProfileSelection:
+        return ProfileSelection(
+            student=self.student.default,
+            grader=self.grader.default,
+        )
 
-def get_merged_profile(profile_name: str, profiles: Dict[str, Profile]) -> BaseProfile:
-    """
-    Recursively resolve and merge profiles to produce a BaseProfile.
+    def list_available_profiles(self) -> AvailableProfiles:
+        return AvailableProfiles(
+            student=AvailableRoleProfiles(
+                default=self.student.default,
+                profiles=list(self.student.profiles.keys()),
+            ),
+            grader=AvailableRoleProfiles(
+                default=self.grader.default,
+                profiles=list(self.grader.profiles.keys()),
+            ),
+        )
 
-    Args:
-        profile_name (str): The name of the profile to resolve.
-        profiles (Dict[str, Profile]): A mapping of profile names to Profile objects.
-
-    Returns:
-        BaseProfile: The fully resolved and merged BaseProfile.
-    """
-    if profile_name not in profiles:
-        raise ValueError(f"Profile '{profile_name}' not found.")
-    base_profile = profiles[profile_name]
-    if isinstance(base_profile, BaseProfile):
-        return base_profile
-    parent_profile = get_merged_profile(base_profile.inherits, profiles)
-    merged_profile = parent_profile.merge(base_profile)
-    return merged_profile
+    def list_available_profile_details(self) -> AvailableProfileDetails:
+        return AvailableProfileDetails(
+            student=AvailableRoleProfileDetails(
+                default=self.student.default,
+                profiles=self.student.profiles,
+            ),
+            grader=AvailableRoleProfileDetails(
+                default=self.grader.default,
+                profiles=self.grader.profiles,
+            ),
+        )

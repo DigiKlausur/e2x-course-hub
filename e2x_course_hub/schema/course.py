@@ -1,34 +1,24 @@
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from .profile import BaseProfile
-from .runtime import RuntimePartial
+from .infrastructure import ImageSelection, ResourceSelection
+from .profile import ProfileSelection
 
 
-def apply_profile_runtime_overrides(
-    profiles: Dict[str, BaseProfile], profile_runtime_overrides: Dict[str, RuntimePartial]
-) -> Dict[str, BaseProfile]:
-    """
-    Apply runtime overrides to a dictionary of profiles.
-
-    Args:
-        profiles (Dict[str, BaseProfile]): A mapping of profile names to BaseProfile objects.
-        profile_runtime_overrides (Dict[str, RuntimePartial]): A mapping of profile names to
-            RuntimePartial objects representing the runtime overrides.
-    Returns:
-        Dict[str, BaseProfile]: A mapping of profile names to BaseProfile objects with applied
-            runtime overrides.
-    """
-    profiles_with_overrides = {}
-    for profile_name, profile in profiles.items():
-        profile_copy = BaseProfile(**profile.model_dump())
-        if profile_name in profile_runtime_overrides:
-            profile_copy.runtime = profile_copy.runtime.merge(
-                profile_runtime_overrides[profile_name]
-            )
-        profiles_with_overrides[profile_name] = profile_copy
-    return profiles_with_overrides
+class TermConfig(BaseModel):
+    image: ImageSelection = Field(
+        ...,
+        description="Image configuration for this term.",
+    )
+    resources: ResourceSelection = Field(
+        ...,
+        description="Resource tier configuration for this term.",
+    )
+    profiles: ProfileSelection = Field(
+        ...,
+        description="Profile configuration for this term.",
+    )
 
 
 class CourseMetadata(BaseModel):
@@ -43,77 +33,54 @@ class CourseMetadata(BaseModel):
     )
 
 
-class ConfigWithRuntimeOverrides(BaseModel):
-    """
-    Base config model that includes profile runtime overrides.
-    """
-
-    profile_runtime_overrides: Dict[str, RuntimePartial] = Field(
-        default_factory=dict,
-        description="Optional runtime overrides for specific profiles.",
+class CourseConfig(BaseModel):
+    metadata: CourseMetadata = Field(..., description="Metadata information about the course.")
+    image: ImageSelection = Field(..., description="Default image configuration for the course.")
+    resources: ResourceSelection = Field(
+        default_factory=ResourceSelection,
+        description="Default resource tier configuration for the course.",
     )
-
-
-class TermConfig(ConfigWithRuntimeOverrides):
-    """
-    Configuration for a specific term/session within a course.
-    """
-
-    allowed_profiles: List[str] = Field(..., description="List of profiles enabled for the term.")
-
-
-class CourseConfig(ConfigWithRuntimeOverrides):
-    """
-    Configuration for a course, including metadata and term configurations.
-    """
-
-    metadata: CourseMetadata = Field(..., description="The course metadata.")
+    profiles: ProfileSelection = Field(
+        default_factory=ProfileSelection,
+        description="Default profile configuration for the course.",
+    )
     terms: Dict[str, TermConfig] = Field(
-        default_factory=dict, description="The active sessions for this course."
+        default_factory=dict,
+        description="Per-term configuration overrides.",
     )
 
-
-class Course(BaseModel):
-    """
-    Represents a course with its configuration and term profiles.
-    Allowed profiles per term are determined based on the course and term configs.
-    """
-
-    config: CourseConfig = Field(..., description="The course config")
-    terms: Dict[str, Dict[str, BaseProfile]] = Field(
-        ..., description="The mapping between term id and term profiles"
-    )
-
-    @property
-    def metadata(self):
-        return self.config.metadata
-
-    @classmethod
-    def from_course_config(
-        cls, course_config: CourseConfig, server_profiles: Dict[str, BaseProfile]
-    ):
+    def get_term_image_selection(self, term_id: str) -> ImageSelection:
         """
-        Create a Course instance from a CourseConfig and server-wide profiles,
-        applying runtime overrides.
-
+        Get the image configuration for a specific term, applying any overrides.
         Args:
-            course_config (CourseConfig): The configuration for the course.
-            server_profiles (Dict[str, BaseProfile]): The server-wide profiles available.
+            term_id (str): The id of the term to get the image configuration for.
         Returns:
-            Course: The constructed Course instance.
+            ImageSelection: The image configuration for the term.
         """
-        course_profiles = apply_profile_runtime_overrides(
-            server_profiles, course_config.profile_runtime_overrides
-        )
-        terms = {}
-        for term_id, term_config in course_config.terms.items():
-            term_profiles = apply_profile_runtime_overrides(
-                course_profiles, term_config.profile_runtime_overrides
-            )
-            enabled_term_profiles = {
-                profile_name: term_profile
-                for profile_name, term_profile in term_profiles.items()
-                if profile_name in term_config.allowed_profiles
-            }
-            terms[term_id] = enabled_term_profiles
-        return cls(config=course_config, terms=terms)
+        assert term_id in self.terms, f"Term '{term_id}' not found in course configuration."
+        term_config = self.terms[term_id]
+        return term_config.image
+
+    def get_term_resource_selection(self, term_id: str) -> ResourceSelection:
+        """
+        Get the resource tier configuration for a specific term, applying any overrides.
+        Args:
+            term_id (str): The id of the term to get the resource tier configuration for.
+        Returns:
+            ResourceSelection: The resource tier configuration for the term.
+        """
+        assert term_id in self.terms, f"Term '{term_id}' not found in course configuration."
+        term_config = self.terms[term_id]
+        return term_config.resources
+
+    def get_term_profile_selection(self, term_id: str) -> ProfileSelection:
+        """
+        Get the profile configuration for a specific term, applying any overrides.
+        Args:
+            term_id (str): The id of the term to get the profile configuration for.
+        Returns:
+            ProfileSelection: The profile configuration for the term.
+        """
+        assert term_id in self.terms, f"Term '{term_id}' not found in course configuration."
+        term_config = self.terms[term_id]
+        return term_config.profiles
