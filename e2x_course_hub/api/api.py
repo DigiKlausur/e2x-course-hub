@@ -3,11 +3,11 @@ from typing import Optional
 
 from e2x_hub_rbac.backend.jupyterhub import HubAPI
 
-from ..context import AppContext
+from ..contract.providers import InfrastructureCatalogProvider
+from ..db.repository import CourseRepository
 from .course_api import CourseAPI
 from .infrastructure_api import InfrastructureAPI
 from .membership_api import MembershipAPI
-from .profile_api import ProfileAPI
 
 
 class API:
@@ -15,22 +15,18 @@ class API:
 
     def __init__(
         self,
-        server_config_file: str,
         hub_api: HubAPI,
+        course_repository: CourseRepository,
+        infrastructure_provider: InfrastructureCatalogProvider,
         add_users_to_hub: bool = False,
         logger: Optional[Logger] = None,
     ):
         if logger is None:
             logger = getLogger(__name__)
-        self.server_config_file = server_config_file
-        self.context = AppContext.from_config_file(server_config_file)
 
         self.courses = CourseAPI(
-            context=self.context,
-            logger=logger,
-        )
-        self.profiles = ProfileAPI(
-            context=self.context,
+            course_repository=course_repository,
+            infrastructure_catalog_provider=infrastructure_provider,
             logger=logger,
         )
         self.memberships = MembershipAPI(
@@ -39,12 +35,6 @@ class API:
             logger=logger,
         )
         self.infrastructure = InfrastructureAPI(
-            context=self.context,
+            infrastructure_provider=infrastructure_provider,
             logger=logger,
         )
-
-    def reload_server_config(self) -> None:
-        """Reload the server configuration from the configuration file.
-        Note: courses are in the database and do not need reloading.
-        """
-        self.context = AppContext.from_config_file(self.server_config_file)
