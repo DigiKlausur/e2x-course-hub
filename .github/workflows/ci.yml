@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      # Ruff reads its config from pyproject.toml and never imports the package,
+      # so this job deliberately skips installing the project — doing so would
+      # drag in Node just to build the UI bundle (see the frontend job).
+      - name: Install ruff
+        run: pip install ruff
+
+      - run: ruff check .
+
+      - run: ruff format --check .
+
+  frontend:
+    name: Frontend and API contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Node must be set up before the Python install: the hatch-jupyter-builder
+      # hook in pyproject.toml shells out to npm, so `pip install .` aborts with
+      # "Could not find cmd (npm) in path" when Node is missing — even while
+      # only generating package metadata.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: course-service-ui/package-lock.json
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Install UI dependencies
+        run: npm ci
+        working-directory: course-service-ui
+
+      # Installing the project makes e2x_course_hub importable for the OpenAPI
+      # export below, and exercises the packaging path as a side effect: the
+      # build hook bundles the UI exactly as a released wheel would.
+      - name: Install the course hub
+        run: pip install .
+
+      # Regenerates openapi.json and schema.d.ts and fails if either differs
+      # from what is committed, so a backend schema change cannot land without
+      # the matching client types.
+      - name: Check the generated API types are up to date
+        run: npm run check:api-types
+        working-directory: course-service-ui
+        env:
+          PYTHON: python
+
+      - name: Lint
+        run: npm run lint
+        working-directory: course-service-ui
+
+      - name: Check formatting
+        run: npx prettier --check src
+        working-directory: course-service-ui
+
+      # Runs `tsc -b` and then the production bundle.
+      - name: Typecheck and build
+        run: npm run build
+        working-directory: course-service-ui
