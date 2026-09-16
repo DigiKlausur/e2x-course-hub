@@ -1,6 +1,5 @@
 import os
 
-from e2x_hub_rbac.backend.jupyterhub import HubAPI
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -13,8 +12,8 @@ from jupyterhub_fastapi_adapter.hub_oauth import (
 )
 
 from ..__about__ import __version__
-from ..api.api import API
 from ..errors import APIError
+from ..loader import load_api
 from ._data import DATA_FILES_PATH
 
 # from jupyterhub_fastapi_adapter.dependencies import User, require_authenticated_user
@@ -24,31 +23,20 @@ from .exception_handlers import api_error_handler
 from .infrastructure.router import router as infrastructure_router
 from .me.router import router as me_router
 from .membership.router import router as membership_router
+from .settings import ServiceSettings
 from .terms.router import router as terms_router
 
-# ── Config from environment ──────────────────────────────────────────
-service_prefix = os.environ.get("JUPYTERHUB_SERVICE_PREFIX", "/").rstrip("/")
-api_token = os.environ.get("JUPYTERHUB_API_TOKEN", "")
-api_url = os.environ.get("JUPYTERHUB_API_URL", "")
-server_config_file = os.environ.get("E2X_COURSE_HUB_CONFIG", "config.yml")
-add_users_to_hub = os.environ.get("E2X_ADD_USERS_TO_HUB", "false").lower() == "true"
+# ── Config ────────────────────────────────────────────────────────────
+settings = ServiceSettings() # pyright: ignore[reportCallIssue], config_file comes from env
+service_prefix = settings.service_prefix.rstrip("/")
 static_path = os.path.join(DATA_FILES_PATH, "static")
 template_path = os.path.join(DATA_FILES_PATH, "templates", "course_service")
-
-
-JUPYTERHUB_SERVICE_PREFIX = os.environ["JUPYTERHUB_SERVICE_PREFIX"]
-
 
 # ── Jinja2 environment for SPA template ──────────────────────────────
 jinja_env = Environment(loader=FileSystemLoader(template_path))
 
 # ── Build API layer (business logic, unchanged) ─────────────────────
-hub_api = HubAPI(api_token=api_token, api_url=api_url)
-api = API(
-    server_config_file=server_config_file,
-    hub_api=hub_api,
-    add_users_to_hub=add_users_to_hub,
-)
+api = load_api(settings)
 
 # ── FastAPI application ──────────────────────────────────────────────
 app = FastAPI(
@@ -63,7 +51,7 @@ app = FastAPI(
 app.exception_handler(AuthenticationRequired)(authentication_required_handler)
 
 # Register OAuth callback route
-app.get(url_path_join(JUPYTERHUB_SERVICE_PREFIX, "oauth_callback"))(oauth_callback)
+app.get(url_path_join(service_prefix, "oauth_callback"))(oauth_callback)
 
 # Store the API instance on app state so dependencies can access it
 app.state.api = api
