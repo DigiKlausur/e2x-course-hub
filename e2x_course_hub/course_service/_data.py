@@ -1,5 +1,3 @@
-import os
-
 """Get the data files for this package."""
 
 
