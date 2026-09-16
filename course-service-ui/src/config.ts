@@ -2,10 +2,6 @@
 export interface AppConfig {
   baseUrl: string;
   apiUrl: string;
-  user: {
-    name: string;
-    admin: boolean;
-  };
 }
 
 declare global {
@@ -24,11 +20,7 @@ export function getConfig(): AppConfig {
   console.warn("Using development config fallback");
   return {
     baseUrl: import.meta.env.VITE_BASE_URL || "",
-    apiUrl: import.meta.env.VITE_API_URL || "/api",
-    user: {
-      name: "dev-user",
-      admin: true,
-    },
+    apiUrl: import.meta.env.VITE_API_URL || "/api"
   };
 }
 
