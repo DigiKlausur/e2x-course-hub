@@ -42,7 +42,9 @@ Source = "https://github.com/Digiklausur/e2x-course-hub"
 [project.optional-dependencies]
 dev = [
   "pre-commit",
-  "ruff",
+  # Pinned so every developer and CI format identically; bump deliberately and
+  # update the matching pin in .github/workflows/ci.yml.
+  "ruff==0.16.7",
   "tbump",
   "build",
   "twine",
