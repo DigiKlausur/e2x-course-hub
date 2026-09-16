@@ -1,0 +1,2275 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "E2X Course Hub API",
+    "version": "0.1.1"
+  },
+  "paths": {
+    "/v1/courses": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "List Courses",
+        "operationId": "list_courses_v1_courses_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Create Course",
+        "operationId": "create_course_v1_courses_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseConfig"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseMetadata"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Get Course",
+        "operationId": "get_course_v1_courses__course_id__get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Delete Course",
+        "operationId": "delete_course_v1_courses__course_id__delete",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/metadata": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Get Course Metadata",
+        "operationId": "get_course_metadata_v1_courses__course_id__metadata_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseMetadata"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Update Course Metadata",
+        "operationId": "update_course_metadata_v1_courses__course_id__metadata_patch",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CourseMetadataUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseMetadata"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/environment": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Get Course Environment",
+        "operationId": "get_course_environment_v1_courses__course_id__environment_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Patch Course Environment",
+        "operationId": "patch_course_environment_v1_courses__course_id__environment_patch",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/terms": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Get Terms",
+        "operationId": "get_terms_v1_courses__course_id__terms_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TermSummaryResponse"
+                  },
+                  "title": "Response Get Terms V1 Courses  Course Id  Terms Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/terms/{term_id}": {
+      "post": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Create Term",
+        "operationId": "create_term_v1_courses__course_id__terms__term_id__post",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateTermRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TermDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Delete Term",
+        "operationId": "delete_term_v1_courses__course_id__terms__term_id__delete",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Get Term",
+        "operationId": "get_term_v1_courses__course_id__terms__term_id__get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TermDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/terms/{term_id}/environment": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Get Term Environment",
+        "operationId": "get_term_environment_v1_courses__course_id__terms__term_id__environment_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Patch Term Environment",
+        "operationId": "patch_term_environment_v1_courses__course_id__terms__term_id__environment_patch",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/catalogs/image-catalog": {
+      "get": {
+        "tags": [
+          "Infrastructure"
+        ],
+        "summary": "List Images",
+        "operationId": "list_images_v1_catalogs_image_catalog_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageCatalogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/catalogs/resource-tiers": {
+      "get": {
+        "tags": [
+          "Infrastructure"
+        ],
+        "summary": "List Resources",
+        "operationId": "list_resources_v1_catalogs_resource_tiers_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceTiersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/catalogs/profile-catalog": {
+      "get": {
+        "tags": [
+          "Infrastructure"
+        ],
+        "summary": "List Profiles",
+        "operationId": "list_profiles_v1_catalogs_profile_catalog_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileCatalogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/lms/admins": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "List Lms Admins",
+        "operationId": "list_lms_admins_v1_lms_admins_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Patch Lms Admins",
+        "operationId": "patch_lms_admins_v1_lms_admins_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/lms/course-creators": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "List Lms Course Creators",
+        "operationId": "list_lms_course_creators_v1_lms_course_creators_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Patch Lms Course Creators",
+        "operationId": "patch_lms_course_creators_v1_lms_course_creators_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/owners": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "List Course Owners",
+        "operationId": "list_course_owners_v1_courses__course_id__owners_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipCollectionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Patch Course Owners",
+        "operationId": "patch_course_owners_v1_courses__course_id__owners_patch",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/terms/{term_id}/instructors": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "List Term Instructors",
+        "operationId": "list_term_instructors_v1_courses__course_id__terms__term_id__instructors_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipCollectionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Patch Term Instructors",
+        "operationId": "patch_term_instructors_v1_courses__course_id__terms__term_id__instructors_patch",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/terms/{term_id}/teaching-assistants": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "List Term Teaching Assistants",
+        "operationId": "list_term_teaching_assistants_v1_courses__course_id__terms__term_id__teaching_assistants_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipCollectionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Patch Term Teaching Assistants",
+        "operationId": "patch_term_teaching_assistants_v1_courses__course_id__terms__term_id__teaching_assistants_patch",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/terms/{term_id}/students": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "List Term Students",
+        "operationId": "list_term_students_v1_courses__course_id__terms__term_id__students_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipCollectionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Patch Term Students",
+        "operationId": "patch_term_students_v1_courses__course_id__terms__term_id__students_patch",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/terms/{term_id}/observers": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "List Term Observers",
+        "operationId": "list_term_observers_v1_courses__course_id__terms__term_id__observers_get",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipCollectionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Patch Term Observers",
+        "operationId": "patch_term_observers_v1_courses__course_id__terms__term_id__observers_patch",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Get Current User",
+        "operationId": "get_current_user_v1_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CourseCapabilities": {
+        "properties": {
+          "editMetadata": {
+            "type": "boolean",
+            "title": "Editmetadata"
+          },
+          "removeCourse": {
+            "type": "boolean",
+            "title": "Removecourse"
+          },
+          "selectEnvironment": {
+            "type": "boolean",
+            "title": "Selectenvironment"
+          },
+          "viewCourseOwners": {
+            "type": "boolean",
+            "title": "Viewcourseowners"
+          },
+          "manageCourseOwners": {
+            "type": "boolean",
+            "title": "Managecourseowners"
+          },
+          "addTerm": {
+            "type": "boolean",
+            "title": "Addterm"
+          }
+        },
+        "type": "object",
+        "required": [
+          "editMetadata",
+          "removeCourse",
+          "selectEnvironment",
+          "viewCourseOwners",
+          "manageCourseOwners",
+          "addTerm"
+        ],
+        "title": "CourseCapabilities"
+      },
+      "CourseCollectionCapabilities": {
+        "properties": {
+          "createCourse": {
+            "type": "boolean",
+            "title": "Createcourse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "createCourse"
+        ],
+        "title": "CourseCollectionCapabilities"
+      },
+      "CourseCollectionResponse": {
+        "properties": {
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/CourseSummaryResponse"
+            },
+            "type": "array",
+            "title": "Courses"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/CourseCollectionCapabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "courses",
+          "capabilities"
+        ],
+        "title": "CourseCollectionResponse"
+      },
+      "CourseConfig": {
+        "properties": {
+          "image": {
+            "$ref": "#/components/schemas/ImageSelection",
+            "description": "Image configuration."
+          },
+          "spawn_role_selections": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SpawnRoleSelection"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/SpawnRole"
+            },
+            "type": "object",
+            "title": "Spawn Role Selections",
+            "description": "Per-spawn role selection configuration."
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/CourseMetadata",
+            "description": "Metadata information about the course."
+          },
+          "terms": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/TermConfig"
+            },
+            "type": "object",
+            "title": "Terms",
+            "description": "Per-term configuration overrides."
+          }
+        },
+        "type": "object",
+        "required": [
+          "image",
+          "spawn_role_selections",
+          "metadata"
+        ],
+        "title": "CourseConfig"
+      },
+      "CourseDetailResponse": {
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/CourseMetadata"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/Environment"
+          },
+          "terms": {
+            "items": {
+              "$ref": "#/components/schemas/TermSummaryResponse"
+            },
+            "type": "array",
+            "title": "Terms"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/CourseCapabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metadata",
+          "environment",
+          "terms",
+          "capabilities"
+        ],
+        "title": "CourseDetailResponse"
+      },
+      "CourseMetadata": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "title": "Course Id",
+            "description": "The id of the course."
+          },
+          "course_name": {
+            "type": "string",
+            "title": "Course Name",
+            "description": "The full name of the course"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "An optional text describing the course."
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "course_name"
+        ],
+        "title": "CourseMetadata",
+        "description": "Metadata information about a course."
+      },
+      "CourseMetadataUpdate": {
+        "properties": {
+          "course_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "title": "CourseMetadataUpdate",
+        "description": "Request body for updating course metadata."
+      },
+      "CourseSummaryResponse": {
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/CourseMetadata"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/CourseCapabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metadata",
+          "capabilities"
+        ],
+        "title": "CourseSummaryResponse"
+      },
+      "CreateTermRequest": {
+        "properties": {
+          "term": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TermConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "CreateTermRequest",
+        "description": "Request body for creating a term."
+      },
+      "Environment": {
+        "properties": {
+          "image": {
+            "$ref": "#/components/schemas/ImageSelection"
+          },
+          "resources": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/SpawnRole"
+            },
+            "type": "object",
+            "title": "Resources",
+            "default": {}
+          },
+          "profiles": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/SpawnRole"
+            },
+            "type": "object",
+            "title": "Profiles",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "image"
+        ],
+        "title": "Environment",
+        "description": "Response body containing the environment configuration of a course or term."
+      },
+      "EnvironmentUpdate": {
+        "properties": {
+          "image": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSelection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resources": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/SpawnRole"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resources"
+          },
+          "profiles": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/SpawnRole"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profiles"
+          }
+        },
+        "type": "object",
+        "title": "EnvironmentUpdate",
+        "description": "Request body for updating the environment configuration of a course or term."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImageCatalogResponse": {
+        "properties": {
+          "capabilities": {
+            "$ref": "#/components/schemas/InfrastructureCapabilities"
+          },
+          "catalog": {
+            "$ref": "#/components/schemas/ImageFamilyOptions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "capabilities",
+          "catalog"
+        ],
+        "title": "ImageCatalogResponse"
+      },
+      "ImageFamilyOption": {
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Display Name"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Description"
+          },
+          "default_tag": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Default Tag"
+          },
+          "tags": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ImageTagInfo"
+            },
+            "type": "object",
+            "title": "Tags"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "display_name",
+          "description",
+          "default_tag",
+          "tags"
+        ],
+        "title": "ImageFamilyOption",
+        "description": "An option for a specific image family."
+      },
+      "ImageFamilyOptions": {
+        "properties": {
+          "default_family": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Default Family"
+          },
+          "families": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ImageFamilyOption"
+            },
+            "type": "object",
+            "title": "Families"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "default_family",
+          "families"
+        ],
+        "title": "ImageFamilyOptions",
+        "description": "A collection of image family options."
+      },
+      "ImageSelection": {
+        "properties": {
+          "family": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Family"
+          },
+          "tag": {
+            "type": "string",
+            "title": "Tag"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "family",
+          "tag"
+        ],
+        "title": "ImageSelection",
+        "description": "A selection of an image family and an optional tag."
+      },
+      "ImageTagInfo": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ImageTagInfo",
+        "description": "Information about a specific image tag."
+      },
+      "InfrastructureCapabilities": {
+        "properties": {
+          "manage": {
+            "type": "boolean",
+            "title": "Manage",
+            "default": false
+          },
+          "view": {
+            "type": "boolean",
+            "title": "View",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "InfrastructureCapabilities"
+      },
+      "MembershipCapabilities": {
+        "properties": {
+          "manage": {
+            "type": "boolean",
+            "title": "Manage",
+            "default": false
+          },
+          "view": {
+            "type": "boolean",
+            "title": "View",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "MembershipCapabilities"
+      },
+      "MembershipCollectionResponse": {
+        "properties": {
+          "usernames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Usernames"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/MembershipCapabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "usernames",
+          "capabilities"
+        ],
+        "title": "MembershipCollectionResponse"
+      },
+      "MembershipPatch": {
+        "properties": {
+          "add": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Add",
+            "description": "Usernames to add."
+          },
+          "remove": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Remove",
+            "description": "Usernames to remove."
+          }
+        },
+        "type": "object",
+        "title": "MembershipPatch",
+        "description": "Request body for add/remove membership operations."
+      },
+      "ProfileCatalogResponse": {
+        "properties": {
+          "capabilities": {
+            "$ref": "#/components/schemas/InfrastructureCapabilities"
+          },
+          "catalog": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ProfileOptions"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/SpawnRole"
+            },
+            "type": "object",
+            "title": "Catalog"
+          }
+        },
+        "type": "object",
+        "required": [
+          "capabilities",
+          "catalog"
+        ],
+        "title": "ProfileCatalogResponse"
+      },
+      "ProfileOption": {
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Display Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "display_name"
+        ],
+        "title": "ProfileOption",
+        "description": "A profile option for a specific spawn role."
+      },
+      "ProfileOptions": {
+        "properties": {
+          "default_profile": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Default Profile"
+          },
+          "profiles": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ProfileOption"
+            },
+            "type": "object",
+            "title": "Profiles"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "default_profile",
+          "profiles"
+        ],
+        "title": "ProfileOptions",
+        "description": "A collection of profile options for a specific spawn role."
+      },
+      "ResourceTierOption": {
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Display Name"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Description"
+          },
+          "warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warning"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "display_name",
+          "description"
+        ],
+        "title": "ResourceTierOption",
+        "description": "A resource tier option for a specific spawn role."
+      },
+      "ResourceTierOptions": {
+        "properties": {
+          "default_tier": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Default Tier"
+          },
+          "tiers": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ResourceTierOption"
+            },
+            "type": "object",
+            "title": "Tiers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "default_tier",
+          "tiers"
+        ],
+        "title": "ResourceTierOptions",
+        "description": "A collection of resource tier options for a specific spawn role."
+      },
+      "ResourceTiersResponse": {
+        "properties": {
+          "capabilities": {
+            "$ref": "#/components/schemas/InfrastructureCapabilities"
+          },
+          "catalog": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ResourceTierOptions"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/SpawnRole"
+            },
+            "type": "object",
+            "title": "Catalog"
+          }
+        },
+        "type": "object",
+        "required": [
+          "capabilities",
+          "catalog"
+        ],
+        "title": "ResourceTiersResponse"
+      },
+      "SpawnRole": {
+        "type": "string",
+        "enum": [
+          "student",
+          "grader"
+        ],
+        "title": "SpawnRole",
+        "description": "Enumeration of spawn roles for the e2x course hub.\n\nRead-only access to the grader environment is not a separate role; it's the\nGRADER role spawned with ``SpawnSelection.course_readonly`` set."
+      },
+      "SpawnRoleSelection": {
+        "properties": {
+          "resource_tier_name": {
+            "type": "string",
+            "title": "Resource Tier Name"
+          },
+          "profile_name": {
+            "type": "string",
+            "title": "Profile Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "resource_tier_name",
+          "profile_name"
+        ],
+        "title": "SpawnRoleSelection",
+        "description": "A selection of spawn options for a specific spawn role"
+      },
+      "TermCapabilities": {
+        "properties": {
+          "viewTerm": {
+            "type": "boolean",
+            "title": "Viewterm"
+          },
+          "removeTerm": {
+            "type": "boolean",
+            "title": "Removeterm"
+          },
+          "membership": {
+            "$ref": "#/components/schemas/TermMembershipCapabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "viewTerm",
+          "removeTerm",
+          "membership"
+        ],
+        "title": "TermCapabilities"
+      },
+      "TermConfig": {
+        "properties": {
+          "image": {
+            "$ref": "#/components/schemas/ImageSelection",
+            "description": "Image configuration."
+          },
+          "spawn_role_selections": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SpawnRoleSelection"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/SpawnRole"
+            },
+            "type": "object",
+            "title": "Spawn Role Selections",
+            "description": "Per-spawn role selection configuration."
+          }
+        },
+        "type": "object",
+        "required": [
+          "image",
+          "spawn_role_selections"
+        ],
+        "title": "TermConfig",
+        "description": "Configuration for a specific term."
+      },
+      "TermDetailResponse": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "title": "Course Id"
+          },
+          "term_id": {
+            "type": "string",
+            "title": "Term Id"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/Environment"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/TermCapabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "term_id",
+          "environment",
+          "capabilities"
+        ],
+        "title": "TermDetailResponse"
+      },
+      "TermMembershipCapabilities": {
+        "properties": {
+          "viewInstructors": {
+            "type": "boolean",
+            "title": "Viewinstructors"
+          },
+          "manageInstructors": {
+            "type": "boolean",
+            "title": "Manageinstructors"
+          },
+          "viewTeachingAssistants": {
+            "type": "boolean",
+            "title": "Viewteachingassistants"
+          },
+          "manageTeachingAssistants": {
+            "type": "boolean",
+            "title": "Manageteachingassistants"
+          },
+          "viewStudents": {
+            "type": "boolean",
+            "title": "Viewstudents"
+          },
+          "manageStudents": {
+            "type": "boolean",
+            "title": "Managestudents"
+          },
+          "viewObservers": {
+            "type": "boolean",
+            "title": "Viewobservers"
+          },
+          "manageObservers": {
+            "type": "boolean",
+            "title": "Manageobservers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "viewInstructors",
+          "manageInstructors",
+          "viewTeachingAssistants",
+          "manageTeachingAssistants",
+          "viewStudents",
+          "manageStudents",
+          "viewObservers",
+          "manageObservers"
+        ],
+        "title": "TermMembershipCapabilities"
+      },
+      "TermSummaryCapabilities": {
+        "properties": {
+          "viewTerm": {
+            "type": "boolean",
+            "title": "Viewterm"
+          },
+          "removeTerm": {
+            "type": "boolean",
+            "title": "Removeterm"
+          }
+        },
+        "type": "object",
+        "required": [
+          "viewTerm",
+          "removeTerm"
+        ],
+        "title": "TermSummaryCapabilities"
+      },
+      "TermSummaryResponse": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "title": "Course Id"
+          },
+          "term_id": {
+            "type": "string",
+            "title": "Term Id"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/TermSummaryCapabilities"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "term_id",
+          "capabilities"
+        ],
+        "title": "TermSummaryResponse"
+      },
+      "UserResponse": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "title": "UserResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
