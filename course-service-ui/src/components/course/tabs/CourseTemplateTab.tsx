@@ -5,7 +5,7 @@ import {
 
 import { useImageCatalog, useResourceCatalog } from "@hooks/catalog";
 import { RuntimeConfigEditor } from "@components/infrastructure/RuntimeConfigEditor";
-import type { ImageSelection } from "@api/types";
+import type { ImageSelection, SpawnRole } from "@api/types";
 
 interface Props {
   courseId: string;
@@ -22,13 +22,8 @@ export function CourseTemplateTab({ courseId }: Props) {
     updateEnvironment.mutate({ image: selection });
   };
 
-  const handleResourceConfirm = (role: "student" | "grader", tier: string) => {
-    updateEnvironment.mutate({
-      resources: {
-        ...environment?.resources,
-        [role]: tier,
-      },
-    });
+  const handleResourceConfirm = (role: SpawnRole, tier: string) => {
+    updateEnvironment.mutate({ resources: { [role]: tier } });
   };
 
   return (

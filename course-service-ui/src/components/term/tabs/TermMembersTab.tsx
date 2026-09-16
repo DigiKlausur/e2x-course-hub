@@ -13,6 +13,7 @@ import {
   useUpdateTeachingAssistants,
   useUpdateInstructors,
 } from "@hooks/membership";
+import { useTerm } from "@hooks/course";
 
 type DialogTarget =
   "students" | "teaching-assistants" | "instructors" | "observers";
@@ -56,19 +57,32 @@ function toggleSelectionForRows(
 export function TermMembersTab({ courseId, termId }: Props) {
   const [addDialogFor, setAddDialogFor] = useState<DialogTarget | null>(null);
 
+  // The term reports which membership lists this user may see. Fetching a list
+  // without the matching permission answers 403, so these flags gate the
+  // requests rather than just hiding the results.
+  const { data: term, isLoading: termLoading } = useTerm(courseId, termId);
+  const membership = term?.capabilities.membership;
+
   const { data: students, isLoading: studentsLoading } = useStudents(
     courseId,
     termId,
+    membership?.viewStudents ?? false,
   );
   const { data: teachingAssistants, isLoading: teachingAssistantsLoading } =
-    useTeachingAssistants(courseId, termId);
+    useTeachingAssistants(
+      courseId,
+      termId,
+      membership?.viewTeachingAssistants ?? false,
+    );
   const { data: instructors, isLoading: instructorsLoading } = useInstructors(
     courseId,
     termId,
+    membership?.viewInstructors ?? false,
   );
   const { data: observers, isLoading: observersLoading } = useObservers(
     courseId,
     termId,
+    membership?.viewObservers ?? false,
   );
 
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(
@@ -102,6 +116,7 @@ export function TermMembersTab({ courseId, termId }: Props) {
       selected: selectedStudents,
       setSelected: setSelectedStudents,
       update: updateStudents,
+      canView: membership?.viewStudents ?? false,
       canManage: students?.capabilities?.manage ?? false,
     },
     {
@@ -113,6 +128,7 @@ export function TermMembersTab({ courseId, termId }: Props) {
       selected: selectedTeachingAssistants,
       setSelected: setSelectedTeachingAssistants,
       update: updateTeachingAssistants,
+      canView: membership?.viewTeachingAssistants ?? false,
       canManage: teachingAssistants?.capabilities?.manage ?? false,
     },
     {
@@ -124,6 +140,7 @@ export function TermMembersTab({ courseId, termId }: Props) {
       selected: selectedInstructors,
       setSelected: setSelectedInstructors,
       update: updateInstructors,
+      canView: membership?.viewInstructors ?? false,
       canManage: instructors?.capabilities?.manage ?? false,
     },
     {
@@ -135,9 +152,10 @@ export function TermMembersTab({ courseId, termId }: Props) {
       selected: selectedObservers,
       setSelected: setSelectedObservers,
       update: updateObservers,
+      canView: membership?.viewObservers ?? false,
       canManage: observers?.capabilities?.manage ?? false,
     },
-  ];
+  ].filter((role) => role.canView);
 
   const activeRole = roles.find((r) => r.id === addDialogFor);
 
@@ -195,6 +213,16 @@ export function TermMembersTab({ courseId, termId }: Props) {
     }),
   );
 
+  if (termLoading) return <p className="text-gray-500">Loading…</p>;
+
+  if (roles.length === 0) {
+    return (
+      <p className="text-gray-500">
+        You are not allowed to view the members of this term.
+      </p>
+    );
+  }
+
   return (
     <div className="grid grid-cols-[2fr_1fr] gap-6">
       <AddMembersDialog
@@ -210,22 +238,15 @@ export function TermMembersTab({ courseId, termId }: Props) {
       <div>
         <Card>
           <CardTitle>Summary</CardTitle>
-          <div className="flex justify-between py-3 border-b border-gray-100">
-            <span className="text-gray-600">Students</span>
-            <strong>{students?.usernames.length ?? "—"}</strong>
-          </div>
-          <div className="flex justify-between py-3 border-b border-gray-100">
-            <span className="text-gray-600">Teaching Assistants</span>
-            <strong>{teachingAssistants?.usernames.length ?? "—"}</strong>
-          </div>
-          <div className="flex justify-between py-3">
-            <span className="text-gray-600">Instructors</span>
-            <strong>{instructors?.usernames.length ?? "—"}</strong>
-          </div>
-          <div className="flex justify-between py-3">
-            <span className="text-gray-600">Observers</span>
-            <strong>{observers?.usernames.length ?? "—"}</strong>
-          </div>
+          {roles.map(({ id, label, data }) => (
+            <div
+              key={id}
+              className="flex justify-between py-3 border-b border-gray-100 last:border-b-0"
+            >
+              <span className="text-gray-600">{label}</span>
+              <strong>{data?.length ?? "—"}</strong>
+            </div>
+          ))}
         </Card>
       </div>
     </div>

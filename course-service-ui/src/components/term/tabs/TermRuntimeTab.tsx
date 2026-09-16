@@ -1,7 +1,7 @@
 import { useTermEnvironment, useUpdateTermEnvironment } from "@hooks/course";
 import { useImageCatalog, useResourceCatalog } from "@hooks/catalog";
 import { RuntimeConfigEditor } from "@components/infrastructure/RuntimeConfigEditor";
-import type { ImageSelection } from "@api/types";
+import type { ImageSelection, SpawnRole } from "@api/types";
 
 interface Props {
   courseId: string;
@@ -15,15 +15,15 @@ export function TermRuntimeTab({ courseId, termId }: Props) {
 
   const updateTermEnvironment = useUpdateTermEnvironment(courseId, termId);
 
+  // Send only what changed: the backend merges each key it receives and leaves
+  // the rest alone, so echoing the whole fetched environment back would only
+  // risk overwriting a concurrent edit with stale values.
   const handleImageConfirm = (selection: ImageSelection) => {
-    updateTermEnvironment.mutate({ ...termEnvironment, image: selection });
+    updateTermEnvironment.mutate({ image: selection });
   };
 
-  const handleResourceConfirm = (role: "student" | "grader", tier: string) => {
-    updateTermEnvironment.mutate({
-      ...termEnvironment,
-      resources: { ...termEnvironment?.resources, [role]: tier },
-    });
+  const handleResourceConfirm = (role: SpawnRole, tier: string) => {
+    updateTermEnvironment.mutate({ resources: { [role]: tier } });
   };
 
   return (

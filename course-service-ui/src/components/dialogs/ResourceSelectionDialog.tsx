@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Modal } from "@components/ui/Modal";
 import { Button } from "@components/ui/Button";
-import type { ResourceCatalog } from "@api/types";
+import type { ResourceCatalog, SpawnRole } from "@api/types";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   initialTier: string;
   resourceCatalog: ResourceCatalog;
-  role: "student" | "grader";
+  role: SpawnRole;
   onConfirm: (tier: string) => void;
 }
 
@@ -55,7 +55,7 @@ export function ResourceSelectionDialog({
       <div className="flex flex-col gap-3">
         {Object.entries(tiers).map(([tierKey, tier]) => {
           const isSelected = selectedTier === tierKey;
-          const r = tier.resources;
+          const metadata = Object.entries(tier.metadata ?? {});
           return (
             <div
               key={tierKey}
@@ -72,16 +72,15 @@ export function ResourceSelectionDialog({
               <div className="text-sm text-gray-500 mt-0.5">
                 {tier.description}
               </div>
-              <div className="mt-2 text-xs text-gray-500 flex gap-4">
-                <span>
-                  {r.cpu_limit} CPU
-                  {r.cpu_guarantee ? ` (${r.cpu_guarantee} guaranteed)` : ""}
-                </span>
-                <span>
-                  {r.mem_limit} RAM
-                  {r.mem_guarantee ? ` (${r.mem_guarantee} guaranteed)` : ""}
-                </span>
-              </div>
+              {metadata.length > 0 && (
+                <div className="mt-2 text-xs text-gray-500 flex gap-4">
+                  {metadata.map(([key, value]) => (
+                    <span key={key}>
+                      {key}: {value}
+                    </span>
+                  ))}
+                </div>
+              )}
               {tier.warning && (
                 <p className="mt-2 text-xs text-amber-600">⚠ {tier.warning}</p>
               )}

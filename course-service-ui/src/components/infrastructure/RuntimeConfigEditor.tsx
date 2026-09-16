@@ -8,9 +8,10 @@ import type {
   ImageSelection,
   ResourceCatalog,
   ResourcesSelection,
+  SpawnRole,
 } from "@api/types";
 
-type Dialog = "image" | "student" | "grader" | null;
+type Dialog = "image" | SpawnRole | null;
 
 interface Props {
   title: string;
@@ -21,7 +22,7 @@ interface Props {
   resourceCatalog: ResourceCatalog | undefined;
   showTag?: boolean;
   onImageConfirm: (selection: ImageSelection) => void;
-  onResourceConfirm: (role: "student" | "grader", tier: string) => void;
+  onResourceConfirm: (role: SpawnRole, tier: string) => void;
 }
 
 export function RuntimeConfigEditor({
@@ -56,8 +57,10 @@ export function RuntimeConfigEditor({
   }
 
   const resourceDescription = (tier: typeof studentTier) =>
-    tier
-      ? `${tier.resources.cpu_limit} CPU · ${tier.resources.mem_limit} RAM`
+    tier?.metadata
+      ? Object.entries(tier.metadata)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(" · ")
       : undefined;
 
   return (

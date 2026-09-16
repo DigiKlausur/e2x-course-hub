@@ -2,14 +2,14 @@ import { MembershipRole } from "@domain/roles";
 
 export const membershipQueryKeys = {
   all: ["membership"] as const,
-  hub: {
-    all: () => [...membershipQueryKeys.all, "hub"] as const,
+  lms: {
+    all: () => [...membershipQueryKeys.all, "lms"] as const,
     roles: {
       [MembershipRole.Admin]: () =>
-        [...membershipQueryKeys.hub.all(), MembershipRole.Admin] as const,
+        [...membershipQueryKeys.lms.all(), MembershipRole.Admin] as const,
       [MembershipRole.CourseCreator]: () =>
         [
-          ...membershipQueryKeys.hub.all(),
+          ...membershipQueryKeys.lms.all(),
           MembershipRole.CourseCreator,
         ] as const,
     },

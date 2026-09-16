@@ -16,8 +16,6 @@ export function CourseOverviewTab({ courseId }: Props) {
   if (isLoading) return <p className="text-gray-500">Loading…</p>;
   if (!course) return null;
 
-  const termIds = Object.keys(course.terms);
-
   const imageDisplayName = course.environment.image?.family
     ? (imageCatalog?.catalog.families[course.environment.image.family]
         ?.display_name ?? course.environment.image.family)
@@ -41,7 +39,7 @@ export function CourseOverviewTab({ courseId }: Props) {
           <Row label="Course ID">{courseId}</Row>
           <Row label="Course Name">{courseMetadata?.course_name}</Row>
           <Row label="Description">{courseMetadata?.description}</Row>
-          <Row label="Terms">{termIds.length}</Row>
+          <Row label="Terms">{course.terms.length}</Row>
         </Card>
       </div>
 

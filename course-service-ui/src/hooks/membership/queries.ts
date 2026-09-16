@@ -4,19 +4,19 @@ import type { MembershipCollectionResponse } from "@api/types";
 import { membershipQueryKeys } from "./keys";
 import { MembershipRole } from "@domain/roles";
 
-export function useHubAdmins() {
+export function useLMSAdmins() {
   return useQuery<MembershipCollectionResponse>({
-    queryKey: [...membershipQueryKeys.hub.roles[MembershipRole.Admin]()],
-    queryFn: () => membershipAPI.hub.fetchHubAdmins(),
+    queryKey: [...membershipQueryKeys.lms.roles[MembershipRole.Admin]()],
+    queryFn: () => membershipAPI.lms.fetchLMSAdmins(),
   });
 }
 
 export function useCourseCreators() {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
-      ...membershipQueryKeys.hub.roles[MembershipRole.CourseCreator](),
+      ...membershipQueryKeys.lms.roles[MembershipRole.CourseCreator](),
     ],
-    queryFn: () => membershipAPI.hub.fetchCourseCreators(),
+    queryFn: () => membershipAPI.lms.fetchCourseCreators(),
   });
 }
 
@@ -31,7 +31,17 @@ export function useCourseOwners(courseId: string) {
   });
 }
 
-export function useInstructors(courseId: string, termId: string) {
+/**
+ * The term membership endpoints are permission guarded and answer 403 rather
+ * than an empty list when the caller may not see a role. Callers therefore pass
+ * `enabled` from the term's `capabilities.membership` flags, so a request is
+ * only made when it can succeed.
+ */
+export function useInstructors(
+  courseId: string,
+  termId: string,
+  enabled = true,
+) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.terms.roles[MembershipRole.Instructor](
@@ -40,10 +50,11 @@ export function useInstructors(courseId: string, termId: string) {
       ),
     ],
     queryFn: () => membershipAPI.term.fetchInstructors(courseId, termId),
+    enabled,
   });
 }
 
-export function useObservers(courseId: string, termId: string) {
+export function useObservers(courseId: string, termId: string, enabled = true) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.terms.roles[MembershipRole.Observer](
@@ -52,10 +63,11 @@ export function useObservers(courseId: string, termId: string) {
       ),
     ],
     queryFn: () => membershipAPI.term.fetchObservers(courseId, termId),
+    enabled,
   });
 }
 
-export function useStudents(courseId: string, termId: string) {
+export function useStudents(courseId: string, termId: string, enabled = true) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.terms.roles[MembershipRole.Student](
@@ -64,10 +76,15 @@ export function useStudents(courseId: string, termId: string) {
       ),
     ],
     queryFn: () => membershipAPI.term.fetchStudents(courseId, termId),
+    enabled,
   });
 }
 
-export function useTeachingAssistants(courseId: string, termId: string) {
+export function useTeachingAssistants(
+  courseId: string,
+  termId: string,
+  enabled = true,
+) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.terms.roles[MembershipRole.TeachingAssistant](
@@ -76,5 +93,6 @@ export function useTeachingAssistants(courseId: string, termId: string) {
       ),
     ],
     queryFn: () => membershipAPI.term.fetchTeachingAssistants(courseId, termId),
+    enabled,
   });
 }

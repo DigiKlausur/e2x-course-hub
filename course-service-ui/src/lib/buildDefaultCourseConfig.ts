@@ -44,13 +44,15 @@ export function buildDefaultCourseConfig({
       family: selectedImageFamily,
       tag: selectedFamily.default_tag || fallbackTag,
     },
-    resources: {
-      student: resourceCatalog.student.default_tier,
-      grader: resourceCatalog.grader.default_tier,
-    },
-    profiles: {
-      student: profileCatalog.student.default,
-      grader: profileCatalog.grader.default,
+    spawn_role_selections: {
+      student: {
+        resource_tier_name: resourceCatalog.student.default_tier,
+        profile_name: profileCatalog.student.default_profile,
+      },
+      grader: {
+        resource_tier_name: resourceCatalog.grader.default_tier,
+        profile_name: profileCatalog.grader.default_profile,
+      },
     },
     terms: {},
   };

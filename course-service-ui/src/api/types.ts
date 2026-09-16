@@ -1,236 +1,146 @@
-export interface ImageSelection {
-  family: string;
-  tag?: string;
-}
+/**
+ * Public API types for the course service.
+ *
+ * These are thin aliases over `schema.d.ts`, which is generated from the
+ * service's OpenAPI document — see `npm run generate:api-types`. Do not add
+ * free-standing interfaces here: a shape that is not derived from the generated
+ * schema can drift from the backend without the compiler noticing, which is
+ * exactly what this indirection exists to prevent.
+ *
+ * The aliases serve two purposes beyond renaming. They give the UI stable names
+ * that survive backend renames (`ImageCatalog` rather than `ImageFamilyOptions`),
+ * and they restore the spawn-role keys described below.
+ *
+ * On `SpawnRoleMap`: the backend types these maps as `dict[SpawnRole, ...]` and
+ * FastAPI faithfully emits `propertyNames: {$ref: SpawnRole}` for them, but
+ * openapi-typescript discards `propertyNames` and widens the result to an open
+ * `{ [key: string]: T }` index signature. Under that signature `catalog.student`
+ * type-checks as a guaranteed `ResourceTierOptions` even when the key is absent,
+ * and a typo like `catalog.studnet` type-checks too. Re-narrowing to the
+ * generated `SpawnRole` union restores both checks. The union itself still comes
+ * from the schema, so adding a spawn role on the backend propagates here.
+ */
+import type { components } from "./schema";
 
-export interface ResourcesSelection {
-  student?: string;
-  grader?: string;
-}
+type Schemas = components["schemas"];
 
-export interface ProfileSelection {
-  student?: string;
-  grader?: string;
-}
+/** A map keyed by spawn role, with every role present. */
+export type SpawnRoleMap<T> = Record<SpawnRole, T>;
+/** A map keyed by spawn role where roles may be absent (the backend defaults these to `{}`). */
+export type PartialSpawnRoleMap<T> = Partial<Record<SpawnRole, T>>;
 
-export interface Environment {
-  image: ImageSelection;
-  resources: ResourcesSelection;
-}
+// ── Selections ───────────────────────────────────────────────────────
+export type SpawnRole = Schemas["SpawnRole"];
+export type ImageSelection = Schemas["ImageSelection"];
+export type SpawnRoleSelection = Schemas["SpawnRoleSelection"];
 
-export interface EnvironmentUpdate {
-  image?: ImageSelection;
-  resources?: ResourcesSelection;
-}
+export type ResourcesSelection = PartialSpawnRoleMap<string>;
+export type ProfileSelection = PartialSpawnRoleMap<string>;
 
-export interface TermConfig {
-  image?: ImageSelection;
-  resources?: ResourcesSelection;
-  profiles?: ProfileSelection;
-}
-
-export interface TermSummaryCapabilities {
-  viewTerm: boolean;
-  removeTerm: boolean;
-}
-
-export interface TermCapabilities extends TermSummaryCapabilities {
-  viewInstructors: boolean;
-  manageInstructors: boolean;
-  viewTeachingAssistants: boolean;
-  manageTeachingAssistants: boolean;
-  viewStudents: boolean;
-  manageStudents: boolean;
-  viewObservers: boolean;
-  manageObservers: boolean;
-  selectEnvironment: boolean;
-}
-
-export interface TermSummaryResponse {
-  course_id: string;
-  term_id: string;
-  capabilities: TermSummaryCapabilities;
-}
-
-export interface TermDetailResponse {
-  course_id: string;
-  term_id: string;
-  environment: Environment;
-  capabilities: TermCapabilities;
-}
-
-export interface CreateTermRequest {
-  /** Request body for creating a term. */
-  term?: TermConfig | null;
-}
-
-export interface MembershipCollectionResponse {
-  usernames: string[];
-  capabilities: {
-    manage: boolean;
-    view: boolean;
-  };
-}
-
-export interface MembershipPatch {
-  /** Usernames to add. */
-  add?: string[];
-  /** Usernames to remove. */
-  remove?: string[];
-}
-
-export interface CourseMetadata {
-  course_id: string;
-  course_name: string;
-  description?: string;
-}
-
-export interface CourseMetadataUpdate {
-  course_name?: string | null;
-  description?: string | null;
-}
-
-export interface CourseConfig {
-  metadata: CourseMetadata;
-  image: ImageSelection;
+// ── Environment ──────────────────────────────────────────────────────
+export type Environment = Omit<
+  Schemas["Environment"],
+  "resources" | "profiles"
+> & {
   resources: ResourcesSelection;
   profiles: ProfileSelection;
-  terms: Record<string, TermConfig>;
-}
+};
 
-export interface CourseCapabilities {
-  editMetadata: boolean;
-  removeCourse: boolean;
-  selectEnvironment: boolean;
-  viewCourseOwners: boolean;
-  manageCourseOwners: boolean;
-  addTerm: boolean;
-}
+export type EnvironmentUpdate = Omit<
+  Schemas["EnvironmentUpdate"],
+  "resources" | "profiles"
+> & {
+  resources?: ResourcesSelection | null;
+  profiles?: ProfileSelection | null;
+};
 
-export interface CourseSummaryResponse {
-  metadata: CourseMetadata;
-  capabilities: CourseCapabilities;
-}
+// ── Courses ──────────────────────────────────────────────────────────
+export type CourseMetadata = Schemas["CourseMetadata"];
+export type CourseMetadataUpdate = Schemas["CourseMetadataUpdate"];
+export type CourseCapabilities = Schemas["CourseCapabilities"];
+export type CourseCollectionCapabilities =
+  Schemas["CourseCollectionCapabilities"];
 
-export interface CourseDetailResponse {
-  metadata: CourseMetadata;
+export type CourseConfig = Omit<
+  Schemas["CourseConfig"],
+  "spawn_role_selections" | "terms"
+> & {
+  spawn_role_selections: SpawnRoleMap<SpawnRoleSelection>;
+  /** Keyed by term id, not by spawn role. */
+  terms?: Record<string, TermConfig>;
+};
+
+export type CourseSummaryResponse = Schemas["CourseSummaryResponse"];
+
+export type CourseDetailResponse = Omit<
+  Schemas["CourseDetailResponse"],
+  "environment"
+> & {
   environment: Environment;
-  terms: TermSummaryResponse[];
-  capabilities: CourseCapabilities;
-}
+};
 
-export interface CourseCollectionResponse {
-  courses: CourseSummaryResponse[];
-  capabilities: {
-    createCourse: boolean;
-  };
-}
+export type CourseCollectionResponse = Schemas["CourseCollectionResponse"];
 
-export interface BaseProfile {
-  name: string;
-  display_name: string;
-  environment: Record<string, string | number | boolean>;
-  mounts: string[];
-}
+// ── Terms ────────────────────────────────────────────────────────────
+export type TermConfig = Omit<
+  Schemas["TermConfig"],
+  "spawn_role_selections"
+> & {
+  spawn_role_selections: SpawnRoleMap<SpawnRoleSelection>;
+};
 
-export interface ProfileDetails {
-  default: string;
-  profiles: BaseProfile[];
-}
+export type TermSummaryCapabilities = Schemas["TermSummaryCapabilities"];
+export type TermMembershipCapabilities = Schemas["TermMembershipCapabilities"];
+export type TermCapabilities = Schemas["TermCapabilities"];
+export type TermSummaryResponse = Schemas["TermSummaryResponse"];
 
-export interface Image {
-  name: string;
-  tag: string;
-  pullPolicy: string;
-}
+export type TermDetailResponse = Omit<
+  Schemas["TermDetailResponse"],
+  "environment"
+> & {
+  environment: Environment;
+};
 
-export interface Resources {
-  cpu_guarantee: string;
-  cpu_limit: string;
-  mem_guarantee: string;
-  mem_limit: string;
-}
+export type CreateTermRequest = Omit<Schemas["CreateTermRequest"], "term"> & {
+  term?: TermConfig | null;
+};
 
-export interface Runtime {
-  image: Image;
-  resources: Resources;
-  environment: Record<string, string>;
-}
+// ── Membership ───────────────────────────────────────────────────────
+export type MembershipCapabilities = Schemas["MembershipCapabilities"];
+export type MembershipCollectionResponse =
+  Schemas["MembershipCollectionResponse"];
+export type MembershipPatch = Schemas["MembershipPatch"];
 
-export interface TagInfo {
-  status: "active" | "deprecated" | "removed";
-  message?: string;
-}
+// ── Infrastructure catalogs ──────────────────────────────────────────
+// The backend names these `*Options`; the UI has always called them catalogs.
+export type ProfileOption = Schemas["ProfileOption"];
+export type ProfileDetails = Schemas["ProfileOptions"];
+export type TagInfo = Schemas["ImageTagInfo"];
+export type ImageFamily = Schemas["ImageFamilyOption"];
+export type ImageCatalog = Schemas["ImageFamilyOptions"];
+export type ResourceTier = Schemas["ResourceTierOption"];
+export type ResourceTiers = Schemas["ResourceTierOptions"];
 
-export interface ImageFlavors {
-  student: string;
-  grader: string;
-}
+export type ResourceCatalog = SpawnRoleMap<ResourceTiers>;
+export type ProfileCatalog = SpawnRoleMap<ProfileDetails>;
 
-export interface ImageFamily {
-  display_name: string;
-  description: string;
-  default_tag: string;
-  pullPolicy?: string;
-  registry?: string;
-  images: ImageFlavors;
-  tags: Record<string, TagInfo>;
-}
+export type InfrastructureCapabilities = Schemas["InfrastructureCapabilities"];
 
-export interface ImageCatalog {
-  default_registry: string;
-  default_pull_policy?: string;
-  default_family: string;
-  families: Record<string, ImageFamily>;
-}
+export type ImageCatalogResponse = Schemas["ImageCatalogResponse"];
 
-export interface ResourceTier {
-  display_name: string;
-  description: string;
-  resources: Resources;
-  warning?: string;
-}
-
-export interface ResourceTiers {
-  default_tier: string;
-  tiers: Record<string, ResourceTier>;
-}
-
-export interface ResourceCatalog {
-  student: ResourceTiers;
-  grader: ResourceTiers;
-}
-
-export interface InfrastructureCapabilities {
-  manage: boolean;
-  view: boolean;
-}
-
-export interface ImageCatalogResponse {
-  capabilities: InfrastructureCapabilities;
-  catalog: ImageCatalog;
-}
-
-export interface ResourceCatalogResponse {
-  capabilities: InfrastructureCapabilities;
+export type ResourceCatalogResponse = Omit<
+  Schemas["ResourceTiersResponse"],
+  "catalog"
+> & {
   catalog: ResourceCatalog;
-}
+};
 
-export interface Profiles {
-  default: string;
-  profiles: string[];
-}
-
-export interface ProfileCatalog {
-  student: ProfileDetails;
-  grader: ProfileDetails;
-}
-
-export interface ProfileCatalogResponse {
-  capabilities: InfrastructureCapabilities;
+export type ProfileCatalogResponse = Omit<
+  Schemas["ProfileCatalogResponse"],
+  "catalog"
+> & {
   catalog: ProfileCatalog;
-}
+};
 
-export interface CurrentUser {
-  username: string;
-}
+// ── Me ───────────────────────────────────────────────────────────────
+export type CurrentUser = Schemas["UserResponse"];

@@ -52,13 +52,9 @@ export function ConfirmDialog({
     >
       <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 animate-in fade-in zoom-in-95">
         <div className="px-6 pt-6">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {title}
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
 
-          <p className="mt-2 text-sm leading-6 text-gray-600">
-            {message}
-          </p>
+          <p className="mt-2 text-sm leading-6 text-gray-600">{message}</p>
 
           {requireConfirmationText && (
             <div className="mt-5">
@@ -92,10 +88,7 @@ export function ConfirmDialog({
         </div>
 
         <div className="mt-6 flex justify-end gap-3 rounded-b-2xl bg-gray-50 px-6 py-4">
-          <Button
-            variant="secondary"
-            onClick={handleClose}
-          >
+          <Button variant="secondary" onClick={handleClose}>
             {cancelText}
           </Button>
 
