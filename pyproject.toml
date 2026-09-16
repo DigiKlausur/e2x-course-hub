@@ -106,3 +106,8 @@ cmd = "twine check dist/*"
 [tool.ruff]
 line-length = 100
 lint.select = ["F", "E", "I"]
+# Ruff treats Markdown as a first-class file type and has "*.md" in its default
+# `include`, so it lints and reformats the Python blocks inside the docs. Those
+# blocks are illustrative and often deliberately partial, so keep Ruff to real
+# Python sources.
+extend-exclude = ["*.md"]
