@@ -7,7 +7,6 @@ from ...api.api import API
 from ...api.course_api import CourseAPI
 from ...api.infrastructure_api import InfrastructureAPI
 from ...api.membership_api import MembershipAPI
-from ...api.profile_api import ProfileAPI
 
 
 # ── API layer dependencies ──────────────────────────────────────────
@@ -21,7 +20,7 @@ def get_db_session(api: API = Depends(get_api)) -> Generator[Session, None, None
 
     Commits on success, rolls back on exception, always closes.
     """
-    session = api.context.course_repo._session_factory()
+    session = api.courses.course_repository._session_factory()
     try:
         yield session
         session.commit()
@@ -42,7 +41,3 @@ def get_membership_api(api: API = Depends(get_api)) -> MembershipAPI:
 
 def get_infrastructure_api(api: API = Depends(get_api)) -> InfrastructureAPI:
     return api.infrastructure
-
-
-def get_profile_api(api: API = Depends(get_api)) -> ProfileAPI:
-    return api.profiles

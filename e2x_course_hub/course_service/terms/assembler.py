@@ -131,7 +131,8 @@ class TermAssembler:
         """
         return Environment(
             image=term_config.image,
-            resources=term_config.resources,
+            resources=term_config.get_resource_selections(),
+            profiles=term_config.get_profile_selections(),
         )
 
     def summary(self, course_id: str, term_id: str) -> TermSummaryResponse:

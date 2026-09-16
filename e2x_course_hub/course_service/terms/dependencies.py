@@ -2,8 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from e2x_course_hub.schema.course import TermConfig
-
+from ...schema.course import TermConfig
 from ..common.dependency_types import (
     CourseAPIDep,
     CurrentUser,
