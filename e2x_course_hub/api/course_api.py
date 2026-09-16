@@ -11,7 +11,12 @@ from ..db.repository import CourseRepository
 from ..errors import CourseExistsError, CourseNotFoundError, TermExistsError, TermNotFoundError
 from ..schema.catalog import InfrastructureCatalogOptions
 from ..schema.course import CourseConfig, CourseMetadata, TermConfig
-from ..schema.selection import ImageSelection, PartialImageSelection, SpawnSelection
+from ..schema.selection import (
+    ImageSelection,
+    PartialImageSelection,
+    SpawnRoleSelection,
+    SpawnSelection,
+)
 from ..schema.types import SpawnRole
 from .course_permissions import COURSE_ROLE_PERMISSIONS, CoursePermission
 
@@ -365,8 +370,14 @@ class CourseAPI(BaseAPI):
         """
         course = self._get_course(course_id, session=session)
         for spawn_role, tier_name in resources_selection.items():
+            current_selection = course.spawn_role_selections[spawn_role]
+            if current_selection.resource_tier_name == tier_name:
+                continue  # No change needed
             self.infrastructure_options.assert_resource_tier_exists(spawn_role, tier_name)
-            course.spawn_role_selections[spawn_role].resource_tier_name = tier_name
+
+            course.spawn_role_selections[spawn_role] = SpawnRoleSelection(
+                resource_tier_name=tier_name, profile_name=current_selection.profile_name
+            )
         self.course_repository.update_course(course_id, course, session=session)
 
     @require_permission(CoursePermission.COURSE_SELECT_PROFILES)
@@ -387,8 +398,13 @@ class CourseAPI(BaseAPI):
         """
         course = self._get_course(course_id, session=session)
         for spawn_role, profile_name in profiles_selection.items():
+            current_selection = course.spawn_role_selections[spawn_role]
+            if current_selection.profile_name == profile_name:
+                continue  # No change needed
             self.infrastructure_options.assert_profile_exists(spawn_role, profile_name)
-            course.spawn_role_selections[spawn_role].profile_name = profile_name
+            course.spawn_role_selections[spawn_role] = SpawnRoleSelection(
+                resource_tier_name=current_selection.resource_tier_name, profile_name=profile_name
+            )
         self.course_repository.update_course(course_id, course, session=session)
 
     @require_permission(CoursePermission.TERM_SELECT_PROFILES)
@@ -411,8 +427,13 @@ class CourseAPI(BaseAPI):
         """
         course, term = self._get_course_and_term(course_id, term_id, session=session)
         for spawn_role, profile_name in profiles_selection.items():
+            current_selection = term.spawn_role_selections[spawn_role]
+            if current_selection.profile_name == profile_name:
+                continue  # No change needed
             self.infrastructure_options.assert_profile_exists(spawn_role, profile_name)
-            term.spawn_role_selections[spawn_role].profile_name = profile_name
+            term.spawn_role_selections[spawn_role] = SpawnRoleSelection(
+                resource_tier_name=current_selection.resource_tier_name, profile_name=profile_name
+            )
         self.course_repository.update_course(course_id, course, session=session)
 
     @require_permission(CoursePermission.TERM_VIEW)
@@ -484,7 +505,7 @@ class CourseAPI(BaseAPI):
             )
         return spawn_selections
 
-    @require_permission(CoursePermission.TERM_SELECT_PROFILES)
+    @require_permission(CoursePermission.TERM_SELECT_RESOURCES)
     def set_term_resources(
         self,
         user: UserLike,
@@ -504,6 +525,12 @@ class CourseAPI(BaseAPI):
         """
         course, term = self._get_course_and_term(course_id, term_id, session=session)
         for spawn_role, tier_name in resources_selection.items():
+            current_selection = term.spawn_role_selections[spawn_role]
+            if current_selection.resource_tier_name == tier_name:
+                continue  # No change needed
             self.infrastructure_options.assert_resource_tier_exists(spawn_role, tier_name)
-            term.spawn_role_selections[spawn_role].resource_tier_name = tier_name
+
+            term.spawn_role_selections[spawn_role] = SpawnRoleSelection(
+                resource_tier_name=tier_name, profile_name=current_selection.profile_name
+            )
         self.course_repository.update_course(course_id, course, session=session)
