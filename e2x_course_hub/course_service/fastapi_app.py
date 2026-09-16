@@ -27,7 +27,7 @@ from .settings import ServiceSettings
 from .terms.router import router as terms_router
 
 # ── Config ────────────────────────────────────────────────────────────
-settings = ServiceSettings() # pyright: ignore[reportCallIssue], config_file comes from env
+settings = ServiceSettings()  # pyright: ignore[reportCallIssue], config_file comes from env
 service_prefix = settings.service_prefix.rstrip("/")
 static_path = os.path.join(DATA_FILES_PATH, "static")
 template_path = os.path.join(DATA_FILES_PATH, "templates", "course_service")
