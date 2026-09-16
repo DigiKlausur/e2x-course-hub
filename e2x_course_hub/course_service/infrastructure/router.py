@@ -31,5 +31,5 @@ async def list_profiles(
     infrastructure_api: InfrastructureAPIDep,
     infrastructure_assembler: InfrastructureAssemblerDep,
 ):
-    profiles = infrastructure_api.list_profiles_details(user)
+    profiles = infrastructure_api.list_profiles(user)
     return infrastructure_assembler.profile_catalog(profiles)

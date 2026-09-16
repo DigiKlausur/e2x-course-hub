@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from ...schema.infrastructure import ImageCatalog, ResourceTiersByRole
-from ...schema.profile import AvailableProfileDetails
+from ...schema.catalog import ImageFamilyOptions, ProfileOptions, ResourceTierOptions
+from ...schema.types import SpawnRole
 
 
 class InfrastructureCapabilities(BaseModel):
@@ -11,14 +11,14 @@ class InfrastructureCapabilities(BaseModel):
 
 class ImageCatalogResponse(BaseModel):
     capabilities: InfrastructureCapabilities
-    catalog: ImageCatalog
+    catalog: ImageFamilyOptions
 
 
 class ResourceTiersResponse(BaseModel):
     capabilities: InfrastructureCapabilities
-    catalog: ResourceTiersByRole
+    catalog: dict[SpawnRole, ResourceTierOptions]
 
 
 class ProfileCatalogResponse(BaseModel):
     capabilities: InfrastructureCapabilities
-    catalog: AvailableProfileDetails
+    catalog: dict[SpawnRole, ProfileOptions]

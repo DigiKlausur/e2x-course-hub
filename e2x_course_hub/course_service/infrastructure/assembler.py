@@ -1,8 +1,8 @@
 from e2x_hub_rbac.auth import PermissionChecker
 
 from ...api.infrastructure_permissions import InfrastructurePermission
-from ...schema.infrastructure import ImageCatalog, ResourceTiersByRole
-from ...schema.profile import AvailableProfileDetails
+from ...schema.catalog import ImageFamilyOptions, ProfileOptions, ResourceTierOptions
+from ...schema.types import SpawnRole
 from .schemas import (
     ImageCatalogResponse,
     InfrastructureCapabilities,
@@ -48,18 +48,20 @@ class InfrastructureAssembler:
             ),
         )
 
-    def image_catalog(self, image_catalog: ImageCatalog) -> ImageCatalogResponse:
+    def image_catalog(self, image_catalog: ImageFamilyOptions) -> ImageCatalogResponse:
         return ImageCatalogResponse(
             capabilities=self._image_catalog_capabilities(), catalog=image_catalog
         )
 
-    def resource_tiers(self, resource_tiers: ResourceTiersByRole) -> ResourceTiersResponse:
+    def resource_tiers(
+        self, resource_tiers: dict[SpawnRole, ResourceTierOptions]
+    ) -> ResourceTiersResponse:
         return ResourceTiersResponse(
             capabilities=self._resource_catalog_capabilities(), catalog=resource_tiers
         )
 
     def profile_catalog(
-        self, available_profiles: AvailableProfileDetails
+        self, available_profiles: dict[SpawnRole, ProfileOptions]
     ) -> ProfileCatalogResponse:
         return ProfileCatalogResponse(
             capabilities=self._profile_catalog_capabilities(), catalog=available_profiles
