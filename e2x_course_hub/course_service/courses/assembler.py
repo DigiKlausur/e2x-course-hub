@@ -77,7 +77,8 @@ class CourseAssembler:
         """
         return Environment(
             image=course_config.image,
-            resources=course_config.resources,
+            resources=course_config.get_resource_selections(),
+            profiles=course_config.get_profile_selections(),
         )
 
     def summary(self, course_metadata: CourseMetadata) -> CourseSummaryResponse:
