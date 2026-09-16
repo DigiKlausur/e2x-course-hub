@@ -209,7 +209,7 @@ class CourseRepository:
             s.refresh(row)
 
             return self._course_row_to_config(row)
-    
+
     def _build_single_spawn_config(
         self,
         course_id: str,
@@ -250,7 +250,6 @@ class CourseRepository:
                     self._build_single_spawn_config(course_id, spawn_role, sel)
                 )
 
-
     def update_course(
         self,
         course_id: str,
@@ -288,7 +287,6 @@ class CourseRepository:
             s.refresh(row)
 
             return self._course_row_to_config(row)
-
 
     def delete_course(
         self,
