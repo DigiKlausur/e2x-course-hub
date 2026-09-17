@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from ...errors import CourseNotFoundError, TermNotFoundError
 from ...schema.course import TermConfig
 from ..common.dependency_types import (
     CourseAPIDep,
@@ -30,10 +31,13 @@ def load_term(
     course_api: CourseAPIDep,
     session: DBSession,
 ) -> TermConfig:
-    course = course_api.get_course(course_id=course_id, user=user, session=session)
+    try:
+        course = course_api.get_course(course_id=course_id, user=user, session=session)
+    except CourseNotFoundError:
+        raise CourseNotFoundError(course_id=course_id)
     term = course.terms.get(term_id) if course else None
     if term is None:
-        raise ValueError(f"Term with ID {term_id} not found in course {course_id}.")
+        raise TermNotFoundError(course_id=course_id, term_id=term_id)
     return term
 
 
