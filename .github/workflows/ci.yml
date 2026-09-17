@@ -22,8 +22,13 @@ jobs:
       # Ruff reads its config from pyproject.toml and never imports the package,
       # so this job deliberately skips installing the project — doing so would
       # drag in Node just to build the UI bundle (see the frontend job).
+      #
+      # Pinned on purpose: formatter output changes between releases, so an
+      # unpinned install makes CI disagree with developers' local ruff without
+      # anything in the repository having changed. Keep in step with the pin in
+      # pyproject.toml's `dev` extra.
       - name: Install ruff
-        run: pip install ruff
+        run: pip install ruff==0.16.7
 
       - run: ruff check .
 
