@@ -1801,9 +1801,14 @@
       },
       "MembershipCapabilities": {
         "properties": {
-          "manage": {
+          "add": {
             "type": "boolean",
-            "title": "Manage",
+            "title": "Add",
+            "default": false
+          },
+          "remove": {
+            "type": "boolean",
+            "title": "Remove",
             "default": false
           },
           "view": {
