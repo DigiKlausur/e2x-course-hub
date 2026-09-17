@@ -7,6 +7,7 @@ standalone scripts that only need part of the API surface (e.g. just a
 """
 
 from importlib.metadata import entry_points
+from logging import getLogger
 from typing import Optional
 
 from e2x_hub_rbac.backend.jupyterhub import HubAPI
@@ -16,6 +17,8 @@ from .api.spawn_api import SpawnAPI
 from .contract.providers import InfrastructureCatalogProvider
 from .db.repository import CourseRepository, get_course_repository_from_db_url
 from .settings import CoreSettings, CourseSettings
+
+logger = getLogger(__name__)
 
 
 def load_infrastructure_catalog_provider(entry_point_name: str) -> InfrastructureCatalogProvider:
@@ -96,9 +99,12 @@ def load_api(settings: Optional[CoreSettings] = None) -> API:
     )
     course_repository = get_course_repository(settings=settings.courses)
 
+    logger.info("Building API with membership settings: %s", settings.membership)
+
     return API(
         hub_api=hub_api,
         course_repository=course_repository,
         infrastructure_provider=infrastructure_catalog_provider,
         add_users_to_hub=settings.membership.add_users_to_hub,
+        delete_empty_groups=settings.membership.delete_empty_groups,
     )

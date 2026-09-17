@@ -21,6 +21,7 @@ class CourseSettings(BaseSettings):
 
 class MembershipSettings(BaseSettings):
     add_users_to_hub: bool = Field(default=False, validation_alias="E2X_ADD_USERS_TO_HUB")
+    delete_empty_groups: bool = Field(default=False, validation_alias="E2X_DELETE_EMPTY_GROUPS")
 
 
 class InfrastructureSettings(BaseSettings):

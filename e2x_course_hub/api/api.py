@@ -19,6 +19,7 @@ class API:
         course_repository: CourseRepository,
         infrastructure_provider: InfrastructureCatalogProvider,
         add_users_to_hub: bool = False,
+        delete_empty_groups: bool = False,
         logger: Optional[Logger] = None,
     ):
         if logger is None:
@@ -32,6 +33,7 @@ class API:
         self.memberships = MembershipAPI(
             group_backend=hub_api,
             add_users_to_hub=add_users_to_hub,
+            delete_empty_groups=delete_empty_groups,
             logger=logger,
         )
         self.infrastructure = InfrastructureAPI(
