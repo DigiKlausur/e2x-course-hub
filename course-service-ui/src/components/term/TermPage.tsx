@@ -1,6 +1,6 @@
 import { Link, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { TabBar } from "@components/ui/TabBar";
-import { useCourseMetadata } from "@hooks/course";
+import { useCourseMetadata, useTerm } from "@hooks/course";
 import { TermOverviewTab } from "./tabs/TermOverviewTab";
 import { TermMembersTab } from "./tabs/TermMembersTab";
 import { TermRuntimeTab } from "./tabs/TermRuntimeTab";
@@ -13,14 +13,34 @@ export function TermPage() {
   }>();
 
   const { data: courseMetadata } = useCourseMetadata(courseId!);
+  const { data: term } = useTerm(courseId!, termId!);
+  const capabilities = term?.capabilities;
+  const membership = capabilities?.membership;
 
   const base = `/course/${courseId}/term/${termId}`;
+  // Same rule as CoursePage: only offer a tab the user can use. Term Runtime is
+  // always offered because the term capabilities carry no equivalent of the
+  // course's `selectEnvironment` flag — see the note in TermRuntimeTab.
   const tabs = [
-    { label: "Overview", to: base },
-    { label: "Members", to: `${base}/members` },
-    { label: "Term Runtime", to: `${base}/runtime` },
-    { label: "Settings", to: `${base}/settings` },
-  ];
+    { label: "Overview", to: base, show: true },
+    {
+      label: "Members",
+      to: `${base}/members`,
+      show: Boolean(
+        membership &&
+        (membership.viewStudents ||
+          membership.viewTeachingAssistants ||
+          membership.viewInstructors ||
+          membership.viewObservers),
+      ),
+    },
+    { label: "Term Runtime", to: `${base}/runtime`, show: true },
+    {
+      label: "Settings",
+      to: `${base}/settings`,
+      show: capabilities?.removeTerm ?? false,
+    },
+  ].filter((tab) => tab.show);
 
   return (
     <div>

@@ -536,10 +536,15 @@ export interface components {
         /** MembershipCapabilities */
         MembershipCapabilities: {
             /**
-             * Manage
+             * Add
              * @default false
              */
-            manage: boolean;
+            add: boolean;
+            /**
+             * Remove
+             * @default false
+             */
+            remove: boolean;
             /**
              * View
              * @default false

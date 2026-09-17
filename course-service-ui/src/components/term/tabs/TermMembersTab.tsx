@@ -14,6 +14,8 @@ import {
   useUpdateInstructors,
 } from "@hooks/membership";
 import { useTerm } from "@hooks/course";
+import { Alert } from "@components/ui/Alert";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 type DialogTarget =
   "students" | "teaching-assistants" | "instructors" | "observers";
@@ -117,7 +119,8 @@ export function TermMembersTab({ courseId, termId }: Props) {
       setSelected: setSelectedStudents,
       update: updateStudents,
       canView: membership?.viewStudents ?? false,
-      canManage: students?.capabilities?.manage ?? false,
+      canAdd: students?.capabilities?.add ?? false,
+      canRemove: students?.capabilities?.remove ?? false,
     },
     {
       id: "teaching-assistants" as const,
@@ -129,7 +132,8 @@ export function TermMembersTab({ courseId, termId }: Props) {
       setSelected: setSelectedTeachingAssistants,
       update: updateTeachingAssistants,
       canView: membership?.viewTeachingAssistants ?? false,
-      canManage: teachingAssistants?.capabilities?.manage ?? false,
+      canAdd: teachingAssistants?.capabilities?.add ?? false,
+      canRemove: teachingAssistants?.capabilities?.remove ?? false,
     },
     {
       id: "instructors" as const,
@@ -141,7 +145,8 @@ export function TermMembersTab({ courseId, termId }: Props) {
       setSelected: setSelectedInstructors,
       update: updateInstructors,
       canView: membership?.viewInstructors ?? false,
-      canManage: instructors?.capabilities?.manage ?? false,
+      canAdd: instructors?.capabilities?.add ?? false,
+      canRemove: instructors?.capabilities?.remove ?? false,
     },
     {
       id: "observers" as const,
@@ -153,11 +158,15 @@ export function TermMembersTab({ courseId, termId }: Props) {
       setSelected: setSelectedObservers,
       update: updateObservers,
       canView: membership?.viewObservers ?? false,
-      canManage: observers?.capabilities?.manage ?? false,
+      canAdd: observers?.capabilities?.add ?? false,
+      canRemove: observers?.capabilities?.remove ?? false,
     },
   ].filter((role) => role.canView);
 
   const activeRole = roles.find((r) => r.id === addDialogFor);
+  // One banner for the whole tab: only one role can be mutated at a time, and
+  // the failure belongs to whichever update was last attempted.
+  const mutationError = roles.find((role) => role.update.error)?.update.error;
 
   const handleDialogConfirm = (usernames: string[]) => {
     activeRole?.update.mutate({ add: usernames });
@@ -174,7 +183,8 @@ export function TermMembersTab({ courseId, termId }: Props) {
       selected,
       setSelected,
       update,
-      canManage,
+      canAdd,
+      canRemove,
     }) => ({
       id,
       label,
@@ -204,10 +214,10 @@ export function TermMembersTab({ courseId, termId }: Props) {
           { onSuccess: () => setSelected(new Set()) },
         );
       },
-      canAdd: canManage,
+      canAdd,
       addLabel: `Add ${label}`,
       onAddClick: () => setAddDialogFor(id),
-      canRemove: canManage,
+      canRemove,
       removeLabel,
       isMutating: update.isPending,
     }),
@@ -232,6 +242,11 @@ export function TermMembersTab({ courseId, termId }: Props) {
         onConfirm={handleDialogConfirm}
       />
       <div>
+        {mutationError && (
+          <Alert className="mb-4" title="Could not update the members">
+            {getErrorMessage(mutationError)}
+          </Alert>
+        )}
         <TabbedMemberDataTableWithCurrentUser tabs={tabs} />
       </div>
 

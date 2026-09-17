@@ -5,6 +5,9 @@ import { Button } from "@components/ui/Button";
 import { AddMembersDialog } from "@components/membership/AddMembersDialog";
 import { MemberDataTableWithCurrentUser } from "@components/membership/MemberDataTableWithCurrentUser";
 import { useCourseOwners, useUpdateCourseOwners } from "@hooks/membership";
+import { useCourse } from "@hooks/course";
+import { Alert } from "@components/ui/Alert";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 interface Props {
   courseId: string;
@@ -45,11 +48,27 @@ export function CourseOwnersTab({ courseId }: Props) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const { data, isLoading } = useCourseOwners(courseId);
+  // Listing owners is permission guarded and answers 403, so the course's own
+  // capability decides whether the request is made at all.
+  const { data: course, isLoading: courseLoading } = useCourse(courseId);
+  const canView = course?.capabilities.viewCourseOwners ?? false;
+
+  const { data, isLoading } = useCourseOwners(courseId, canView);
   const update = useUpdateCourseOwners(courseId);
 
   const usernames = data?.usernames ?? [];
-  const canManage = data?.capabilities?.manage ?? false;
+  const canAdd = data?.capabilities?.add ?? false;
+  const canRemove = data?.capabilities?.remove ?? false;
+
+  if (courseLoading) return <p className="text-gray-500">Loading…</p>;
+
+  if (!canView) {
+    return (
+      <p className="text-gray-500">
+        You are not allowed to view the owners of this course.
+      </p>
+    );
+  }
 
   return (
     <div className="max-w-2xl">
@@ -63,9 +82,14 @@ export function CourseOwnersTab({ courseId }: Props) {
         }}
       />
       <Card>
+        {update.error && (
+          <Alert className="mb-4" title="Could not update the owners">
+            {getErrorMessage(update.error)}
+          </Alert>
+        )}
         <div className="flex items-center justify-between mb-4">
           <CardTitle>Course Owners</CardTitle>
-          {canManage && (
+          {canAdd && (
             <Button
               variant="primary"
               onClick={() => setAddDialogOpen(true)}
@@ -104,7 +128,7 @@ export function CourseOwnersTab({ courseId }: Props) {
               { onSuccess: () => setSelected(new Set()) },
             );
           }}
-          canRemove={canManage}
+          canRemove={canRemove}
           removeLabel="Owner"
           isMutating={update.isPending}
         />

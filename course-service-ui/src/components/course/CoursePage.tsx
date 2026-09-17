@@ -1,6 +1,6 @@
 import { Link, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { TabBar } from "@components/ui/TabBar";
-import { useCourseMetadata } from "@hooks/course";
+import { useCourse } from "@hooks/course";
 import { CourseOverviewTab } from "./tabs/CourseOverviewTab";
 import { CourseTermsTab } from "./tabs/CourseTermsTab";
 import { CourseOwnersTab } from "./tabs/CourseOwnersTab";
@@ -10,16 +10,33 @@ import { CourseSettingsTab } from "./tabs/CourseSettingsTab";
 export function CoursePage() {
   const { courseId } = useParams<{ courseId: string }>();
 
-  const { data: metadata, isLoading } = useCourseMetadata(courseId!);
+  const { data: course, isLoading } = useCourse(courseId!);
+  const metadata = course?.metadata;
+  const capabilities = course?.capabilities;
 
   const base = `/course/${courseId}`;
+  // Only offer a tab the user can actually use. The routes below stay mounted
+  // regardless, so a bookmarked URL still resolves — each tab does its own
+  // permission check and explains itself rather than 404ing.
   const tabs = [
-    { label: "Overview", to: base },
-    { label: "Course Owners", to: `${base}/owners` },
-    { label: "Semesters", to: `${base}/terms` },
-    { label: "Image & Resource Defaults", to: `${base}/template` },
-    { label: "Settings", to: `${base}/settings` },
-  ];
+    { label: "Overview", to: base, show: true },
+    {
+      label: "Course Owners",
+      to: `${base}/owners`,
+      show: capabilities?.viewCourseOwners ?? false,
+    },
+    { label: "Semesters", to: `${base}/terms`, show: true },
+    {
+      label: "Image & Resource Defaults",
+      to: `${base}/template`,
+      show: capabilities?.selectEnvironment ?? false,
+    },
+    {
+      label: "Settings",
+      to: `${base}/settings`,
+      show: (capabilities?.editMetadata || capabilities?.removeCourse) ?? false,
+    },
+  ].filter((tab) => tab.show);
 
   return (
     <div>

@@ -11,6 +11,8 @@ export interface ConfirmDialogProps {
   onConfirm: () => void;
   variant?: "default" | "destructive";
   requireConfirmationText?: string;
+  /** Set while the confirmed action is in flight, to block a second submit. */
+  isConfirming?: boolean;
 }
 
 export function ConfirmDialog({
@@ -23,13 +25,15 @@ export function ConfirmDialog({
   onConfirm,
   variant = "default",
   requireConfirmationText,
+  isConfirming = false,
 }: ConfirmDialogProps) {
   const [inputValue, setInputValue] = useState("");
 
   if (!open) return null;
 
   const canConfirm =
-    !requireConfirmationText || inputValue === requireConfirmationText;
+    (!requireConfirmationText || inputValue === requireConfirmationText) &&
+    !isConfirming;
 
   const handleConfirm = () => {
     if (!canConfirm) return;
@@ -39,6 +43,9 @@ export function ConfirmDialog({
   };
 
   const handleClose = () => {
+    // Don't let a backdrop click dismiss the dialog mid-request; the caller
+    // closes it once the action resolves.
+    if (isConfirming) return;
     setInputValue("");
     onClose();
   };
@@ -74,6 +81,7 @@ export function ConfirmDialog({
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
+                disabled={isConfirming}
                 className="
                   mt-2 block w-full rounded-lg border border-gray-300
                   px-3 py-2 text-sm text-gray-900
@@ -88,7 +96,11 @@ export function ConfirmDialog({
         </div>
 
         <div className="mt-6 flex justify-end gap-3 rounded-b-2xl bg-gray-50 px-6 py-4">
-          <Button variant="secondary" onClick={handleClose}>
+          <Button
+            variant="secondary"
+            onClick={handleClose}
+            disabled={isConfirming}
+          >
             {cancelText}
           </Button>
 

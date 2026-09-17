@@ -5,6 +5,8 @@ import { Button } from "@components/ui/Button";
 import { useCourse } from "@hooks/course";
 import { useCreateTerm } from "@hooks/course";
 import { CreateTermDialog } from "@components/dialogs/CreateTermDialog";
+import { Alert } from "@components/ui/Alert";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 interface Props {
   courseId: string;
@@ -18,7 +20,9 @@ export function CourseTermsTab({ courseId }: Props) {
 
   if (isLoading) return <p className="text-gray-500">Loading…</p>;
 
-  const termIds = course ? course.terms.map((term) => term.term_id) : [];
+  const terms = course?.terms ?? [];
+  const termIds = terms.map((term) => term.term_id);
+  const canAddTerm = course?.capabilities.addTerm ?? false;
 
   const handleCreate = async (termId: string) => {
     await createTerm.mutateAsync({ termId, termConfig: {} });
@@ -35,29 +39,45 @@ export function CourseTermsTab({ courseId }: Props) {
         isSubmitting={createTerm.isPending}
       />
       <Card>
+        {createTerm.error && (
+          <Alert className="mb-4" title="Could not create the semester">
+            {getErrorMessage(createTerm.error)}
+          </Alert>
+        )}
+
         <div className="flex justify-between items-center mb-5">
           <CardTitle>Semesters</CardTitle>
-          <Button variant="primary" onClick={() => setDialogOpen(true)}>
-            + Create Semester
-          </Button>
+          {canAddTerm && (
+            <Button variant="primary" onClick={() => setDialogOpen(true)}>
+              + Create Semester
+            </Button>
+          )}
         </div>
 
-        {termIds.length === 0 && (
+        {terms.length === 0 && (
           <p className="text-gray-400 text-sm">No semesters yet.</p>
         )}
 
-        {termIds.map((termId) => (
+        {terms.map((term) => (
           <div
-            key={termId}
+            key={term.term_id}
             className="flex justify-between items-center py-4 border-b border-gray-100 last:border-b-0"
           >
             <div>
-              <Link
-                to={`/course/${courseId}/term/${termId}`}
-                className="font-semibold text-hbrs-dark-blue hover:text-hbrs-medium-blue hover:underline"
-              >
-                {termId}
-              </Link>
+              {/* Opening a term requires TERM_VIEW; without it the page would
+                  only 403, so show the id as plain text instead of a dead link. */}
+              {term.capabilities.viewTerm ? (
+                <Link
+                  to={`/course/${courseId}/term/${term.term_id}`}
+                  className="font-semibold text-hbrs-dark-blue hover:text-hbrs-medium-blue hover:underline"
+                >
+                  {term.term_id}
+                </Link>
+              ) : (
+                <span className="font-semibold text-gray-400">
+                  {term.term_id}
+                </span>
+              )}
             </div>
           </div>
         ))}

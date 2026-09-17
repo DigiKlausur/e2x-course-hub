@@ -1,6 +1,7 @@
-import { useTermEnvironment, useUpdateTermEnvironment } from "@hooks/course";
+import { useTerm, useUpdateTermEnvironment } from "@hooks/course";
 import { useImageCatalog, useResourceCatalog } from "@hooks/catalog";
 import { RuntimeConfigEditor } from "@components/infrastructure/RuntimeConfigEditor";
+import { getErrorMessage } from "@/lib/errorMessage";
 import type { ImageSelection, SpawnRole } from "@api/types";
 
 interface Props {
@@ -9,7 +10,14 @@ interface Props {
 }
 
 export function TermRuntimeTab({ courseId, termId }: Props) {
-  const { data: termEnvironment } = useTermEnvironment(courseId, termId);
+  const { data: term } = useTerm(courseId, termId);
+  const termEnvironment = term?.environment;
+
+  // NOTE: there is no term-level equivalent of CourseCapabilities.selectEnvironment,
+  // even though TERM_SELECT_IMAGE / _RESOURCES / _PROFILES exist as permissions.
+  // Until TermCapabilities exposes one, the editor stays enabled and an
+  // unauthorised change is reported by the backend instead of being prevented.
+
   const { data: imageCatalog } = useImageCatalog();
   const { data: resourceCatalog } = useResourceCatalog();
 
@@ -33,6 +41,11 @@ export function TermRuntimeTab({ courseId, termId }: Props) {
       resourcesSelection={termEnvironment?.resources}
       imageCatalog={imageCatalog?.catalog}
       resourceCatalog={resourceCatalog?.catalog}
+      errorMessage={
+        updateTermEnvironment.error
+          ? getErrorMessage(updateTermEnvironment.error)
+          : undefined
+      }
       onImageConfirm={handleImageConfirm}
       onResourceConfirm={handleResourceConfirm}
     />

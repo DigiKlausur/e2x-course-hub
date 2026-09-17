@@ -20,7 +20,12 @@ export function useCourseCreators() {
   });
 }
 
-export function useCourseOwners(courseId: string) {
+/**
+ * Like the term membership endpoints below, this is permission guarded and
+ * answers 403 rather than an empty list, so callers pass `enabled` from the
+ * course's `capabilities.viewCourseOwners`.
+ */
+export function useCourseOwners(courseId: string, enabled = true) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.courses.roles[MembershipRole.CourseOwner](
@@ -28,6 +33,7 @@ export function useCourseOwners(courseId: string) {
       ),
     ],
     queryFn: () => membershipAPI.course.fetchOwners(courseId),
+    enabled,
   });
 }
 

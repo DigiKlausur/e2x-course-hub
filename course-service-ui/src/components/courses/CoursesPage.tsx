@@ -8,7 +8,9 @@ import {
 } from "@hooks/catalog";
 import { buildDefaultCourseConfig } from "../../lib/buildDefaultCourseConfig";
 import { Button } from "@components/ui/Button";
+import { Alert } from "@components/ui/Alert";
 import { CreateCourseDialog } from "@components/dialogs/CreateCourseDialog";
+import { getErrorMessage } from "@/lib/errorMessage";
 
 export function CoursesPage() {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ export function CoursesPage() {
   const profileCatalog = useProfileCatalog();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const canCreateCourse = capabilities?.createCourse ?? false;
 
   const handleCreate = async (data: {
     courseId: string;
@@ -48,29 +51,37 @@ export function CoursesPage() {
             <h1 className="text-3xl font-bold text-gray-900 m-0">Courses</h1>
             <p className="mt-1 text-gray-500">Manage your courses and terms</p>
           </div>
-          <Button variant="primary" onClick={() => setDialogOpen(true)}>
-            + Create Course
-          </Button>
+          {/* Only offer the button when the backend says the user may create a
+              course. Previously it was always shown while the dialog was
+              conditional, so an unauthorised click did nothing at all. */}
+          {canCreateCourse && (
+            <Button variant="primary" onClick={() => setDialogOpen(true)}>
+              + Create Course
+            </Button>
+          )}
         </div>
       </header>
 
-      {capabilities?.createCourse === false ? (
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3">
-          <p>You are not allowed to create courses.</p>
-        </div>
-      ) : (
-        <CreateCourseDialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          existingCourseIds={courses?.map((c) => c.metadata.course_id) ?? []}
-          onCreate={handleCreate}
-          isSubmitting={createCourse.isPending}
-        />
-      )}
+      <CreateCourseDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        existingCourseIds={courses?.map((c) => c.metadata.course_id) ?? []}
+        onCreate={handleCreate}
+        isSubmitting={createCourse.isPending}
+      />
 
       <div className="max-w-5xl mx-auto px-10 py-8">
+        {createCourse.error && (
+          <Alert className="mb-6" title="Could not create the course">
+            {getErrorMessage(createCourse.error)}
+          </Alert>
+        )}
         {isLoading && <p className="text-gray-500">Loading courses…</p>}
-        {error && <p className="text-red-600">Failed to load courses.</p>}
+        {error && (
+          <Alert className="mb-6" title="Failed to load courses">
+            {getErrorMessage(error)}
+          </Alert>
+        )}
         {courses && (
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <table className="w-full text-sm">

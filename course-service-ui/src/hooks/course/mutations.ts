@@ -37,6 +37,21 @@ const invalidateTerm = (
     queryKey: courseKeys.terms.detail(courseId, termId),
   });
 
+// After a delete the resource is gone, so drop it from the cache instead of
+// invalidating it. Invalidating would refetch a URL that now 404s, and any
+// component still mounted would flash an error before it can navigate away.
+const removeCourse = (queryClient: QueryClient, courseId: string) =>
+  queryClient.removeQueries({ queryKey: courseKeys.detail(courseId) });
+
+const removeTerm = (
+  queryClient: QueryClient,
+  courseId: string,
+  termId: string,
+) =>
+  queryClient.removeQueries({
+    queryKey: courseKeys.terms.detail(courseId, termId),
+  });
+
 export function useCreateCourse() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -50,11 +65,10 @@ export function useDeleteCourse(courseId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => courseAPI.deleteCourse(courseId),
-    onSuccess: () =>
-      Promise.all([
-        invalidateCourse(queryClient, courseId),
-        invalidateCourses(queryClient),
-      ]),
+    onSuccess: () => {
+      removeCourse(queryClient, courseId);
+      return invalidateCourses(queryClient);
+    },
   });
 }
 export function useUpdateCourseMetadata(courseId: string) {
@@ -96,12 +110,13 @@ export function useDeleteTerm(courseId: string, termId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => courseAPI.deleteTerm(courseId, termId),
-    onSuccess: () =>
-      Promise.all([
+    onSuccess: () => {
+      removeTerm(queryClient, courseId, termId);
+      return Promise.all([
         invalidateCourse(queryClient, courseId),
         invalidateTerms(queryClient, courseId),
-        invalidateTerm(queryClient, courseId, termId),
-      ]),
+      ]);
+    },
   });
 }
 

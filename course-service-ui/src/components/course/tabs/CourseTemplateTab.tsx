@@ -1,10 +1,8 @@
-import {
-  useCourseEnvironment,
-  useUpdateCourseEnvironment,
-} from "@hooks/course";
+import { useCourse, useUpdateCourseEnvironment } from "@hooks/course";
 
 import { useImageCatalog, useResourceCatalog } from "@hooks/catalog";
 import { RuntimeConfigEditor } from "@components/infrastructure/RuntimeConfigEditor";
+import { getErrorMessage } from "@/lib/errorMessage";
 import type { ImageSelection, SpawnRole } from "@api/types";
 
 interface Props {
@@ -12,7 +10,10 @@ interface Props {
 }
 
 export function CourseTemplateTab({ courseId }: Props) {
-  const { data: environment } = useCourseEnvironment(courseId);
+  const { data: course } = useCourse(courseId);
+  const environment = course?.environment;
+  const canEdit = course?.capabilities.selectEnvironment ?? false;
+
   const { data: imageCatalog } = useImageCatalog();
   const { data: resourceCatalog } = useResourceCatalog();
 
@@ -34,6 +35,12 @@ export function CourseTemplateTab({ courseId }: Props) {
       resourcesSelection={environment?.resources}
       imageCatalog={imageCatalog?.catalog}
       resourceCatalog={resourceCatalog?.catalog}
+      canEdit={canEdit}
+      errorMessage={
+        updateEnvironment.error
+          ? getErrorMessage(updateEnvironment.error)
+          : undefined
+      }
       onImageConfirm={handleImageConfirm}
       onResourceConfirm={handleResourceConfirm}
       showTag={false}
