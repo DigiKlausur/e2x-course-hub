@@ -2,7 +2,8 @@ from pydantic import BaseModel, Field
 
 
 class MembershipCapabilities(BaseModel):
-    manage: bool = False
+    add: bool = False
+    remove: bool = False
     view: bool = False
 
 

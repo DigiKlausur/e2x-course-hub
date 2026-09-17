@@ -24,10 +24,8 @@ async def list_lms_admins(
     return membership_assembler.collection(
         usernames=await membership_api.list_lms_admins(user),
         view_permission=MembershipPermission.LIST_LMS_ADMINS,
-        manage_permission=(
-            MembershipPermission.ADD_LMS_ADMIN,
-            MembershipPermission.REMOVE_LMS_ADMIN,
-        ),
+        add_permission=MembershipPermission.ADD_LMS_ADMIN,
+        remove_permission=MembershipPermission.REMOVE_LMS_ADMIN,
     )
 
 
@@ -52,10 +50,8 @@ async def list_lms_course_creators(
     return membership_assembler.collection(
         usernames=await membership_api.list_course_creators(user),
         view_permission=MembershipPermission.LIST_COURSE_CREATORS,
-        manage_permission=(
-            MembershipPermission.ADD_COURSE_CREATOR,
-            MembershipPermission.REMOVE_COURSE_CREATOR,
-        ),
+        add_permission=MembershipPermission.ADD_COURSE_CREATOR,
+        remove_permission=MembershipPermission.REMOVE_COURSE_CREATOR,
     )
 
 
@@ -81,10 +77,8 @@ async def list_course_owners(
     return membership_assembler.collection(
         usernames=await membership_api.list_course_owners(user, course_id),
         view_permission=MembershipPermission.LIST_COURSE_OWNERS,
-        manage_permission=(
-            MembershipPermission.ADD_COURSE_OWNER,
-            MembershipPermission.REMOVE_COURSE_OWNER,
-        ),
+        add_permission=MembershipPermission.ADD_COURSE_OWNER,
+        remove_permission=MembershipPermission.REMOVE_COURSE_OWNER,
         course_id=course_id,
     )
 
@@ -113,10 +107,8 @@ async def list_term_instructors(
     return membership_assembler.collection(
         usernames=await membership_api.list_instructors(user, course_id, term_id),
         view_permission=MembershipPermission.LIST_INSTRUCTORS,
-        manage_permission=(
-            MembershipPermission.ADD_INSTRUCTOR,
-            MembershipPermission.REMOVE_INSTRUCTOR,
-        ),
+        add_permission=MembershipPermission.ADD_INSTRUCTOR,
+        remove_permission=MembershipPermission.REMOVE_INSTRUCTOR,
         course_id=course_id,
         term_id=term_id,
     )
@@ -150,10 +142,8 @@ async def list_term_teaching_assistants(
     return membership_assembler.collection(
         usernames=await membership_api.list_teaching_assistants(user, course_id, term_id),
         view_permission=MembershipPermission.LIST_TEACHING_ASSISTANTS,
-        manage_permission=(
-            MembershipPermission.ADD_TEACHING_ASSISTANT,
-            MembershipPermission.REMOVE_TEACHING_ASSISTANT,
-        ),
+        add_permission=MembershipPermission.ADD_TEACHING_ASSISTANT,
+        remove_permission=MembershipPermission.REMOVE_TEACHING_ASSISTANT,
         course_id=course_id,
         term_id=term_id,
     )
@@ -184,10 +174,8 @@ async def list_term_students(
     return membership_assembler.collection(
         usernames=await membership_api.list_students(user, course_id, term_id),
         view_permission=MembershipPermission.LIST_STUDENTS,
-        manage_permission=(
-            MembershipPermission.ADD_STUDENT,
-            MembershipPermission.REMOVE_STUDENT,
-        ),
+        add_permission=MembershipPermission.ADD_STUDENT,
+        remove_permission=MembershipPermission.REMOVE_STUDENT,
         course_id=course_id,
         term_id=term_id,
     )
@@ -218,10 +206,8 @@ async def list_term_observers(
     return membership_assembler.collection(
         usernames=await membership_api.list_observers(user, course_id, term_id),
         view_permission=MembershipPermission.LIST_OBSERVERS,
-        manage_permission=(
-            MembershipPermission.ADD_OBSERVER,
-            MembershipPermission.REMOVE_OBSERVER,
-        ),
+        add_permission=MembershipPermission.ADD_OBSERVER,
+        remove_permission=MembershipPermission.REMOVE_OBSERVER,
         course_id=course_id,
         term_id=term_id,
     )
