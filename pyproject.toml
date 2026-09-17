@@ -31,7 +31,7 @@ dependencies = [
   "httpx>=0.24",
   "python-multipart>=0.0.6",
   "jupyterhub-fastapi-adapter>=0.1.0",
-  "e2x-hub-rbac>=0.2.0",
+  "e2x-hub-rbac>=0.3.0",
 ]
 
 [project.urls]
