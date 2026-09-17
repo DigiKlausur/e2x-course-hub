@@ -4,6 +4,7 @@ from ..common.dependency_types import (
     CourseAPIDep,
     CurrentUser,
     DBSession,
+    MembershipAPIDep,
 )
 from ..common.schemas import Environment, EnvironmentUpdate
 from .dependencies import LoadedTerm, TermAssemblerDep
@@ -36,9 +37,11 @@ async def delete_term(
     term_id: str,
     user: CurrentUser,
     course_api: CourseAPIDep,
+    membership_api: MembershipAPIDep,
     session: DBSession,
 ):
     course_api.remove_term(user, course_id, term_id, session=session)
+    await membership_api.remove_term_members(course_id, term_id)
 
 
 @router.get("", response_model=TermDetailResponse)

@@ -61,9 +61,13 @@ async def delete_course(
     course_id: str,
     user: CurrentUser,
     course_api: CourseAPIDep,
+    membership_api: MembershipAPIDep,
     session: DBSession,
 ):
+    course = course_api.get_course(user, course_id, session=session)
+    term_ids = list(course.terms.keys())
     course_api.remove_course(user, course_id, session=session)
+    await membership_api.remove_course_members(course_id, term_ids)
 
 
 # ── Metadata ─────────────────────────────────────────────────────────
