@@ -13,7 +13,7 @@ from typing import Optional
 from e2x_hub_rbac.backend.jupyterhub import HubAPI
 
 from .api.api import API
-from .api.spawn_api import SpawnAPI
+from .api.spawn_api import SpawnOfferingAPI
 from .contract.providers import InfrastructureCatalogProvider
 from .db.repository import CourseRepository, get_course_repository_from_db_url
 from .settings import CoreSettings, CourseSettings
@@ -72,13 +72,13 @@ def get_course_repository(
     return get_course_repository_from_db_url(course_db_url or settings.db_url)
 
 
-def load_spawn_api(
+def load_spawn_offering_api(
     course_repository: Optional[CourseRepository] = None,
     settings: Optional[CourseSettings] = None,
-) -> SpawnAPI:
-    """Build a standalone SpawnAPI, without needing the rest of the API layer."""
+) -> SpawnOfferingAPI:
+    """Build a standalone SpawnOfferingAPI, without needing the rest of the API layer."""
     course_repository = course_repository or get_course_repository(settings=settings)
-    return SpawnAPI(course_repository=course_repository)
+    return SpawnOfferingAPI(course_repository=course_repository)
 
 
 def load_api(settings: Optional[CoreSettings] = None) -> API:
