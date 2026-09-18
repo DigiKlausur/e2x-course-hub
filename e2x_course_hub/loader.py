@@ -13,7 +13,7 @@ from typing import Optional
 from e2x_hub_rbac.backend.jupyterhub import HubAPI
 
 from .api.api import API
-from .api.spawn_api import SpawnOfferingAPI
+from .api.spawn_offering_api import SpawnOfferingAPI
 from .contract.providers import InfrastructureCatalogProvider
 from .db.repository import CourseRepository, get_course_repository_from_db_url
 from .settings import CoreSettings, CourseSettings
