@@ -2,9 +2,7 @@ import { Link, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { TabBar } from "@components/ui/TabBar";
 import { useCourse } from "@hooks/course";
 import { CourseOverviewTab } from "./tabs/CourseOverviewTab";
-import { CourseTermsTab } from "./tabs/CourseTermsTab";
 import { CourseOwnersTab } from "./tabs/CourseOwnersTab";
-import { CourseTemplateTab } from "./tabs/CourseTemplateTab";
 import { CourseSettingsTab } from "./tabs/CourseSettingsTab";
 
 export function CoursePage() {
@@ -24,12 +22,6 @@ export function CoursePage() {
       label: "Course Owners",
       to: `${base}/owners`,
       show: capabilities?.viewCourseOwners ?? false,
-    },
-    { label: "Semesters", to: `${base}/terms`, show: true },
-    {
-      label: "Image & Resource Defaults",
-      to: `${base}/template`,
-      show: capabilities?.selectEnvironment ?? false,
     },
     {
       label: "Settings",
@@ -62,16 +54,8 @@ export function CoursePage() {
         <Routes>
           <Route index element={<CourseOverviewTab courseId={courseId!} />} />
           <Route
-            path="terms"
-            element={<CourseTermsTab courseId={courseId!} />}
-          />
-          <Route
             path="owners"
             element={<CourseOwnersTab courseId={courseId!} />}
-          />
-          <Route
-            path="template"
-            element={<CourseTemplateTab courseId={courseId!} />}
           />
           <Route
             path="settings"
