@@ -3,3 +3,4 @@ autodoc-pydantic
 myst-parser
 sphinx>=4
 pydata-sphinx-theme
+autodoc_pydantic>=2.0
