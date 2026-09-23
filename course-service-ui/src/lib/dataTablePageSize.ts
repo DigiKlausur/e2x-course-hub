@@ -1,4 +1,4 @@
-export const DATA_TABLE_PAGE_SIZE_OPTIONS = [10, 25, 50, 100, 1000] as const;
+export const DATA_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 25, 50, 100, 1000] as const;
 export type DataTablePageSize = (typeof DATA_TABLE_PAGE_SIZE_OPTIONS)[number];
 
 /** Reads a page size previously stored under `storageKey`, falling back to 25. */
