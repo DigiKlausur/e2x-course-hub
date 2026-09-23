@@ -9,8 +9,53 @@ import {
 import { buildDefaultCourseConfig } from "../../lib/buildDefaultCourseConfig";
 import { Button } from "@components/ui/Button";
 import { Alert } from "@components/ui/Alert";
+import { DataTable } from "@components/ui/DataTable";
+import type { DataTableColumn } from "@components/ui/DataTable";
 import { CreateCourseDialog } from "@components/dialogs/CreateCourseDialog";
 import { getErrorMessage } from "@/lib/errorMessage";
+import type { CourseSummaryResponse } from "@/api/types";
+
+const PAGE_SIZE_KEY = "course-table-page-size";
+
+const columns: DataTableColumn<CourseSummaryResponse>[] = [
+  {
+    id: "course_id",
+    header: "Course ID",
+    cell: (course) => (
+      <Link
+        to={`/course/${course.metadata.course_id}`}
+        className="font-semibold text-hbrs-dark-blue hover:text-hbrs-medium-blue hover:underline"
+      >
+        {course.metadata.course_id}
+      </Link>
+    ),
+    sortAccessor: (course) => course.metadata.course_id.toLowerCase(),
+  },
+  {
+    id: "course_name",
+    header: "Name",
+    cell: (course) => (
+      <span className="text-gray-800">{course.metadata.course_name}</span>
+    ),
+  },
+  {
+    id: "description",
+    header: "Description",
+    cell: (course) => (
+      <span className="text-gray-500">
+        {course.metadata.description ?? "—"}
+      </span>
+    ),
+  },
+];
+
+function matchesQuery(course: CourseSummaryResponse, query: string): boolean {
+  return (
+    course.metadata.course_id.toLowerCase().includes(query) ||
+    course.metadata.course_name.toLowerCase().includes(query) ||
+    (course.metadata.description?.toLowerCase().includes(query) ?? false)
+  );
+}
 
 export function CoursesPage() {
   const navigate = useNavigate();
@@ -83,55 +128,20 @@ export function CoursesPage() {
           </Alert>
         )}
         {courses && (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-sky-50 text-left">
-                  <th className="px-6 py-3 font-semibold text-gray-700">
-                    Course ID
-                  </th>
-                  <th className="px-6 py-3 font-semibold text-gray-700">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 font-semibold text-gray-700">
-                    Description
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {courses.map((course) => (
-                  <tr
-                    key={course.metadata.course_id}
-                    className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 font-semibold">
-                      <Link
-                        to={`/course/${course.metadata.course_id}`}
-                        className="text-hbrs-dark-blue hover:text-hbrs-medium-blue hover:underline"
-                      >
-                        {course.metadata.course_id}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-gray-800">
-                      {course.metadata.course_name}
-                    </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {course.metadata.description ?? "—"}
-                    </td>
-                  </tr>
-                ))}
-                {courses.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="px-6 py-8 text-center text-gray-400"
-                    >
-                      No courses found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden p-4">
+            <DataTable
+              rows={courses}
+              getRowId={(course) => course.metadata.course_id}
+              columns={columns}
+              pageSizeStorageKey={PAGE_SIZE_KEY}
+              defaultSort={{ columnId: "course_id", direction: "asc" }}
+              emptyMessage="No courses found."
+              noMatchMessage="No matching courses."
+              filter={{
+                placeholder: "Search courses...",
+                predicate: matchesQuery,
+              }}
+            />
           </div>
         )}
       </div>
