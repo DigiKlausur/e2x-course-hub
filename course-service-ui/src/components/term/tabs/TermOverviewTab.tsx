@@ -1,57 +1,296 @@
+import { useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { Card, CardTitle } from "@components/ui/Card";
 import { Row } from "@components/ui/Row";
-import { Badge } from "@components/ui/Badge";
-import { useTermEnvironment } from "@hooks/course";
+import { Alert } from "@components/ui/Alert";
+import { RuntimeConfigEditor } from "@components/infrastructure/RuntimeConfigEditor";
+import { AddMembersDialog } from "@components/membership/AddMembersDialog";
+import { TabbedMemberDataTableWithCurrentUser } from "@components/membership/TabbedMemberDataTableWithCurrentUser";
+import { useTerm, useUpdateTermEnvironment } from "@hooks/course";
 import { useImageCatalog, useResourceCatalog } from "@hooks/catalog";
+import {
+  useObservers,
+  useStudents,
+  useTeachingAssistants,
+  useInstructors,
+  useUpdateObservers,
+  useUpdateStudents,
+  useUpdateTeachingAssistants,
+  useUpdateInstructors,
+} from "@hooks/membership";
+import { getErrorMessage } from "@/lib/errorMessage";
+import type { ImageSelection, SpawnRole } from "@api/types";
+
+type DialogTarget =
+  "students" | "teaching-assistants" | "instructors" | "observers";
 
 interface Props {
   courseId: string;
   termId: string;
 }
 
+function toggleSelection(
+  setSelection: Dispatch<SetStateAction<Set<string>>>,
+  username: string,
+) {
+  setSelection((prev) => {
+    const next = new Set(prev);
+    if (next.has(username)) {
+      next.delete(username);
+    } else {
+      next.add(username);
+    }
+    return next;
+  });
+}
+
+function toggleSelectionForRows(
+  setSelection: Dispatch<SetStateAction<Set<string>>>,
+  select: boolean,
+  usernames: string[],
+) {
+  setSelection((prev) => {
+    const next = new Set(prev);
+    if (select) {
+      usernames.forEach((u) => next.add(u));
+    } else {
+      usernames.forEach((u) => next.delete(u));
+    }
+    return next;
+  });
+}
+
 export function TermOverviewTab({ courseId, termId }: Props) {
-  const { data: termEnvironment, isLoading } = useTermEnvironment(
+  const [addDialogFor, setAddDialogFor] = useState<DialogTarget | null>(null);
+
+  // The term reports which membership lists this user may see. Fetching a list
+  // without the matching permission answers 403, so these flags gate the
+  // requests rather than just hiding the results.
+  const { data: term, isLoading: termLoading } = useTerm(courseId, termId);
+  const membership = term?.capabilities.membership;
+
+  const { data: imageCatalog } = useImageCatalog();
+  const { data: resourceCatalog } = useResourceCatalog();
+  const updateEnvironment = useUpdateTermEnvironment(courseId, termId);
+
+  const { data: students, isLoading: studentsLoading } = useStudents(
+    courseId,
+    termId,
+    membership?.viewStudents ?? false,
+  );
+  const { data: teachingAssistants, isLoading: teachingAssistantsLoading } =
+    useTeachingAssistants(
+      courseId,
+      termId,
+      membership?.viewTeachingAssistants ?? false,
+    );
+  const { data: instructors, isLoading: instructorsLoading } = useInstructors(
+    courseId,
+    termId,
+    membership?.viewInstructors ?? false,
+  );
+  const { data: observers, isLoading: observersLoading } = useObservers(
+    courseId,
+    termId,
+    membership?.viewObservers ?? false,
+  );
+
+  const [selectedStudents, setSelectedStudents] = useState<Set<string>>(
+    new Set(),
+  );
+  const [selectedTeachingAssistants, setSelectedTeachingAssistants] = useState<
+    Set<string>
+  >(new Set());
+  const [selectedInstructors, setSelectedInstructors] = useState<Set<string>>(
+    new Set(),
+  );
+  const [selectedObservers, setSelectedObservers] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const updateStudents = useUpdateStudents(courseId, termId);
+  const updateTeachingAssistants = useUpdateTeachingAssistants(
     courseId,
     termId,
   );
-  const { data: imageCatalog } = useImageCatalog();
-  const { data: resourceCatalog } = useResourceCatalog();
+  const updateInstructors = useUpdateInstructors(courseId, termId);
+  const updateObservers = useUpdateObservers(courseId, termId);
 
-  if (isLoading) return <p className="text-gray-500">Loading…</p>;
+  const roles = [
+    {
+      id: "students" as const,
+      label: "Students",
+      removeLabel: "Student",
+      data: students?.usernames,
+      isLoading: studentsLoading,
+      selected: selectedStudents,
+      setSelected: setSelectedStudents,
+      update: updateStudents,
+      canView: membership?.viewStudents ?? false,
+      canAdd: students?.capabilities?.add ?? false,
+      canRemove: students?.capabilities?.remove ?? false,
+    },
+    {
+      id: "teaching-assistants" as const,
+      label: "Teaching Assistants",
+      removeLabel: "Teaching Assistant",
+      data: teachingAssistants?.usernames,
+      isLoading: teachingAssistantsLoading,
+      selected: selectedTeachingAssistants,
+      setSelected: setSelectedTeachingAssistants,
+      update: updateTeachingAssistants,
+      canView: membership?.viewTeachingAssistants ?? false,
+      canAdd: teachingAssistants?.capabilities?.add ?? false,
+      canRemove: teachingAssistants?.capabilities?.remove ?? false,
+    },
+    {
+      id: "instructors" as const,
+      label: "Instructors",
+      removeLabel: "Instructor",
+      data: instructors?.usernames,
+      isLoading: instructorsLoading,
+      selected: selectedInstructors,
+      setSelected: setSelectedInstructors,
+      update: updateInstructors,
+      canView: membership?.viewInstructors ?? false,
+      canAdd: instructors?.capabilities?.add ?? false,
+      canRemove: instructors?.capabilities?.remove ?? false,
+    },
+    {
+      id: "observers" as const,
+      label: "Observers",
+      removeLabel: "Observer",
+      data: observers?.usernames,
+      isLoading: observersLoading,
+      selected: selectedObservers,
+      setSelected: setSelectedObservers,
+      update: updateObservers,
+      canView: membership?.viewObservers ?? false,
+      canAdd: observers?.capabilities?.add ?? false,
+      canRemove: observers?.capabilities?.remove ?? false,
+    },
+  ].filter((role) => role.canView);
 
-  const imageDisplayName = termEnvironment?.image?.family
-    ? (imageCatalog?.catalog.families[termEnvironment.image.family]
-        ?.display_name ?? termEnvironment.image.family)
-    : "—";
-  const studentDisplayName = termEnvironment?.resources?.student
-    ? (resourceCatalog?.catalog.student.tiers[termEnvironment.resources.student]
-        ?.display_name ?? termEnvironment.resources.student)
-    : "—";
-  const graderDisplayName = termEnvironment?.resources?.grader
-    ? (resourceCatalog?.catalog.grader.tiers[termEnvironment.resources.grader]
-        ?.display_name ?? termEnvironment.resources.grader)
-    : "—";
+  const activeRole = roles.find((r) => r.id === addDialogFor);
+  // One banner for the whole tab: only one role can be mutated at a time, and
+  // the failure belongs to whichever update was last attempted.
+  const mutationError = roles.find((role) => role.update.error)?.update.error;
+
+  const handleDialogConfirm = (usernames: string[]) => {
+    activeRole?.update.mutate({ add: usernames });
+    setAddDialogFor(null);
+  };
+
+  const memberTabs = roles.map(
+    ({
+      id,
+      label,
+      removeLabel,
+      data,
+      isLoading,
+      selected,
+      setSelected,
+      update,
+      canAdd,
+      canRemove,
+    }) => ({
+      id,
+      label,
+      usernames: data ?? [],
+      isLoading,
+      selected,
+      onSelect: (username: string) => toggleSelection(setSelected, username),
+      onSelectAll: (select: boolean, usernames: string[]) =>
+        toggleSelectionForRows(setSelected, select, usernames),
+      onRemove: (username: string) => {
+        update.mutate(
+          { remove: [username] },
+          {
+            onSuccess: () =>
+              setSelected((prev) => {
+                const next = new Set(prev);
+                next.delete(username);
+                return next;
+              }),
+          },
+        );
+      },
+      onRemoveSelected: () => {
+        if (selected.size === 0) return;
+        update.mutate(
+          { remove: Array.from(selected) },
+          { onSuccess: () => setSelected(new Set()) },
+        );
+      },
+      canAdd,
+      addLabel: `Add ${label}`,
+      onAddClick: () => setAddDialogFor(id),
+      canRemove,
+      removeLabel,
+      isMutating: update.isPending,
+    }),
+  );
+
+  const handleImageConfirm = (selection: ImageSelection) => {
+    updateEnvironment.mutate({ image: selection });
+  };
+
+  const handleResourceConfirm = (role: SpawnRole, tier: string) => {
+    updateEnvironment.mutate({ resources: { [role]: tier } });
+  };
+
+  if (termLoading) return <p className="text-gray-500">Loading…</p>;
 
   return (
-    <div className="grid grid-cols-[2fr_1fr] gap-6">
+    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[2fr_1fr]">
+      <div>
+        <AddMembersDialog
+          open={addDialogFor !== null}
+          roleLabel={activeRole?.label ?? "Unknown"}
+          onCancel={() => setAddDialogFor(null)}
+          onConfirm={handleDialogConfirm}
+        />
+
+        {mutationError && (
+          <Alert className="mb-4" title="Could not update the members">
+            {getErrorMessage(mutationError)}
+          </Alert>
+        )}
+
+        {roles.length === 0 ? (
+          <p className="text-gray-500">
+            You are not allowed to view the members of this term.
+          </p>
+        ) : (
+          <TabbedMemberDataTableWithCurrentUser tabs={memberTabs} />
+        )}
+      </div>
+
       <div>
         <Card>
           <CardTitle>General Information</CardTitle>
           <Row label="Course">{courseId}</Row>
           <Row label="Term">{termId}</Row>
         </Card>
-      </div>
 
-      <div>
-        <Card>
-          <CardTitle>Configuration Summary</CardTitle>
-          <Row label="Status">
-            <Badge variant="active">Active</Badge>
-          </Row>
-          <Row label="Notebook Image">{imageDisplayName}</Row>
-          <Row label="Student Resources">{studentDisplayName}</Row>
-          <Row label="Grader Resources">{graderDisplayName}</Row>
-        </Card>
+        {/* NOTE: there is no term-level equivalent of CourseCapabilities.selectEnvironment,
+            even though TERM_SELECT_IMAGE / _RESOURCES / _PROFILES exist as permissions.
+            Until TermCapabilities exposes one, the editor stays enabled and an
+            unauthorised change is reported by the backend instead of being prevented. */}
+        <RuntimeConfigEditor
+          title="Term Runtime"
+          imageSelection={term?.environment.image}
+          resourcesSelection={term?.environment.resources}
+          imageCatalog={imageCatalog?.catalog}
+          resourceCatalog={resourceCatalog?.catalog}
+          errorMessage={
+            updateEnvironment.error
+              ? getErrorMessage(updateEnvironment.error)
+              : undefined
+          }
+          onImageConfirm={handleImageConfirm}
+          onResourceConfirm={handleResourceConfirm}
+        />
       </div>
     </div>
   );
