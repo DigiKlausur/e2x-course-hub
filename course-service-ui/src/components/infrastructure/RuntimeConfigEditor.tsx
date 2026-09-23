@@ -70,7 +70,7 @@ export function RuntimeConfigEditor({
       : undefined;
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <Card>
         <CardTitle>{title}</CardTitle>
         {description && (
