@@ -1,7 +1,6 @@
 # e2x Course Hub
 
-A JupyterHub service for running multi-course, multi-term teaching deployments on
-Kubernetes. It manages courses, terms, and course membership; enforces who may do what
+A JupyterHub service for running multi-course, multi-term teaching deployments. It manages courses, terms, and course membership; enforces who may do what
 via role-based access control; and tells a separate infrastructure spawner which
 courses/terms a user may launch and with which environment — without ever deciding
 hardware itself.
@@ -76,10 +75,11 @@ course-service-ui/       # React 19 + TypeScript SPA, built with Vite
 | Consumes   | `InfrastructureCatalogProvider`                                        | `SpawnOfferingProvider`                             |
 | Never does | translates a selection to hardware                                    | decides who is allowed to do what                   |
 
-The spawner is a separate, pluggable package (a Kubernetes/KubeSpawner-based
-implementation is used in production). The course hub discovers it at startup through
+The spawner is a separate, pluggable package. The course hub discovers it at startup through
 the `e2x_course_hub.infrastructure_catalog_providers` entry-point group, selected by
 name via the `E2X_INFRASTRUCTURE_PROVIDER` setting — the hub never imports it directly.
+See [`e2x-course-hub-kubespawner`](https://github.com/DigiKlausur/e2x-course-hub-kubespawner)
+for an example implementation based on KubeSpawner.
 
 ## Installation
 
