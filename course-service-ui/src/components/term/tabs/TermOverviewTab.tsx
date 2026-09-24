@@ -19,6 +19,7 @@ import {
   useUpdateInstructors,
 } from "@hooks/membership";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { MembershipRole, memberLabels } from "@domain/roles";
 import {
   membershipCapabilityText,
   termCapabilityText,
@@ -123,8 +124,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
   const roles = [
     {
       id: "students" as const,
-      label: "Students",
-      removeLabel: "Student",
+      labels: memberLabels[MembershipRole.Student],
       data: students?.usernames,
       isLoading: studentsLoading,
       selected: selectedStudents,
@@ -136,8 +136,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
     },
     {
       id: "teaching-assistants" as const,
-      label: "Teaching Assistants",
-      removeLabel: "Teaching Assistant",
+      labels: memberLabels[MembershipRole.TeachingAssistant],
       data: teachingAssistants?.usernames,
       isLoading: teachingAssistantsLoading,
       selected: selectedTeachingAssistants,
@@ -149,8 +148,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
     },
     {
       id: "instructors" as const,
-      label: "Instructors",
-      removeLabel: "Instructor",
+      labels: memberLabels[MembershipRole.Instructor],
       data: instructors?.usernames,
       isLoading: instructorsLoading,
       selected: selectedInstructors,
@@ -162,8 +160,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
     },
     {
       id: "observers" as const,
-      label: "Observers",
-      removeLabel: "Observer",
+      labels: memberLabels[MembershipRole.Observer],
       data: observers?.usernames,
       isLoading: observersLoading,
       selected: selectedObservers,
@@ -188,8 +185,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
   const memberTabs = roles.map(
     ({
       id,
-      label,
-      removeLabel,
+      labels,
       data,
       isLoading,
       selected,
@@ -199,7 +195,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       canRemove,
     }) => ({
       id,
-      label,
+      label: labels.plural,
       usernames: data ?? [],
       isLoading,
       selected,
@@ -227,17 +223,11 @@ export function TermOverviewTab({ courseId, termId }: Props) {
         );
       },
       canAdd,
-      addLabel: membershipCapabilityText.add({
-        singular: removeLabel,
-        plural: label,
-      }).label,
-      addDescription: membershipCapabilityText.add({
-        singular: removeLabel,
-        plural: label,
-      }).description,
+      addLabel: membershipCapabilityText.add(labels).label,
+      addDescription: membershipCapabilityText.add(labels).description,
       onAddClick: () => setAddDialogFor(id),
       canRemove,
-      removeLabel,
+      removeLabel: labels.singular,
       isMutating: update.isPending,
     }),
   );
@@ -257,7 +247,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       <div>
         <AddMembersDialog
           open={addDialogFor !== null}
-          roleLabel={activeRole?.label ?? "Unknown"}
+          roleLabel={activeRole?.labels.plural ?? "Unknown"}
           onCancel={() => setAddDialogFor(null)}
           onConfirm={handleDialogConfirm}
         />

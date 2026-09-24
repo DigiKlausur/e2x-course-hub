@@ -1,11 +1,6 @@
 import type { MembershipCapabilities } from "@api/types";
+import type { MemberLabels } from "@domain/roles";
 import type { CapabilityText } from "./types";
-
-/** A member list's labels as shown in the UI, e.g. "Teaching Assistant(s)". */
-export interface MemberLabels {
-  singular: string;
-  plural: string;
-}
 
 /** Shared by every member list: course owners and each term role. */
 export const membershipCapabilityText = {

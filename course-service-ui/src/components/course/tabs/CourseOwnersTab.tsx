@@ -9,9 +9,9 @@ import { useCourse } from "@hooks/course";
 import { Alert } from "@components/ui/Alert";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { membershipCapabilityText } from "@domain/capabilities";
-import type { MemberLabels } from "@domain/capabilities";
+import { MembershipRole, memberLabels } from "@domain/roles";
 
-const OWNER_LABELS: MemberLabels = { singular: "Owner", plural: "Owners" };
+const OWNER_LABELS = memberLabels[MembershipRole.CourseOwner];
 
 interface Props {
   courseId: string;
@@ -80,7 +80,7 @@ export function CourseOwnersTab({ courseId }: Props) {
     <div className="max-w-2xl">
       <AddMembersDialog
         open={addDialogOpen}
-        roleLabel="Owner"
+        roleLabel={OWNER_LABELS.singular}
         onCancel={() => setAddDialogOpen(false)}
         onConfirm={(names) => {
           update.mutate({ add: names });
@@ -94,7 +94,7 @@ export function CourseOwnersTab({ courseId }: Props) {
           </Alert>
         )}
         <div className="flex items-center justify-between mb-4">
-          <CardTitle>Course Owners</CardTitle>
+          <CardTitle>{OWNER_LABELS.plural}</CardTitle>
           {canAdd && (
             <Button
               variant="primary"
@@ -136,7 +136,7 @@ export function CourseOwnersTab({ courseId }: Props) {
             );
           }}
           canRemove={canRemove}
-          removeLabel="Owner"
+          removeLabel={OWNER_LABELS.singular}
           isMutating={update.isPending}
         />
       </Card>

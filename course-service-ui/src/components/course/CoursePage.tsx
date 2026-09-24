@@ -1,6 +1,7 @@
 import { Link, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { TabBar } from "@components/ui/TabBar";
 import { useCourse } from "@hooks/course";
+import { MembershipRole, memberLabels } from "@domain/roles";
 import { CourseOverviewTab } from "./tabs/CourseOverviewTab";
 import { CourseOwnersTab } from "./tabs/CourseOwnersTab";
 import { CourseSettingsTab } from "./tabs/CourseSettingsTab";
@@ -19,7 +20,7 @@ export function CoursePage() {
   const tabs = [
     { label: "Overview", to: base, show: true },
     {
-      label: "Course Owners",
+      label: memberLabels[MembershipRole.CourseOwner].plural,
       to: `${base}/owners`,
       show: capabilities?.courseOwners.view ?? false,
     },
