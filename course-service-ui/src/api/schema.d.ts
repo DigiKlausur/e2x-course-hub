@@ -344,6 +344,8 @@ export interface components {
         CourseCollectionCapabilities: {
             /** Createcourse */
             createCourse: boolean;
+            lmsAdmins: components["schemas"]["MembershipCapabilities"];
+            courseCreators: components["schemas"]["MembershipCapabilities"];
         };
         /** CourseCollectionResponse */
         CourseCollectionResponse: {

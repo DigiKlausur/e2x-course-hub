@@ -1366,11 +1366,19 @@
           "createCourse": {
             "type": "boolean",
             "title": "Createcourse"
+          },
+          "lmsAdmins": {
+            "$ref": "#/components/schemas/MembershipCapabilities"
+          },
+          "courseCreators": {
+            "$ref": "#/components/schemas/MembershipCapabilities"
           }
         },
         "type": "object",
         "required": [
-          "createCourse"
+          "createCourse",
+          "lmsAdmins",
+          "courseCreators"
         ],
         "title": "CourseCollectionCapabilities"
       },
