@@ -4,19 +4,26 @@ import type { MembershipCollectionResponse } from "@api/types";
 import { membershipQueryKeys } from "./keys";
 import { MembershipRole } from "@domain/roles";
 
-export function useLMSAdmins() {
+/**
+ * Permission guarded like the course and term lists below, so callers pass
+ * `enabled` from the course collection's `capabilities.lmsAdmins.view` /
+ * `capabilities.courseCreators.view`.
+ */
+export function useLMSAdmins(enabled = true) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [...membershipQueryKeys.lms.roles[MembershipRole.Admin]()],
     queryFn: () => membershipAPI.lms.fetchLMSAdmins(),
+    enabled,
   });
 }
 
-export function useCourseCreators() {
+export function useCourseCreators(enabled = true) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.lms.roles[MembershipRole.CourseCreator](),
     ],
     queryFn: () => membershipAPI.lms.fetchCourseCreators(),
+    enabled,
   });
 }
 
