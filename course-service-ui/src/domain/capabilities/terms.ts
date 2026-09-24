@@ -8,10 +8,10 @@ export const termCapabilityText = {
   },
   removeTerm: {
     label: "Delete Semester",
-    description: "Permanently delete the term and remove all of its members.",
+    description: "Permanently delete the semester and remove all of its members.",
   },
   selectEnvironment: {
     label: "Change term runtime",
-    description: "Choose the notebook image and resources used in this term.",
+    description: "Choose the notebook image and resources used for this semester.",
   },
 } satisfies CapabilityTextMap<TermCapabilities>;
