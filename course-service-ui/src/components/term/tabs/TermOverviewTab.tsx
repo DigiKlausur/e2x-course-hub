@@ -273,16 +273,13 @@ export function TermOverviewTab({ courseId, termId }: Props) {
           <Row label="Term">{termId}</Row>
         </Card>
 
-        {/* NOTE: there is no term-level equivalent of CourseCapabilities.selectEnvironment,
-            even though TERM_SELECT_IMAGE / _RESOURCES / _PROFILES exist as permissions.
-            Until TermCapabilities exposes one, the editor stays enabled and an
-            unauthorised change is reported by the backend instead of being prevented. */}
         <RuntimeConfigEditor
           title="Term Runtime"
           imageSelection={term?.environment.image}
           resourcesSelection={term?.environment.resources}
           imageCatalog={imageCatalog?.catalog}
           resourceCatalog={resourceCatalog?.catalog}
+          canEdit={term?.capabilities.selectEnvironment ?? false}
           errorMessage={
             updateEnvironment.error
               ? getErrorMessage(updateEnvironment.error)
