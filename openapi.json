@@ -1343,13 +1343,8 @@
             "type": "boolean",
             "title": "Selectenvironment"
           },
-          "viewCourseOwners": {
-            "type": "boolean",
-            "title": "Viewcourseowners"
-          },
-          "manageCourseOwners": {
-            "type": "boolean",
-            "title": "Managecourseowners"
+          "courseOwners": {
+            "$ref": "#/components/schemas/MembershipCapabilities"
           },
           "addTerm": {
             "type": "boolean",
@@ -1361,8 +1356,7 @@
           "editMetadata",
           "removeCourse",
           "selectEnvironment",
-          "viewCourseOwners",
-          "manageCourseOwners",
+          "courseOwners",
           "addTerm"
         ],
         "title": "CourseCapabilities"
@@ -2141,49 +2135,25 @@
       },
       "TermMembershipCapabilities": {
         "properties": {
-          "viewInstructors": {
-            "type": "boolean",
-            "title": "Viewinstructors"
+          "instructors": {
+            "$ref": "#/components/schemas/MembershipCapabilities"
           },
-          "manageInstructors": {
-            "type": "boolean",
-            "title": "Manageinstructors"
+          "teachingAssistants": {
+            "$ref": "#/components/schemas/MembershipCapabilities"
           },
-          "viewTeachingAssistants": {
-            "type": "boolean",
-            "title": "Viewteachingassistants"
+          "students": {
+            "$ref": "#/components/schemas/MembershipCapabilities"
           },
-          "manageTeachingAssistants": {
-            "type": "boolean",
-            "title": "Manageteachingassistants"
-          },
-          "viewStudents": {
-            "type": "boolean",
-            "title": "Viewstudents"
-          },
-          "manageStudents": {
-            "type": "boolean",
-            "title": "Managestudents"
-          },
-          "viewObservers": {
-            "type": "boolean",
-            "title": "Viewobservers"
-          },
-          "manageObservers": {
-            "type": "boolean",
-            "title": "Manageobservers"
+          "observers": {
+            "$ref": "#/components/schemas/MembershipCapabilities"
           }
         },
         "type": "object",
         "required": [
-          "viewInstructors",
-          "manageInstructors",
-          "viewTeachingAssistants",
-          "manageTeachingAssistants",
-          "viewStudents",
-          "manageStudents",
-          "viewObservers",
-          "manageObservers"
+          "instructors",
+          "teachingAssistants",
+          "students",
+          "observers"
         ],
         "title": "TermMembershipCapabilities"
       },

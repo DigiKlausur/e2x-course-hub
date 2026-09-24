@@ -4,6 +4,7 @@ from e2x_hub_rbac.permissions.membership import MembershipPermission
 from ...api.course_permissions import CoursePermission
 from ...schema.course import CourseConfig, CourseMetadata
 from ..common.schemas import Environment
+from ..membership.schemas import MembershipCapabilities
 from ..terms.assembler import TermAssembler
 from .schemas import (
     CourseCapabilities,
@@ -46,19 +47,19 @@ class CourseAssembler:
                     CoursePermission.COURSE_SELECT_PROFILES,
                 ]
             ),
-            viewCourseOwners=self.membership_permission_checker.has_permission(
-                permission=MembershipPermission.LIST_COURSE_OWNERS,
-                course_id=course_id,
-            ),
-            manageCourseOwners=all(
-                self.membership_permission_checker.has_permission(
-                    permission=permission,
+            courseOwners=MembershipCapabilities(
+                view=self.membership_permission_checker.has_permission(
+                    permission=MembershipPermission.LIST_COURSE_OWNERS,
                     course_id=course_id,
-                )
-                for permission in [
-                    MembershipPermission.ADD_COURSE_OWNER,
-                    MembershipPermission.REMOVE_COURSE_OWNER,
-                ]
+                ),
+                add=self.membership_permission_checker.has_permission(
+                    permission=MembershipPermission.ADD_COURSE_OWNER,
+                    course_id=course_id,
+                ),
+                remove=self.membership_permission_checker.has_permission(
+                    permission=MembershipPermission.REMOVE_COURSE_OWNER,
+                    course_id=course_id,
+                ),
             ),
             addTerm=self.course_permission_checker.has_permission(
                 permission=CoursePermission.TERM_ADD,

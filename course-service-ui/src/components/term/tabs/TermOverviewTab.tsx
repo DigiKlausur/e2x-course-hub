@@ -63,9 +63,9 @@ function toggleSelectionForRows(
 export function TermOverviewTab({ courseId, termId }: Props) {
   const [addDialogFor, setAddDialogFor] = useState<DialogTarget | null>(null);
 
-  // The term reports which membership lists this user may see. Fetching a list
-  // without the matching permission answers 403, so these flags gate the
-  // requests rather than just hiding the results.
+  // The term reports which membership lists this user may see and change.
+  // Fetching a list without the matching permission answers 403, so the view
+  // flags gate the requests rather than just hiding the results.
   const { data: term, isLoading: termLoading } = useTerm(courseId, termId);
   const membership = term?.capabilities.membership;
 
@@ -76,23 +76,23 @@ export function TermOverviewTab({ courseId, termId }: Props) {
   const { data: students, isLoading: studentsLoading } = useStudents(
     courseId,
     termId,
-    membership?.viewStudents ?? false,
+    membership?.students.view ?? false,
   );
   const { data: teachingAssistants, isLoading: teachingAssistantsLoading } =
     useTeachingAssistants(
       courseId,
       termId,
-      membership?.viewTeachingAssistants ?? false,
+      membership?.teachingAssistants.view ?? false,
     );
   const { data: instructors, isLoading: instructorsLoading } = useInstructors(
     courseId,
     termId,
-    membership?.viewInstructors ?? false,
+    membership?.instructors.view ?? false,
   );
   const { data: observers, isLoading: observersLoading } = useObservers(
     courseId,
     termId,
-    membership?.viewObservers ?? false,
+    membership?.observers.view ?? false,
   );
 
   const [selectedStudents, setSelectedStudents] = useState<Set<string>>(
@@ -126,9 +126,9 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       selected: selectedStudents,
       setSelected: setSelectedStudents,
       update: updateStudents,
-      canView: membership?.viewStudents ?? false,
-      canAdd: students?.capabilities?.add ?? false,
-      canRemove: students?.capabilities?.remove ?? false,
+      canView: membership?.students.view ?? false,
+      canAdd: membership?.students.add ?? false,
+      canRemove: membership?.students.remove ?? false,
     },
     {
       id: "teaching-assistants" as const,
@@ -139,9 +139,9 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       selected: selectedTeachingAssistants,
       setSelected: setSelectedTeachingAssistants,
       update: updateTeachingAssistants,
-      canView: membership?.viewTeachingAssistants ?? false,
-      canAdd: teachingAssistants?.capabilities?.add ?? false,
-      canRemove: teachingAssistants?.capabilities?.remove ?? false,
+      canView: membership?.teachingAssistants.view ?? false,
+      canAdd: membership?.teachingAssistants.add ?? false,
+      canRemove: membership?.teachingAssistants.remove ?? false,
     },
     {
       id: "instructors" as const,
@@ -152,9 +152,9 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       selected: selectedInstructors,
       setSelected: setSelectedInstructors,
       update: updateInstructors,
-      canView: membership?.viewInstructors ?? false,
-      canAdd: instructors?.capabilities?.add ?? false,
-      canRemove: instructors?.capabilities?.remove ?? false,
+      canView: membership?.instructors.view ?? false,
+      canAdd: membership?.instructors.add ?? false,
+      canRemove: membership?.instructors.remove ?? false,
     },
     {
       id: "observers" as const,
@@ -165,9 +165,9 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       selected: selectedObservers,
       setSelected: setSelectedObservers,
       update: updateObservers,
-      canView: membership?.viewObservers ?? false,
-      canAdd: observers?.capabilities?.add ?? false,
-      canRemove: observers?.capabilities?.remove ?? false,
+      canView: membership?.observers.view ?? false,
+      canAdd: membership?.observers.add ?? false,
+      canRemove: membership?.observers.remove ?? false,
     },
   ].filter((role) => role.canView);
 

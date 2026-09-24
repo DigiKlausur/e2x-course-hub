@@ -23,7 +23,7 @@ export function useCourseCreators() {
 /**
  * Like the term membership endpoints below, this is permission guarded and
  * answers 403 rather than an empty list, so callers pass `enabled` from the
- * course's `capabilities.viewCourseOwners`.
+ * course's `capabilities.courseOwners.view`.
  */
 export function useCourseOwners(courseId: string, enabled = true) {
   return useQuery<MembershipCollectionResponse>({

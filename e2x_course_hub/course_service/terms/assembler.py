@@ -4,6 +4,7 @@ from e2x_hub_rbac.permissions.membership import MembershipPermission
 from ...api.course_permissions import CoursePermission
 from ...schema.course import TermConfig
 from ..common.schemas import Environment
+from ..membership.schemas import MembershipCapabilities
 from .schemas import (
     TermCapabilities,
     TermDetailResponse,
@@ -22,71 +23,50 @@ class TermAssembler:
         self.course_permission_checker = course_permission_checker
         self.membership_permission_checker = membership_permission_checker
 
+    def _role_membership(
+        self,
+        course_id: str,
+        term_id: str,
+        view: MembershipPermission,
+        add: MembershipPermission,
+        remove: MembershipPermission,
+    ) -> MembershipCapabilities:
+        def check(permission: MembershipPermission) -> bool:
+            return self.membership_permission_checker.has_permission(
+                permission=permission, course_id=course_id, term_id=term_id
+            )
+
+        return MembershipCapabilities(view=check(view), add=check(add), remove=check(remove))
+
     def _membership_capabilities(self, course_id: str, term_id: str) -> TermMembershipCapabilities:
         return TermMembershipCapabilities(
-            viewInstructors=self.membership_permission_checker.has_permission(
-                permission=MembershipPermission.LIST_INSTRUCTORS,
-                course_id=course_id,
-                term_id=term_id,
+            instructors=self._role_membership(
+                course_id,
+                term_id,
+                view=MembershipPermission.LIST_INSTRUCTORS,
+                add=MembershipPermission.ADD_INSTRUCTOR,
+                remove=MembershipPermission.REMOVE_INSTRUCTOR,
             ),
-            manageInstructors=all(
-                self.membership_permission_checker.has_permission(
-                    permission=permission,
-                    course_id=course_id,
-                    term_id=term_id,
-                )
-                for permission in [
-                    MembershipPermission.ADD_INSTRUCTOR,
-                    MembershipPermission.REMOVE_INSTRUCTOR,
-                ]
+            teachingAssistants=self._role_membership(
+                course_id,
+                term_id,
+                view=MembershipPermission.LIST_TEACHING_ASSISTANTS,
+                add=MembershipPermission.ADD_TEACHING_ASSISTANT,
+                remove=MembershipPermission.REMOVE_TEACHING_ASSISTANT,
             ),
-            viewTeachingAssistants=self.membership_permission_checker.has_permission(
-                permission=MembershipPermission.LIST_TEACHING_ASSISTANTS,
-                course_id=course_id,
-                term_id=term_id,
+            students=self._role_membership(
+                course_id,
+                term_id,
+                view=MembershipPermission.LIST_STUDENTS,
+                add=MembershipPermission.ADD_STUDENT,
+                remove=MembershipPermission.REMOVE_STUDENT,
             ),
-            manageTeachingAssistants=all(
-                self.membership_permission_checker.has_permission(
-                    permission=permission,
-                    course_id=course_id,
-                    term_id=term_id,
-                )
-                for permission in [
-                    MembershipPermission.ADD_TEACHING_ASSISTANT,
-                    MembershipPermission.REMOVE_TEACHING_ASSISTANT,
-                ]
-            ),
-            viewStudents=self.membership_permission_checker.has_permission(
-                permission=MembershipPermission.LIST_STUDENTS,
-                course_id=course_id,
-                term_id=term_id,
-            ),
-            manageStudents=all(
-                self.membership_permission_checker.has_permission(
-                    permission=permission,
-                    course_id=course_id,
-                    term_id=term_id,
-                )
-                for permission in [
-                    MembershipPermission.ADD_STUDENT,
-                    MembershipPermission.REMOVE_STUDENT,
-                ]
-            ),
-            viewObservers=self.membership_permission_checker.has_permission(
-                permission=MembershipPermission.LIST_OBSERVERS,
-                course_id=course_id,
-                term_id=term_id,
-            ),
-            manageObservers=all(
-                self.membership_permission_checker.has_permission(
-                    permission=permission,
-                    course_id=course_id,
-                    term_id=term_id,
-                )
-                for permission in [
-                    MembershipPermission.ADD_OBSERVER,
-                    MembershipPermission.REMOVE_OBSERVER,
-                ]
+            observers=self._role_membership(
+                course_id,
+                term_id,
+                view=MembershipPermission.LIST_OBSERVERS,
+                add=MembershipPermission.ADD_OBSERVER,
+                remove=MembershipPermission.REMOVE_OBSERVER,
             ),
         )
 

@@ -2,17 +2,14 @@ from pydantic import BaseModel
 
 from ...schema.course import TermConfig
 from ..common.schemas import Environment
+from ..membership.schemas import MembershipCapabilities
 
 
 class TermMembershipCapabilities(BaseModel):
-    viewInstructors: bool
-    manageInstructors: bool
-    viewTeachingAssistants: bool
-    manageTeachingAssistants: bool
-    viewStudents: bool
-    manageStudents: bool
-    viewObservers: bool
-    manageObservers: bool
+    instructors: MembershipCapabilities
+    teachingAssistants: MembershipCapabilities
+    students: MembershipCapabilities
+    observers: MembershipCapabilities
 
 
 class TermSummaryCapabilities(BaseModel):

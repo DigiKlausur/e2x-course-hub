@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 from ...schema.course import CourseMetadata
 from ..common.schemas import Environment
+from ..membership.schemas import MembershipCapabilities
 from ..terms.schemas import TermSummaryResponse
 
 
@@ -9,8 +10,7 @@ class CourseCapabilities(BaseModel):
     editMetadata: bool
     removeCourse: bool
     selectEnvironment: bool
-    viewCourseOwners: bool
-    manageCourseOwners: bool
+    courseOwners: MembershipCapabilities
     addTerm: bool
 
 

@@ -51,14 +51,15 @@ export function CourseOwnersTab({ courseId }: Props) {
   // Listing owners is permission guarded and answers 403, so the course's own
   // capability decides whether the request is made at all.
   const { data: course, isLoading: courseLoading } = useCourse(courseId);
-  const canView = course?.capabilities.viewCourseOwners ?? false;
+  const owners = course?.capabilities.courseOwners;
+  const canView = owners?.view ?? false;
+  const canAdd = owners?.add ?? false;
+  const canRemove = owners?.remove ?? false;
 
   const { data, isLoading } = useCourseOwners(courseId, canView);
   const update = useUpdateCourseOwners(courseId);
 
   const usernames = data?.usernames ?? [];
-  const canAdd = data?.capabilities?.add ?? false;
-  const canRemove = data?.capabilities?.remove ?? false;
 
   if (courseLoading) return <p className="text-gray-500">Loading…</p>;
 

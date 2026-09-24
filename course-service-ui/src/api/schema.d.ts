@@ -336,10 +336,7 @@ export interface components {
             removeCourse: boolean;
             /** Selectenvironment */
             selectEnvironment: boolean;
-            /** Viewcourseowners */
-            viewCourseOwners: boolean;
-            /** Managecourseowners */
-            manageCourseOwners: boolean;
+            courseOwners: components["schemas"]["MembershipCapabilities"];
             /** Addterm */
             addTerm: boolean;
         };
@@ -694,22 +691,10 @@ export interface components {
         };
         /** TermMembershipCapabilities */
         TermMembershipCapabilities: {
-            /** Viewinstructors */
-            viewInstructors: boolean;
-            /** Manageinstructors */
-            manageInstructors: boolean;
-            /** Viewteachingassistants */
-            viewTeachingAssistants: boolean;
-            /** Manageteachingassistants */
-            manageTeachingAssistants: boolean;
-            /** Viewstudents */
-            viewStudents: boolean;
-            /** Managestudents */
-            manageStudents: boolean;
-            /** Viewobservers */
-            viewObservers: boolean;
-            /** Manageobservers */
-            manageObservers: boolean;
+            instructors: components["schemas"]["MembershipCapabilities"];
+            teachingAssistants: components["schemas"]["MembershipCapabilities"];
+            students: components["schemas"]["MembershipCapabilities"];
+            observers: components["schemas"]["MembershipCapabilities"];
         };
         /** TermSummaryCapabilities */
         TermSummaryCapabilities: {

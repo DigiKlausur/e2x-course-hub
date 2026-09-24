@@ -21,7 +21,7 @@ export function CoursePage() {
     {
       label: "Course Owners",
       to: `${base}/owners`,
-      show: capabilities?.viewCourseOwners ?? false,
+      show: capabilities?.courseOwners.view ?? false,
     },
     {
       label: "Settings",
