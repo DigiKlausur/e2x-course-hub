@@ -120,10 +120,25 @@ class CourseAssembler:
 
 class CourseCollectionAssembler:
     def __init__(
-        self, course_permission_checker: PermissionChecker, course_assembler: CourseAssembler
+        self,
+        course_permission_checker: PermissionChecker,
+        membership_permission_checker: PermissionChecker,
+        course_assembler: CourseAssembler,
     ):
         self.course_permission_checker = course_permission_checker
+        self.membership_permission_checker = membership_permission_checker
         self.course_assembler = course_assembler
+
+    def _role_membership(
+        self,
+        view: MembershipPermission,
+        add: MembershipPermission,
+        remove: MembershipPermission,
+    ) -> MembershipCapabilities:
+        check = self.membership_permission_checker.has_permission
+        return MembershipCapabilities(
+            view=check(permission=view), add=check(permission=add), remove=check(permission=remove)
+        )
 
     def _capabilities(self) -> CourseCollectionCapabilities:
         """
@@ -135,7 +150,17 @@ class CourseCollectionAssembler:
         return CourseCollectionCapabilities(
             createCourse=self.course_permission_checker.has_permission(
                 permission=CoursePermission.ADD_COURSE
-            )
+            ),
+            lmsAdmins=self._role_membership(
+                view=MembershipPermission.LIST_LMS_ADMINS,
+                add=MembershipPermission.ADD_LMS_ADMIN,
+                remove=MembershipPermission.REMOVE_LMS_ADMIN,
+            ),
+            courseCreators=self._role_membership(
+                view=MembershipPermission.LIST_COURSE_CREATORS,
+                add=MembershipPermission.ADD_COURSE_CREATOR,
+                remove=MembershipPermission.REMOVE_COURSE_CREATOR,
+            ),
         )
 
     def collection(self, course_metadata_list: list[CourseMetadata]) -> CourseCollectionResponse:

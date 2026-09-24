@@ -29,10 +29,12 @@ def get_course_assembler(
 def get_course_collection_assembler(
     user: CurrentUser,
     course_api: CourseAPIDep,
+    membership_api: MembershipAPIDep,
     course_assembler: CourseAssembler = Depends(get_course_assembler),
 ) -> CourseCollectionAssembler:
     return CourseCollectionAssembler(
         course_permission_checker=course_api.permission_checker(user),
+        membership_permission_checker=membership_api.permission_checker(user),
         course_assembler=course_assembler,
     )
 

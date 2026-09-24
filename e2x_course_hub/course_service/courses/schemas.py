@@ -28,6 +28,8 @@ class CourseDetailResponse(BaseModel):
 
 class CourseCollectionCapabilities(BaseModel):
     createCourse: bool
+    lmsAdmins: MembershipCapabilities
+    courseCreators: MembershipCapabilities
 
 
 class CourseCollectionResponse(BaseModel):
