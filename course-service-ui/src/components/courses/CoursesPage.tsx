@@ -92,24 +92,8 @@ export function CoursesPage() {
   return (
     <div>
       <header className="bg-white border-b border-gray-200 px-10 py-8">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 m-0">Courses</h1>
-            <p className="mt-1 text-gray-500">Manage your courses and terms</p>
-          </div>
-          {/* Only offer the button when the backend says the user may create a
-              course. Previously it was always shown while the dialog was
-              conditional, so an unauthorised click did nothing at all. */}
-          {canCreateCourse && (
-            <Button
-              variant="primary"
-              onClick={() => setDialogOpen(true)}
-              title={courseCollectionCapabilityText.createCourse.description}
-            >
-              + {courseCollectionCapabilityText.createCourse.label}
-            </Button>
-          )}
-        </div>
+        <h1 className="text-3xl font-bold text-gray-900 m-0">Courses</h1>
+        <p className="mt-1 text-gray-500">Manage your courses and terms</p>
       </header>
 
       <CreateCourseDialog
@@ -134,6 +118,20 @@ export function CoursesPage() {
         )}
         {courses && (
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden p-4">
+            {canCreateCourse && (
+              <div className="mb-4 flex justify-end">
+                <Button
+                  variant="primary"
+                  onClick={() => setDialogOpen(true)}
+                  title={
+                    courseCollectionCapabilityText.createCourse.description
+                  }
+                  className="px-3 py-2 text-xs"
+                >
+                  + {courseCollectionCapabilityText.createCourse.label}
+                </Button>
+              </div>
+            )}
             <DataTable
               rows={courses}
               getRowId={(course) => course.metadata.course_id}
