@@ -19,6 +19,10 @@ import {
   useUpdateInstructors,
 } from "@hooks/membership";
 import { getErrorMessage } from "@/lib/errorMessage";
+import {
+  membershipCapabilityText,
+  termCapabilityText,
+} from "@domain/capabilities";
 import type { ImageSelection, SpawnRole } from "@api/types";
 
 type DialogTarget =
@@ -223,7 +227,14 @@ export function TermOverviewTab({ courseId, termId }: Props) {
         );
       },
       canAdd,
-      addLabel: `Add ${label}`,
+      addLabel: membershipCapabilityText.add({
+        singular: removeLabel,
+        plural: label,
+      }).label,
+      addDescription: membershipCapabilityText.add({
+        singular: removeLabel,
+        plural: label,
+      }).description,
       onAddClick: () => setAddDialogFor(id),
       canRemove,
       removeLabel,
@@ -275,6 +286,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
 
         <RuntimeConfigEditor
           title="Term Runtime"
+          description={termCapabilityText.selectEnvironment.description}
           imageSelection={term?.environment.image}
           resourcesSelection={term?.environment.resources}
           imageCatalog={imageCatalog?.catalog}

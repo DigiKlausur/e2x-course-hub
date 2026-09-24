@@ -13,6 +13,7 @@ import { DataTable } from "@components/ui/DataTable";
 import type { DataTableColumn } from "@components/ui/DataTable";
 import { CreateCourseDialog } from "@components/dialogs/CreateCourseDialog";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { courseCollectionCapabilityText } from "@domain/capabilities";
 import type { CourseSummaryResponse } from "@/api/types";
 
 const PAGE_SIZE_KEY = "course-table-page-size";
@@ -100,8 +101,12 @@ export function CoursesPage() {
               course. Previously it was always shown while the dialog was
               conditional, so an unauthorised click did nothing at all. */}
           {canCreateCourse && (
-            <Button variant="primary" onClick={() => setDialogOpen(true)}>
-              + Create Course
+            <Button
+              variant="primary"
+              onClick={() => setDialogOpen(true)}
+              title={courseCollectionCapabilityText.createCourse.description}
+            >
+              + {courseCollectionCapabilityText.createCourse.label}
             </Button>
           )}
         </div>

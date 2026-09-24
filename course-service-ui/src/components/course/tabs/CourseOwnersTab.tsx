@@ -8,6 +8,10 @@ import { useCourseOwners, useUpdateCourseOwners } from "@hooks/membership";
 import { useCourse } from "@hooks/course";
 import { Alert } from "@components/ui/Alert";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { membershipCapabilityText } from "@domain/capabilities";
+import type { MemberLabels } from "@domain/capabilities";
+
+const OWNER_LABELS: MemberLabels = { singular: "Owner", plural: "Owners" };
 
 interface Props {
   courseId: string;
@@ -60,6 +64,7 @@ export function CourseOwnersTab({ courseId }: Props) {
   const update = useUpdateCourseOwners(courseId);
 
   const usernames = data?.usernames ?? [];
+  const addText = membershipCapabilityText.add(OWNER_LABELS);
 
   if (courseLoading) return <p className="text-gray-500">Loading…</p>;
 
@@ -96,8 +101,9 @@ export function CourseOwnersTab({ courseId }: Props) {
               onClick={() => setAddDialogOpen(true)}
               disabled={update.isPending}
               className="px-3 py-2 text-xs"
+              title={addText.description}
             >
-              + Add Owner
+              + {addText.label}
             </Button>
           )}
         </div>

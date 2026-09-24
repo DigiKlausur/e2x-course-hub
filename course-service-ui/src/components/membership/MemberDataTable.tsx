@@ -4,6 +4,7 @@ import { ConfirmDialog } from "@components/ui/ConfirmDialog";
 import { DataTable } from "@components/ui/DataTable";
 import type { DataTableColumn } from "@components/ui/DataTable";
 import type { CurrentUser } from "@/api/types";
+import { membershipCapabilityText } from "@domain/capabilities";
 
 const PAGE_SIZE_KEY = "member-table-page-size";
 
@@ -78,6 +79,10 @@ export function MemberDataTable({
   isMutating,
 }: MemberDataTableProps) {
   const [removeDialog, setRemoveDialog] = useState<RemoveDialog>(null);
+  const removeText = membershipCapabilityText.remove({
+    singular: removeLabel,
+    plural: `${removeLabel}s`,
+  });
 
   const columns: DataTableColumn<string>[] = [
     {
@@ -98,8 +103,9 @@ export function MemberDataTable({
                 onClick={() => setRemoveDialog({ type: "single", username })}
                 disabled={isMutating}
                 className="px-3 py-1.5 text-xs whitespace-nowrap"
+                title={removeText.description}
               >
-                Remove {removeLabel}
+                {removeText.label}
               </Button>
             ),
           },

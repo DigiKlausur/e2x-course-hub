@@ -19,6 +19,7 @@ export interface MemberTabConfig {
   removeLabel?: string;
   canAdd?: boolean;
   addLabel?: string;
+  addDescription?: string;
   onAddClick?: () => void;
   isMutating?: boolean;
 }
@@ -78,6 +79,7 @@ export function TabbedMemberDataTable({
             onClick={activeTab.onAddClick}
             disabled={activeTab.isMutating}
             className="px-3 py-2 text-xs"
+            title={activeTab.addDescription}
           >
             + {activeTab.addLabel ?? `Add ${activeTab.label}`}
           </Button>

@@ -10,6 +10,7 @@ import {
   useUpdateCourseMetadata,
 } from "@hooks/course";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { courseCapabilityText } from "@domain/capabilities";
 
 interface Props {
   courseId: string;
@@ -69,6 +70,9 @@ export function CourseSettingsTab({ courseId }: Props) {
         {canEditMetadata && (
           <Card>
             <CardTitle>Course Settings</CardTitle>
+            <p className="text-sm text-gray-500 mb-4">
+              {courseCapabilityText.editMetadata.description}
+            </p>
 
             {updateMetadata.error && (
               <Alert className="mb-5" title="Could not save the changes">
@@ -125,7 +129,7 @@ export function CourseSettingsTab({ courseId }: Props) {
           <Card>
             <CardTitle>Danger Zone</CardTitle>
             <p className="text-sm text-gray-500 mb-4">
-              Permanently delete this course and all its terms.
+              {courseCapabilityText.removeCourse.description}
             </p>
 
             {deleteCourse.error && (
@@ -139,7 +143,9 @@ export function CourseSettingsTab({ courseId }: Props) {
               onClick={() => setDeleteDialogOpen(true)}
               disabled={deleteCourse.isPending}
             >
-              {deleteCourse.isPending ? "Deleting…" : "Delete Course"}
+              {deleteCourse.isPending
+                ? "Deleting…"
+                : courseCapabilityText.removeCourse.label}
             </Button>
 
             <ConfirmDialog

@@ -7,6 +7,7 @@ import { Alert } from "@components/ui/Alert";
 import { ConfirmDialog } from "@components/ui/ConfirmDialog";
 import { useDeleteTerm, useTerm } from "@hooks/course";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { termCapabilityText } from "@domain/capabilities";
 
 interface Props {
   courseId: string;
@@ -35,7 +36,7 @@ export function TermSettingsTab({ courseId, termId }: Props) {
             carry only an environment. Runtime settings live in the Term Runtime
             tab, so this card is read-only. */}
         <Card>
-          <CardTitle>Term Settings</CardTitle>
+          <CardTitle>Semester Settings</CardTitle>
           <Row label="Course">{courseId}</Row>
           <Row label="Term">{termId}</Row>
         </Card>
@@ -46,7 +47,7 @@ export function TermSettingsTab({ courseId, termId }: Props) {
           <Card>
             <CardTitle>Danger Zone</CardTitle>
             <p className="text-sm text-gray-500 mb-4">
-              Permanently remove this term.
+              {termCapabilityText.removeTerm.description}
             </p>
 
             {deleteTerm.error && (
@@ -61,7 +62,9 @@ export function TermSettingsTab({ courseId, termId }: Props) {
                 onClick={() => setDeleteDialogOpen(true)}
                 disabled={deleteTerm.isPending}
               >
-                {deleteTerm.isPending ? "Deleting…" : "Delete Term"}
+                {deleteTerm.isPending
+                  ? "Deleting…"
+                  : termCapabilityText.removeTerm.label}
               </Button>
             </div>
 

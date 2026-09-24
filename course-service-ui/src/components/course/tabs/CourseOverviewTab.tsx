@@ -16,6 +16,7 @@ import {
   useUpdateCourseEnvironment,
 } from "@hooks/course";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { courseCapabilityText } from "@domain/capabilities";
 import type {
   ImageSelection,
   SpawnRole,
@@ -120,8 +121,12 @@ export function CourseOverviewTab({ courseId }: Props) {
             }}
             toolbarEnd={
               canAddTerm && (
-                <Button variant="primary" onClick={() => setDialogOpen(true)}>
-                  + Create Semester
+                <Button
+                  variant="primary"
+                  onClick={() => setDialogOpen(true)}
+                  title={courseCapabilityText.addTerm.description}
+                >
+                  + {courseCapabilityText.addTerm.label}
                 </Button>
               )
             }
@@ -139,7 +144,7 @@ export function CourseOverviewTab({ courseId }: Props) {
 
         <RuntimeConfigEditor
           title="Current Semester Template"
-          description="These are the defaults applied when a new semester is created for this course. Changing them here does not affect existing semesters."
+          description={courseCapabilityText.selectEnvironment.description}
           imageSelection={course.environment.image}
           resourcesSelection={course.environment.resources}
           imageCatalog={imageCatalog?.catalog}
