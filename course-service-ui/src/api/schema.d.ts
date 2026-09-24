@@ -664,6 +664,8 @@ export interface components {
             viewTerm: boolean;
             /** Removeterm */
             removeTerm: boolean;
+            /** Selectenvironment */
+            selectEnvironment: boolean;
             membership: components["schemas"]["TermMembershipCapabilities"];
         };
         /**

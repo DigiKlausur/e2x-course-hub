@@ -2070,6 +2070,10 @@
             "type": "boolean",
             "title": "Removeterm"
           },
+          "selectEnvironment": {
+            "type": "boolean",
+            "title": "Selectenvironment"
+          },
           "membership": {
             "$ref": "#/components/schemas/TermMembershipCapabilities"
           }
@@ -2078,6 +2082,7 @@
         "required": [
           "viewTerm",
           "removeTerm",
+          "selectEnvironment",
           "membership"
         ],
         "title": "TermCapabilities"
