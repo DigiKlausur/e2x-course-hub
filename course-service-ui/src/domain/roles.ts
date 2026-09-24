@@ -1,6 +1,6 @@
 export const MembershipRole = {
-  Admin: "admin",
-  CourseOwner: "owner",
+  Admin: "lms-admin",
+  CourseOwner: "course-owner",
   CourseCreator: "course-creator",
   Instructor: "instructor",
   TeachingAssistant: "teaching-assistant",
