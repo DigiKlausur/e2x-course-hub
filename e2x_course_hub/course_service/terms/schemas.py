@@ -21,6 +21,7 @@ class TermSummaryCapabilities(BaseModel):
 
 
 class TermCapabilities(TermSummaryCapabilities):
+    selectEnvironment: bool
     membership: TermMembershipCapabilities
 
 

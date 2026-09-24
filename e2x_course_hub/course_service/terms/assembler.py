@@ -116,6 +116,18 @@ class TermAssembler:
                 course_id=course_id,
                 term_id=term_id,
             ),
+            selectEnvironment=all(
+                self.course_permission_checker.has_permission(
+                    permission=permission,
+                    course_id=course_id,
+                    term_id=term_id,
+                )
+                for permission in [
+                    CoursePermission.TERM_SELECT_IMAGE,
+                    CoursePermission.TERM_SELECT_RESOURCES,
+                    CoursePermission.TERM_SELECT_PROFILES,
+                ]
+            ),
             membership=self._membership_capabilities(course_id, term_id),
         )
 
