@@ -2,7 +2,10 @@ import type { MembershipCapabilities } from "@api/types";
 import type { MemberLabels } from "@domain/roles";
 import type { CapabilityText } from "./types";
 
-/** Shared by every member list: course owners and each term role. */
+/**
+ * Shared by every member list: LMS admins, course creators, course owners and
+ * each term role.
+ */
 export const membershipCapabilityText = {
   view: ({ plural }: MemberLabels) => ({
     label: `View ${plural}`,

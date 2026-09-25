@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
 import { Card, CardTitle } from "@components/ui/Card";
 import { Row } from "@components/ui/Row";
 import { Alert } from "@components/ui/Alert";
@@ -18,6 +17,7 @@ import {
   useUpdateTeachingAssistants,
   useUpdateInstructors,
 } from "@hooks/membership";
+import { useSelection } from "@hooks/ui";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { MembershipRole, memberLabels } from "@domain/roles";
 import {
@@ -32,37 +32,6 @@ type DialogTarget =
 interface Props {
   courseId: string;
   termId: string;
-}
-
-function toggleSelection(
-  setSelection: Dispatch<SetStateAction<Set<string>>>,
-  username: string,
-) {
-  setSelection((prev) => {
-    const next = new Set(prev);
-    if (next.has(username)) {
-      next.delete(username);
-    } else {
-      next.add(username);
-    }
-    return next;
-  });
-}
-
-function toggleSelectionForRows(
-  setSelection: Dispatch<SetStateAction<Set<string>>>,
-  select: boolean,
-  usernames: string[],
-) {
-  setSelection((prev) => {
-    const next = new Set(prev);
-    if (select) {
-      usernames.forEach((u) => next.add(u));
-    } else {
-      usernames.forEach((u) => next.delete(u));
-    }
-    return next;
-  });
 }
 
 export function TermOverviewTab({ courseId, termId }: Props) {
@@ -100,18 +69,10 @@ export function TermOverviewTab({ courseId, termId }: Props) {
     membership?.observers.view ?? false,
   );
 
-  const [selectedStudents, setSelectedStudents] = useState<Set<string>>(
-    new Set(),
-  );
-  const [selectedTeachingAssistants, setSelectedTeachingAssistants] = useState<
-    Set<string>
-  >(new Set());
-  const [selectedInstructors, setSelectedInstructors] = useState<Set<string>>(
-    new Set(),
-  );
-  const [selectedObservers, setSelectedObservers] = useState<Set<string>>(
-    new Set(),
-  );
+  const studentSelection = useSelection();
+  const teachingAssistantSelection = useSelection();
+  const instructorSelection = useSelection();
+  const observerSelection = useSelection();
 
   const updateStudents = useUpdateStudents(courseId, termId);
   const updateTeachingAssistants = useUpdateTeachingAssistants(
@@ -127,8 +88,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       labels: memberLabels[MembershipRole.Student],
       data: students?.usernames,
       isLoading: studentsLoading,
-      selected: selectedStudents,
-      setSelected: setSelectedStudents,
+      selection: studentSelection,
       update: updateStudents,
       canView: membership?.students.view ?? false,
       canAdd: membership?.students.add ?? false,
@@ -139,8 +99,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       labels: memberLabels[MembershipRole.TeachingAssistant],
       data: teachingAssistants?.usernames,
       isLoading: teachingAssistantsLoading,
-      selected: selectedTeachingAssistants,
-      setSelected: setSelectedTeachingAssistants,
+      selection: teachingAssistantSelection,
       update: updateTeachingAssistants,
       canView: membership?.teachingAssistants.view ?? false,
       canAdd: membership?.teachingAssistants.add ?? false,
@@ -151,8 +110,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       labels: memberLabels[MembershipRole.Instructor],
       data: instructors?.usernames,
       isLoading: instructorsLoading,
-      selected: selectedInstructors,
-      setSelected: setSelectedInstructors,
+      selection: instructorSelection,
       update: updateInstructors,
       canView: membership?.instructors.view ?? false,
       canAdd: membership?.instructors.add ?? false,
@@ -163,8 +121,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       labels: memberLabels[MembershipRole.Observer],
       data: observers?.usernames,
       isLoading: observersLoading,
-      selected: selectedObservers,
-      setSelected: setSelectedObservers,
+      selection: observerSelection,
       update: updateObservers,
       canView: membership?.observers.view ?? false,
       canAdd: membership?.observers.add ?? false,
@@ -188,8 +145,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       labels,
       data,
       isLoading,
-      selected,
-      setSelected,
+      selection,
       update,
       canAdd,
       canRemove,
@@ -198,28 +154,20 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       label: labels.plural,
       usernames: data ?? [],
       isLoading,
-      selected,
-      onSelect: (username: string) => toggleSelection(setSelected, username),
-      onSelectAll: (select: boolean, usernames: string[]) =>
-        toggleSelectionForRows(setSelected, select, usernames),
+      selected: selection.selected,
+      onSelect: selection.toggle,
+      onSelectAll: selection.toggleRows,
       onRemove: (username: string) => {
         update.mutate(
           { remove: [username] },
-          {
-            onSuccess: () =>
-              setSelected((prev) => {
-                const next = new Set(prev);
-                next.delete(username);
-                return next;
-              }),
-          },
+          { onSuccess: () => selection.remove(username) },
         );
       },
       onRemoveSelected: () => {
-        if (selected.size === 0) return;
+        if (selection.selected.size === 0) return;
         update.mutate(
-          { remove: Array.from(selected) },
-          { onSuccess: () => setSelected(new Set()) },
+          { remove: Array.from(selection.selected) },
+          { onSuccess: selection.clear },
         );
       },
       canAdd,
