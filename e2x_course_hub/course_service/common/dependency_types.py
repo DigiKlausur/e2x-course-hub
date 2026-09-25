@@ -1,5 +1,6 @@
 from typing import Annotated
 
+from e2x_hub_rbac.auth import PermissionChecker
 from fastapi import Depends
 from jupyterhub_fastapi_adapter.dependencies import User, require_authenticated_user
 from sqlalchemy.orm import Session
@@ -12,6 +13,7 @@ from .dependencies import (
     get_db_session,
     get_infrastructure_api,
     get_membership_api,
+    get_permission_checker,
 )
 
 CurrentUser = Annotated[User, Depends(require_authenticated_user)]
@@ -19,3 +21,4 @@ DBSession = Annotated[Session, Depends(get_db_session)]
 CourseAPIDep = Annotated[CourseAPI, Depends(get_course_api)]
 MembershipAPIDep = Annotated[MembershipAPI, Depends(get_membership_api)]
 InfrastructureAPIDep = Annotated[InfrastructureAPI, Depends(get_infrastructure_api)]
+PermissionCheckerDep = Annotated[PermissionChecker, Depends(get_permission_checker)]

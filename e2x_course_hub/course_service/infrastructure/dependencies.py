@@ -2,20 +2,14 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from ..common.dependency_types import (
-    CurrentUser,
-    InfrastructureAPIDep,
-)
+from ..common.dependency_types import PermissionCheckerDep
 from .assembler import InfrastructureAssembler
 
 
 def get_infrastructure_assembler(
-    user: CurrentUser,
-    infrastructure_api: InfrastructureAPIDep,
+    permission_checker: PermissionCheckerDep,
 ) -> InfrastructureAssembler:
-    return InfrastructureAssembler(
-        infrastructure_permission_checker=infrastructure_api.permission_checker(user),
-    )
+    return InfrastructureAssembler(permission_checker=permission_checker)
 
 
 InfrastructureAssemblerDep = Annotated[

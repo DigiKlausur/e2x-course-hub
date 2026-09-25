@@ -1,8 +1,6 @@
-from e2x_hub_rbac.permissions.membership import MembershipPermission
 from fastapi import APIRouter
 
 from ..common.dependency_types import CurrentUser, MembershipAPIDep
-from .dependencies import MembershipAssemblerDep
 from .schemas import MembershipCollectionResponse, MembershipPatch
 
 router = APIRouter(
@@ -19,14 +17,8 @@ term_prefix = course_prefix + "/terms/{term_id}"
 async def list_lms_admins(
     user: CurrentUser,
     membership_api: MembershipAPIDep,
-    membership_assembler: MembershipAssemblerDep,
 ):
-    return membership_assembler.collection(
-        usernames=await membership_api.list_lms_admins(user),
-        view_permission=MembershipPermission.LIST_LMS_ADMINS,
-        add_permission=MembershipPermission.ADD_LMS_ADMIN,
-        remove_permission=MembershipPermission.REMOVE_LMS_ADMIN,
-    )
+    return MembershipCollectionResponse(usernames=await membership_api.list_lms_admins(user))
 
 
 @router.patch(lms_prefix + "/admins", status_code=204)
@@ -45,14 +37,8 @@ async def patch_lms_admins(
 async def list_lms_course_creators(
     user: CurrentUser,
     membership_api: MembershipAPIDep,
-    membership_assembler: MembershipAssemblerDep,
 ):
-    return membership_assembler.collection(
-        usernames=await membership_api.list_course_creators(user),
-        view_permission=MembershipPermission.LIST_COURSE_CREATORS,
-        add_permission=MembershipPermission.ADD_COURSE_CREATOR,
-        remove_permission=MembershipPermission.REMOVE_COURSE_CREATOR,
-    )
+    return MembershipCollectionResponse(usernames=await membership_api.list_course_creators(user))
 
 
 @router.patch(lms_prefix + "/course-creators", status_code=204)
@@ -72,14 +58,9 @@ async def list_course_owners(
     course_id: str,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
-    membership_assembler: MembershipAssemblerDep,
 ):
-    return membership_assembler.collection(
-        usernames=await membership_api.list_course_owners(user, course_id),
-        view_permission=MembershipPermission.LIST_COURSE_OWNERS,
-        add_permission=MembershipPermission.ADD_COURSE_OWNER,
-        remove_permission=MembershipPermission.REMOVE_COURSE_OWNER,
-        course_id=course_id,
+    return MembershipCollectionResponse(
+        usernames=await membership_api.list_course_owners(user, course_id)
     )
 
 
@@ -102,15 +83,9 @@ async def list_term_instructors(
     term_id: str,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
-    membership_assembler: MembershipAssemblerDep,
 ):
-    return membership_assembler.collection(
-        usernames=await membership_api.list_instructors(user, course_id, term_id),
-        view_permission=MembershipPermission.LIST_INSTRUCTORS,
-        add_permission=MembershipPermission.ADD_INSTRUCTOR,
-        remove_permission=MembershipPermission.REMOVE_INSTRUCTOR,
-        course_id=course_id,
-        term_id=term_id,
+    return MembershipCollectionResponse(
+        usernames=await membership_api.list_instructors(user, course_id, term_id)
     )
 
 
@@ -137,15 +112,9 @@ async def list_term_teaching_assistants(
     term_id: str,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
-    membership_assembler: MembershipAssemblerDep,
 ):
-    return membership_assembler.collection(
-        usernames=await membership_api.list_teaching_assistants(user, course_id, term_id),
-        view_permission=MembershipPermission.LIST_TEACHING_ASSISTANTS,
-        add_permission=MembershipPermission.ADD_TEACHING_ASSISTANT,
-        remove_permission=MembershipPermission.REMOVE_TEACHING_ASSISTANT,
-        course_id=course_id,
-        term_id=term_id,
+    return MembershipCollectionResponse(
+        usernames=await membership_api.list_teaching_assistants(user, course_id, term_id)
     )
 
 
@@ -169,15 +138,9 @@ async def list_term_students(
     term_id: str,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
-    membership_assembler: MembershipAssemblerDep,
 ):
-    return membership_assembler.collection(
-        usernames=await membership_api.list_students(user, course_id, term_id),
-        view_permission=MembershipPermission.LIST_STUDENTS,
-        add_permission=MembershipPermission.ADD_STUDENT,
-        remove_permission=MembershipPermission.REMOVE_STUDENT,
-        course_id=course_id,
-        term_id=term_id,
+    return MembershipCollectionResponse(
+        usernames=await membership_api.list_students(user, course_id, term_id)
     )
 
 
@@ -201,15 +164,9 @@ async def list_term_observers(
     term_id: str,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
-    membership_assembler: MembershipAssemblerDep,
 ):
-    return membership_assembler.collection(
-        usernames=await membership_api.list_observers(user, course_id, term_id),
-        view_permission=MembershipPermission.LIST_OBSERVERS,
-        add_permission=MembershipPermission.ADD_OBSERVER,
-        remove_permission=MembershipPermission.REMOVE_OBSERVER,
-        course_id=course_id,
-        term_id=term_id,
+    return MembershipCollectionResponse(
+        usernames=await membership_api.list_observers(user, course_id, term_id)
     )
 
 

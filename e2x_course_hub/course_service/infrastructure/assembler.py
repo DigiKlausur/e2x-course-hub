@@ -1,68 +1,37 @@
 from e2x_hub_rbac.auth import PermissionChecker
 
-from ...api.infrastructure_permissions import InfrastructurePermission
 from ...schema.catalog import ImageFamilyOptions, ProfileOptions, ResourceTierOptions
 from ...schema.types import SpawnRole
+from ..actions import LmsActions, lms_actions, user_can
 from .schemas import (
     ImageCatalogResponse,
-    InfrastructureCapabilities,
     ProfileCatalogResponse,
     ResourceTiersResponse,
 )
 
 
 class InfrastructureAssembler:
-    def __init__(
-        self,
-        infrastructure_permission_checker: PermissionChecker,
-    ):
-        self.infrastructure_permission_checker = infrastructure_permission_checker
+    def __init__(self, permission_checker: PermissionChecker):
+        self.permission_checker = permission_checker
 
-    def _image_catalog_capabilities(self) -> InfrastructureCapabilities:
-        return InfrastructureCapabilities(
-            manage=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.LMS_MANAGE_IMAGE_CATALOG
-            ),
-            view=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.LMS_VIEW_IMAGE_CATALOG
-            ),
-        )
-
-    def _resource_catalog_capabilities(self) -> InfrastructureCapabilities:
-        return InfrastructureCapabilities(
-            manage=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.LMS_MANAGE_RESOURCE_CATALOG
-            ),
-            view=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.LMS_VIEW_RESOURCE_CATALOG
-            ),
-        )
-
-    def _profile_catalog_capabilities(self) -> InfrastructureCapabilities:
-        return InfrastructureCapabilities(
-            manage=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.LMS_MANAGE_PROFILE_CATALOG
-            ),
-            view=self.infrastructure_permission_checker.has_permission(
-                InfrastructurePermission.LMS_VIEW_PROFILE_CATALOG
-            ),
-        )
+    def _lms_actions(self) -> LmsActions:
+        return lms_actions(user_can(self.permission_checker))
 
     def image_catalog(self, image_catalog: ImageFamilyOptions) -> ImageCatalogResponse:
         return ImageCatalogResponse(
-            capabilities=self._image_catalog_capabilities(), catalog=image_catalog
+            actions=self._lms_actions().catalogs.images, catalog=image_catalog
         )
 
     def resource_tiers(
         self, resource_tiers: dict[SpawnRole, ResourceTierOptions]
     ) -> ResourceTiersResponse:
         return ResourceTiersResponse(
-            capabilities=self._resource_catalog_capabilities(), catalog=resource_tiers
+            actions=self._lms_actions().catalogs.resources, catalog=resource_tiers
         )
 
     def profile_catalog(
         self, available_profiles: dict[SpawnRole, ProfileOptions]
     ) -> ProfileCatalogResponse:
         return ProfileCatalogResponse(
-            capabilities=self._profile_catalog_capabilities(), catalog=available_profiles
+            actions=self._lms_actions().catalogs.profiles, catalog=available_profiles
         )

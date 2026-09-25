@@ -7,35 +7,25 @@ from ..common.dependency_types import (
     CourseAPIDep,
     CurrentUser,
     DBSession,
-    MembershipAPIDep,
+    PermissionCheckerDep,
 )
 from ..terms.dependencies import TermAssemblerDep
 from .assembler import CourseAssembler, CourseCollectionAssembler
 
 
 def get_course_assembler(
-    user: CurrentUser,
-    course_api: CourseAPIDep,
-    membership_api: MembershipAPIDep,
+    permission_checker: PermissionCheckerDep,
     term_assembler: TermAssemblerDep,
 ) -> CourseAssembler:
-    return CourseAssembler(
-        course_permission_checker=course_api.permission_checker(user),
-        membership_permission_checker=membership_api.permission_checker(user),
-        term_assembler=term_assembler,
-    )
+    return CourseAssembler(permission_checker=permission_checker, term_assembler=term_assembler)
 
 
 def get_course_collection_assembler(
-    user: CurrentUser,
-    course_api: CourseAPIDep,
-    membership_api: MembershipAPIDep,
+    permission_checker: PermissionCheckerDep,
     course_assembler: CourseAssembler = Depends(get_course_assembler),
 ) -> CourseCollectionAssembler:
     return CourseCollectionAssembler(
-        course_permission_checker=course_api.permission_checker(user),
-        membership_permission_checker=membership_api.permission_checker(user),
-        course_assembler=course_assembler,
+        permission_checker=permission_checker, course_assembler=course_assembler
     )
 
 
