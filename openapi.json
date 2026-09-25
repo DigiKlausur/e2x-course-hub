@@ -1325,6 +1325,48 @@
           }
         }
       }
+    },
+    "/v1/roles/{role}/capabilities": {
+      "get": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Get Role Capabilities",
+        "description": "What a role can and cannot do, e.g. to explain it before adding someone to it.\n\nThe same for every course and term, so any logged-in user may ask.",
+        "operationId": "get_role_capabilities_v1_roles__role__capabilities_get",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/RoleName"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleCapabilitiesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1360,6 +1402,21 @@
           "addTerm"
         ],
         "title": "CourseCapabilities"
+      },
+      "CourseCapabilityId": {
+        "type": "string",
+        "enum": [
+          "viewCourse",
+          "viewMetadata",
+          "editMetadata",
+          "removeCourse",
+          "selectEnvironment",
+          "addTerm",
+          "courseOwners.view",
+          "courseOwners.add",
+          "courseOwners.remove"
+        ],
+        "title": "CourseCapabilityId"
       },
       "CourseCollectionCapabilities": {
         "properties": {
@@ -1801,6 +1858,25 @@
         "type": "object",
         "title": "InfrastructureCapabilities"
       },
+      "LmsCapabilityId": {
+        "type": "string",
+        "enum": [
+          "createCourse",
+          "lmsAdmins.view",
+          "lmsAdmins.add",
+          "lmsAdmins.remove",
+          "courseCreators.view",
+          "courseCreators.add",
+          "courseCreators.remove",
+          "imageCatalog.view",
+          "imageCatalog.manage",
+          "resourceCatalog.view",
+          "resourceCatalog.manage",
+          "profileCatalog.view",
+          "profileCatalog.manage"
+        ],
+        "title": "LmsCapabilityId"
+      },
       "MembershipCapabilities": {
         "properties": {
           "add": {
@@ -2033,6 +2109,107 @@
         ],
         "title": "ResourceTiersResponse"
       },
+      "RoleCapabilitiesResponse": {
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/RoleName"
+          },
+          "lms": {
+            "items": {
+              "$ref": "#/components/schemas/RoleLmsCapability"
+            },
+            "type": "array",
+            "title": "Lms"
+          },
+          "course": {
+            "items": {
+              "$ref": "#/components/schemas/RoleCourseCapability"
+            },
+            "type": "array",
+            "title": "Course"
+          },
+          "term": {
+            "items": {
+              "$ref": "#/components/schemas/RoleTermCapability"
+            },
+            "type": "array",
+            "title": "Term"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "lms",
+          "course",
+          "term"
+        ],
+        "title": "RoleCapabilitiesResponse",
+        "description": "Every capability and whether a role has it, grouped by the level each applies to.\n\nDenied capabilities are included so a role can be explained by what it can\nand cannot do. The order follows the definitions."
+      },
+      "RoleCourseCapability": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CourseCapabilityId"
+          },
+          "granted": {
+            "type": "boolean",
+            "title": "Granted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "granted"
+        ],
+        "title": "RoleCourseCapability"
+      },
+      "RoleLmsCapability": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/LmsCapabilityId"
+          },
+          "granted": {
+            "type": "boolean",
+            "title": "Granted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "granted"
+        ],
+        "title": "RoleLmsCapability"
+      },
+      "RoleName": {
+        "type": "string",
+        "enum": [
+          "lms-admin",
+          "course-creator",
+          "course-owner",
+          "instructor",
+          "teaching-assistant",
+          "observer",
+          "student"
+        ],
+        "title": "RoleName"
+      },
+      "RoleTermCapability": {
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/TermCapabilityId"
+          },
+          "granted": {
+            "type": "boolean",
+            "title": "Granted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "granted"
+        ],
+        "title": "RoleTermCapability"
+      },
       "SpawnRole": {
         "type": "string",
         "enum": [
@@ -2088,6 +2265,30 @@
           "membership"
         ],
         "title": "TermCapabilities"
+      },
+      "TermCapabilityId": {
+        "type": "string",
+        "enum": [
+          "viewTerm",
+          "removeTerm",
+          "selectEnvironment",
+          "membership.instructors.view",
+          "membership.instructors.add",
+          "membership.instructors.remove",
+          "membership.teachingAssistants.view",
+          "membership.teachingAssistants.add",
+          "membership.teachingAssistants.remove",
+          "membership.students.view",
+          "membership.students.add",
+          "membership.students.remove",
+          "membership.observers.view",
+          "membership.observers.add",
+          "membership.observers.remove",
+          "spawnStudentEnvironment",
+          "spawnGraderEnvironment",
+          "spawnReadonlyGraderEnvironment"
+        ],
+        "title": "TermCapabilityId"
       },
       "TermConfig": {
         "properties": {

@@ -36,6 +36,7 @@ from e2x_course_hub.course_service.me.router import router as me_router  # noqa:
 from e2x_course_hub.course_service.membership.router import (  # noqa: E402
     router as membership_router,
 )
+from e2x_course_hub.course_service.roles.router import router as roles_router  # noqa: E402
 from e2x_course_hub.course_service.terms.router import router as terms_router  # noqa: E402
 
 # Mirrors the router registration in ``course_service.fastapi_app``. The service
@@ -47,6 +48,7 @@ ROUTERS = (
     infrastructure_router,
     membership_router,
     me_router,
+    roles_router,
 )
 
 

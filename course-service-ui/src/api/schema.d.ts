@@ -324,6 +324,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/roles/{role}/capabilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Role Capabilities
+         * @description What a role can and cannot do, e.g. to explain it before adding someone to it.
+         *
+         *     The same for every course and term, so any logged-in user may ask.
+         */
+        get: operations["get_role_capabilities_v1_roles__role__capabilities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -340,6 +362,11 @@ export interface components {
             /** Addterm */
             addTerm: boolean;
         };
+        /**
+         * CourseCapabilityId
+         * @enum {string}
+         */
+        CourseCapabilityId: "viewCourse" | "viewMetadata" | "editMetadata" | "removeCourse" | "selectEnvironment" | "addTerm" | "courseOwners.view" | "courseOwners.add" | "courseOwners.remove";
         /** CourseCollectionCapabilities */
         CourseCollectionCapabilities: {
             /** Createcourse */
@@ -532,6 +559,11 @@ export interface components {
              */
             view: boolean;
         };
+        /**
+         * LmsCapabilityId
+         * @enum {string}
+         */
+        LmsCapabilityId: "createCourse" | "lmsAdmins.view" | "lmsAdmins.add" | "lmsAdmins.remove" | "courseCreators.view" | "courseCreators.add" | "courseCreators.remove" | "imageCatalog.view" | "imageCatalog.manage" | "resourceCatalog.view" | "resourceCatalog.manage" | "profileCatalog.view" | "profileCatalog.manage";
         /** MembershipCapabilities */
         MembershipCapabilities: {
             /**
@@ -639,6 +671,45 @@ export interface components {
             };
         };
         /**
+         * RoleCapabilitiesResponse
+         * @description Every capability and whether a role has it, grouped by the level each applies to.
+         *
+         *     Denied capabilities are included so a role can be explained by what it can
+         *     and cannot do. The order follows the definitions.
+         */
+        RoleCapabilitiesResponse: {
+            role: components["schemas"]["RoleName"];
+            /** Lms */
+            lms: components["schemas"]["RoleLmsCapability"][];
+            /** Course */
+            course: components["schemas"]["RoleCourseCapability"][];
+            /** Term */
+            term: components["schemas"]["RoleTermCapability"][];
+        };
+        /** RoleCourseCapability */
+        RoleCourseCapability: {
+            id: components["schemas"]["CourseCapabilityId"];
+            /** Granted */
+            granted: boolean;
+        };
+        /** RoleLmsCapability */
+        RoleLmsCapability: {
+            id: components["schemas"]["LmsCapabilityId"];
+            /** Granted */
+            granted: boolean;
+        };
+        /**
+         * RoleName
+         * @enum {string}
+         */
+        RoleName: "lms-admin" | "course-creator" | "course-owner" | "instructor" | "teaching-assistant" | "observer" | "student";
+        /** RoleTermCapability */
+        RoleTermCapability: {
+            id: components["schemas"]["TermCapabilityId"];
+            /** Granted */
+            granted: boolean;
+        };
+        /**
          * SpawnRole
          * @description Enumeration of spawn roles for the e2x course hub.
          *
@@ -667,6 +738,11 @@ export interface components {
             selectEnvironment: boolean;
             membership: components["schemas"]["TermMembershipCapabilities"];
         };
+        /**
+         * TermCapabilityId
+         * @enum {string}
+         */
+        TermCapabilityId: "viewTerm" | "removeTerm" | "selectEnvironment" | "membership.instructors.view" | "membership.instructors.add" | "membership.instructors.remove" | "membership.teachingAssistants.view" | "membership.teachingAssistants.add" | "membership.teachingAssistants.remove" | "membership.students.view" | "membership.students.add" | "membership.students.remove" | "membership.observers.view" | "membership.observers.add" | "membership.observers.remove" | "spawnStudentEnvironment" | "spawnGraderEnvironment" | "spawnReadonlyGraderEnvironment";
         /**
          * TermConfig
          * @description Configuration for a specific term.
@@ -1688,6 +1764,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+        };
+    };
+    get_role_capabilities_v1_roles__role__capabilities_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                role: components["schemas"]["RoleName"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleCapabilitiesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
