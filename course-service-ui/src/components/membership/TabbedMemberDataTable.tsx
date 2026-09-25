@@ -2,8 +2,10 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@components/ui/Button";
 import { Card } from "@components/ui/Card";
+import { Tabs } from "@components/ui/Tabs";
 import { MemberDataTable } from "./MemberDataTable";
 import { RoleInfoLink } from "@components/actions/RoleInfoLink";
+import type { RoleContext } from "@components/actions/RoleActionsModal";
 import type { MembershipRole } from "@domain/roles";
 import type { CurrentUser } from "@api/types";
 
@@ -31,11 +33,14 @@ export interface MemberTabConfig {
 export interface TabbedMemberDataTableProps {
   tabs: MemberTabConfig[];
   currentUser: CurrentUser;
+  /** The course and semester of the lists, named in the explanation of a role. */
+  roleContext?: RoleContext;
 }
 
 export function TabbedMemberDataTable({
   tabs,
   currentUser,
+  roleContext,
 }: TabbedMemberDataTableProps) {
   const [activeTabId, setActiveTabId] = useState<string>(tabs[0]?.id ?? "");
 
@@ -48,37 +53,23 @@ export function TabbedMemberDataTable({
 
   return (
     <Card className="mb-0">
-      {/* Tab bar */}
-      <div className="border-b border-gray-200">
-        <div className="flex flex-wrap gap-1">
-          {tabs.map((tab) => {
-            const isActive = tab.id === activeTab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTabId(tab.id)}
-                className={`inline-flex items-center gap-2 rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
-                  isActive
-                    ? "border-hbrs-dark-blue text-hbrs-dark-blue"
-                    : "border-transparent text-gray-500 hover:text-gray-800"
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
-                  {tab.usernames.length}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <Tabs
+        tabs={tabs.map((tab) => ({
+          id: tab.id,
+          label: tab.label,
+          badge: tab.usernames.length,
+        }))}
+        activeId={activeTab.id}
+        onChange={setActiveTabId}
+      />
 
       {/* Tab header: title + add button */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-4">
           <h3 className="text-base font-semibold">{activeTab.label}</h3>
-          {activeTab.role && <RoleInfoLink role={activeTab.role} />}
+          {activeTab.role && (
+            <RoleInfoLink role={activeTab.role} context={roleContext} />
+          )}
         </div>
         {activeTab.canAdd && (
           <Button

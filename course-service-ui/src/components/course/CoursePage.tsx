@@ -55,7 +55,7 @@ export function CoursePage() {
           <YourAccessButton
             actions={actions}
             texts={courseActionText}
-            scope="in this course"
+            scope={`in course ${courseId}`}
           />
         )}
       </header>

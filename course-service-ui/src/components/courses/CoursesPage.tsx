@@ -41,7 +41,7 @@ export function CoursesPage() {
           <YourAccessButton
             actions={actions}
             texts={lmsActionText}
-            scope="across the LMS"
+            scope="across the whole LMS"
           />
         )}
       </header>

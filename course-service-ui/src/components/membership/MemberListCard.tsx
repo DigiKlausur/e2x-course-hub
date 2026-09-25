@@ -6,6 +6,7 @@ import { Button } from "@components/ui/Button";
 import { Alert } from "@components/ui/Alert";
 import { AddMembersDialog } from "@components/membership/AddMembersDialog";
 import { RoleInfoLink } from "@components/actions/RoleInfoLink";
+import type { RoleContext } from "@components/actions/RoleActionsModal";
 import { MemberDataTableWithCurrentUser } from "@components/membership/MemberDataTableWithCurrentUser";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { memberListActionText } from "@domain/actions";
@@ -20,6 +21,8 @@ interface Props {
   update: UseMutationResult<void, Error, MembershipPatch>;
   /** Shown instead of the card when `actions.list` is false. */
   notAllowedMessage: string;
+  /** The course the list belongs to, named in the explanation of the role. */
+  roleContext?: RoleContext;
 }
 
 /**
@@ -35,6 +38,7 @@ export function MemberListCard({
   isLoading,
   update,
   notAllowedMessage,
+  roleContext,
 }: Props) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const selection = useSelection();
@@ -52,6 +56,7 @@ export function MemberListCard({
         open={addDialogOpen}
         roleLabel={labels.singular}
         role={role}
+        roleContext={roleContext}
         onCancel={() => setAddDialogOpen(false)}
         onConfirm={(names) => {
           update.mutate({ add: names });
@@ -70,7 +75,7 @@ export function MemberListCard({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-4">
             <CardTitle>{labels.plural}</CardTitle>
-            <RoleInfoLink role={role} />
+            <RoleInfoLink role={role} context={roleContext} />
           </div>
           {actions.add && (
             <Button

@@ -28,6 +28,7 @@ export function CourseOwnersTab({ courseId }: Props) {
       isLoading={isLoading}
       update={update}
       notAllowedMessage="You are not allowed to view the owners of this course."
+      roleContext={{ courseId }}
     />
   );
 }

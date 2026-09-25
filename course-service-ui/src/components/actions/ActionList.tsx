@@ -35,7 +35,11 @@ function ActionItem({ text, granted }: { text: ActionText; granted: boolean }) {
         >
           {text.label}
         </div>
-        <div className="text-xs text-gray-500">{text.description}</div>
+        <div
+          className={`text-xs ${granted ? "text-gray-600" : "text-gray-400"}`}
+        >
+          {text.description}
+        </div>
       </div>
     </li>
   );

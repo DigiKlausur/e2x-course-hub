@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Info } from "lucide-react";
 import { type MembershipRole, memberLabels } from "@domain/roles";
-import { RoleActionsModal } from "./RoleActionsModal";
+import { RoleActionsModal, type RoleContext } from "./RoleActionsModal";
 
 interface Props {
   role: MembershipRole;
+  /** The course and semester the link is shown in, named in the explanation. */
+  context?: RoleContext;
 }
 
 /** "What can Teaching Assistants do?", opening the explanation of the role. */
-export function RoleInfoLink({ role }: Props) {
+export function RoleInfoLink({ role, context }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -25,6 +27,7 @@ export function RoleInfoLink({ role }: Props) {
         role={role}
         open={open}
         onClose={() => setOpen(false)}
+        context={context}
       />
     </>
   );

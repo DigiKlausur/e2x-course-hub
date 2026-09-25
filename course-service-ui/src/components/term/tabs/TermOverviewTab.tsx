@@ -200,6 +200,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
           open={addDialogFor !== null}
           roleLabel={activeRole?.labels.plural ?? "Unknown"}
           role={activeRole?.role}
+          roleContext={{ courseId, termId }}
           onCancel={() => setAddDialogFor(null)}
           onConfirm={handleDialogConfirm}
         />
@@ -215,7 +216,10 @@ export function TermOverviewTab({ courseId, termId }: Props) {
             You are not allowed to view the members of this semester.
           </p>
         ) : (
-          <TabbedMemberDataTableWithCurrentUser tabs={memberTabs} />
+          <TabbedMemberDataTableWithCurrentUser
+            tabs={memberTabs}
+            roleContext={{ courseId, termId }}
+          />
         )}
       </div>
 

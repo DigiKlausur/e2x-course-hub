@@ -56,7 +56,7 @@ export function TermPage() {
           <YourAccessButton
             actions={actions}
             texts={termActionText}
-            scope="in this semester"
+            scope={`in semester ${termId} of course ${courseId}`}
           />
         )}
       </header>

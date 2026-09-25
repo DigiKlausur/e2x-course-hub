@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@components/ui/Button";
 import { Modal } from "@components/ui/Modal";
 import { RoleInfoLink } from "@components/actions/RoleInfoLink";
+import type { RoleContext } from "@components/actions/RoleActionsModal";
 import type { MembershipRole } from "@domain/roles";
 
 interface AddMembersDialogProps {
@@ -9,6 +10,8 @@ interface AddMembersDialogProps {
   roleLabel: string;
   /** Offers to explain what the role can do before anyone is added to it. */
   role?: MembershipRole;
+  /** Where the members are added, named in the explanation of the role. */
+  roleContext?: RoleContext;
   onCancel: () => void;
   onConfirm: (usernames: string[]) => void;
 }
@@ -27,6 +30,7 @@ export function AddMembersDialog({
   open,
   roleLabel,
   role,
+  roleContext,
   onCancel,
   onConfirm,
 }: AddMembersDialogProps) {
@@ -81,7 +85,7 @@ export function AddMembersDialog({
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       {role && (
         <div className="mt-3">
-          <RoleInfoLink role={role} />
+          <RoleInfoLink role={role} context={roleContext} />
         </div>
       )}
     </Modal>
