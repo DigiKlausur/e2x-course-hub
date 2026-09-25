@@ -33,7 +33,7 @@ PERMISSION_TO_SPAWN: dict[SpawnPermission, tuple[SpawnRole, bool]] = {
 
 SPAWN_ROLE_PERMISSIONS: RolePermissions = {
     Role.LMS_ADMIN: frozenset(SpawnPermissionSets.SPAWN_ALL),
-    Role.COURSE_CREATOR: frozenset([SpawnPermission.SPAWN_GRADER_READONLY_PROFILE]),
+    Role.COURSE_CREATOR: frozenset([]),
     Role.COURSE_OWNER: frozenset(
         frozenset(
             [
