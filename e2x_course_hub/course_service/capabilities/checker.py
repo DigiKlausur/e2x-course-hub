@@ -1,8 +1,7 @@
-from e2x_hub_rbac.auth import PermissionChecker, Role, Scope, UserLike
+from e2x_hub_rbac.auth import PermissionChecker, Role, UserLike
 
 from ...api.role_permissions import ROLE_PERMISSIONS
 from ..membership.schemas import MembershipCapabilities
-from .definitions import CAPABILITIES_BY_SCOPE
 from .model import Capability, MembershipCapabilityGroup
 
 
@@ -50,11 +49,3 @@ def role_has(role: Role, capability: Capability) -> bool:
     own level, so no course or term is needed.
     """
     return capability.permissions <= ROLE_PERMISSIONS[role]
-
-
-def role_capabilities(role: Role) -> dict[Scope, list[Capability]]:
-    """The capabilities a role has, grouped by the level they apply to."""
-    return {
-        scope: [capability for capability in capabilities if role_has(role, capability)]
-        for scope, capabilities in CAPABILITIES_BY_SCOPE.items()
-    }

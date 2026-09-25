@@ -27,10 +27,32 @@ else:
     TermCapabilityId = _capability_ids("TermCapabilityId", Scope.TERM)
 
 
+# One model per level so each id is typed with its level's enum. Objects rather
+# than a dict of id to bool, because a dict loses the key type in the generated
+# frontend types.
+class RoleLmsCapability(BaseModel):
+    id: LmsCapabilityId
+    granted: bool
+
+
+class RoleCourseCapability(BaseModel):
+    id: CourseCapabilityId
+    granted: bool
+
+
+class RoleTermCapability(BaseModel):
+    id: TermCapabilityId
+    granted: bool
+
+
 class RoleCapabilitiesResponse(BaseModel):
-    """What a role may do, grouped by the level each capability applies to."""
+    """Every capability and whether a role has it, grouped by the level each applies to.
+
+    Denied capabilities are included so a role can be explained by what it can
+    and cannot do. The order follows the definitions.
+    """
 
     role: RoleName
-    lms: list[LmsCapabilityId]
-    course: list[CourseCapabilityId]
-    term: list[TermCapabilityId]
+    lms: list[RoleLmsCapability]
+    course: list[RoleCourseCapability]
+    term: list[RoleTermCapability]

@@ -1,4 +1,4 @@
-from .checker import CapabilityChecker, role_capabilities, role_has
+from .checker import CapabilityChecker, role_has
 from .definitions import ALL_CAPABILITIES, CAPABILITIES_BY_SCOPE, COURSE, LMS, TERM
 from .model import Capability, MembershipCapabilityGroup
 
@@ -11,6 +11,5 @@ __all__ = [
     "Capability",
     "CapabilityChecker",
     "MembershipCapabilityGroup",
-    "role_capabilities",
     "role_has",
 ]
