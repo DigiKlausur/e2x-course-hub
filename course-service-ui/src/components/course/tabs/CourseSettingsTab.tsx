@@ -10,7 +10,7 @@ import {
   useUpdateCourseMetadata,
 } from "@hooks/course";
 import { getErrorMessage } from "@/lib/errorMessage";
-import { courseCapabilityText } from "@domain/capabilities";
+import { courseActionText } from "@domain/actions";
 
 interface Props {
   courseId: string;
@@ -33,8 +33,8 @@ export function CourseSettingsTab({ courseId }: Props) {
   const currentName = name ?? metadata?.course_name ?? "";
   const currentDescription = description ?? metadata?.description ?? "";
 
-  const canEditMetadata = course?.capabilities.editMetadata ?? false;
-  const canRemoveCourse = course?.capabilities.removeCourse ?? false;
+  const canEditMetadata = course?.actions.metadata.edit ?? false;
+  const canRemoveCourse = course?.actions.remove ?? false;
 
   const handleSave = () => {
     updateMetadata.mutate(
@@ -71,7 +71,7 @@ export function CourseSettingsTab({ courseId }: Props) {
           <Card>
             <CardTitle>Course Settings</CardTitle>
             <p className="text-sm text-gray-500 mb-4">
-              {courseCapabilityText.editMetadata.description}
+              {courseActionText.metadata.edit.description}
             </p>
 
             {updateMetadata.error && (
@@ -129,7 +129,7 @@ export function CourseSettingsTab({ courseId }: Props) {
           <Card>
             <CardTitle>Danger Zone</CardTitle>
             <p className="text-sm text-gray-500 mb-4">
-              {courseCapabilityText.removeCourse.description}
+              {courseActionText.remove.description}
             </p>
 
             {deleteCourse.error && (
@@ -145,7 +145,7 @@ export function CourseSettingsTab({ courseId }: Props) {
             >
               {deleteCourse.isPending
                 ? "Deleting…"
-                : courseCapabilityText.removeCourse.label}
+                : courseActionText.remove.label}
             </Button>
 
             <ConfirmDialog

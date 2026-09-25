@@ -16,7 +16,7 @@ import {
   useUpdateCourseEnvironment,
 } from "@hooks/course";
 import { getErrorMessage } from "@/lib/errorMessage";
-import { courseCapabilityText } from "@domain/capabilities";
+import { courseActionText } from "@domain/actions";
 import type {
   ImageSelection,
   SpawnRole,
@@ -35,7 +35,7 @@ function buildSemesterColumns(
       id: "term_id",
       header: "Semester",
       cell: (term) =>
-        term.capabilities.viewTerm ? (
+        term.actions.view ? (
           <Link
             to={`/course/${courseId}/term/${term.term_id}`}
             className="font-semibold text-hbrs-dark-blue hover:text-hbrs-medium-blue hover:underline"
@@ -71,7 +71,7 @@ export function CourseOverviewTab({ courseId }: Props) {
 
   const terms = course.terms;
   const termIds = terms.map((term) => term.term_id);
-  const canAddTerm = course.capabilities.addTerm;
+  const canAddTerm = course.actions.terms.add;
   const semesterColumns = buildSemesterColumns(courseId);
 
   const handleCreate = async (termId: string) => {
@@ -124,9 +124,9 @@ export function CourseOverviewTab({ courseId }: Props) {
                 <Button
                   variant="primary"
                   onClick={() => setDialogOpen(true)}
-                  title={courseCapabilityText.addTerm.description}
+                  title={courseActionText.terms.add.description}
                 >
-                  + {courseCapabilityText.addTerm.label}
+                  + {courseActionText.terms.add.label}
                 </Button>
               )
             }
@@ -144,12 +144,12 @@ export function CourseOverviewTab({ courseId }: Props) {
 
         <RuntimeConfigEditor
           title="Current Semester Template"
-          description={courseCapabilityText.selectEnvironment.description}
+          description={courseActionText.environment.select.description}
           imageSelection={course.environment.image}
           resourcesSelection={course.environment.resources}
           imageCatalog={imageCatalog?.catalog}
           resourceCatalog={resourceCatalog?.catalog}
-          canEdit={course.capabilities.selectEnvironment}
+          canEdit={course.actions.environment.select}
           showTag={false}
           errorMessage={
             updateEnvironment.error

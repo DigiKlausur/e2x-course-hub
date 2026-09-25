@@ -20,10 +20,7 @@ import {
 import { useSelection } from "@hooks/ui";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { MembershipRole, memberLabels } from "@domain/roles";
-import {
-  membershipCapabilityText,
-  termCapabilityText,
-} from "@domain/capabilities";
+import { memberListActionText, termActionText } from "@domain/actions";
 import type { ImageSelection, SpawnRole } from "@api/types";
 
 type DialogTarget =
@@ -41,7 +38,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
   // Fetching a list without the matching permission answers 403, so the view
   // flags gate the requests rather than just hiding the results.
   const { data: term, isLoading: termLoading } = useTerm(courseId, termId);
-  const membership = term?.capabilities.membership;
+  const members = term?.actions.members;
 
   const { data: imageCatalog } = useImageCatalog();
   const { data: resourceCatalog } = useResourceCatalog();
@@ -50,23 +47,23 @@ export function TermOverviewTab({ courseId, termId }: Props) {
   const { data: students, isLoading: studentsLoading } = useStudents(
     courseId,
     termId,
-    membership?.students.view ?? false,
+    members?.students.list ?? false,
   );
   const { data: teachingAssistants, isLoading: teachingAssistantsLoading } =
     useTeachingAssistants(
       courseId,
       termId,
-      membership?.teachingAssistants.view ?? false,
+      members?.teachingAssistants.list ?? false,
     );
   const { data: instructors, isLoading: instructorsLoading } = useInstructors(
     courseId,
     termId,
-    membership?.instructors.view ?? false,
+    members?.instructors.list ?? false,
   );
   const { data: observers, isLoading: observersLoading } = useObservers(
     courseId,
     termId,
-    membership?.observers.view ?? false,
+    members?.observers.list ?? false,
   );
 
   const studentSelection = useSelection();
@@ -90,9 +87,9 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       isLoading: studentsLoading,
       selection: studentSelection,
       update: updateStudents,
-      canView: membership?.students.view ?? false,
-      canAdd: membership?.students.add ?? false,
-      canRemove: membership?.students.remove ?? false,
+      canView: members?.students.list ?? false,
+      canAdd: members?.students.add ?? false,
+      canRemove: members?.students.remove ?? false,
     },
     {
       id: "teaching-assistants" as const,
@@ -101,9 +98,9 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       isLoading: teachingAssistantsLoading,
       selection: teachingAssistantSelection,
       update: updateTeachingAssistants,
-      canView: membership?.teachingAssistants.view ?? false,
-      canAdd: membership?.teachingAssistants.add ?? false,
-      canRemove: membership?.teachingAssistants.remove ?? false,
+      canView: members?.teachingAssistants.list ?? false,
+      canAdd: members?.teachingAssistants.add ?? false,
+      canRemove: members?.teachingAssistants.remove ?? false,
     },
     {
       id: "instructors" as const,
@@ -112,9 +109,9 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       isLoading: instructorsLoading,
       selection: instructorSelection,
       update: updateInstructors,
-      canView: membership?.instructors.view ?? false,
-      canAdd: membership?.instructors.add ?? false,
-      canRemove: membership?.instructors.remove ?? false,
+      canView: members?.instructors.list ?? false,
+      canAdd: members?.instructors.add ?? false,
+      canRemove: members?.instructors.remove ?? false,
     },
     {
       id: "observers" as const,
@@ -123,9 +120,9 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       isLoading: observersLoading,
       selection: observerSelection,
       update: updateObservers,
-      canView: membership?.observers.view ?? false,
-      canAdd: membership?.observers.add ?? false,
-      canRemove: membership?.observers.remove ?? false,
+      canView: members?.observers.list ?? false,
+      canAdd: members?.observers.add ?? false,
+      canRemove: members?.observers.remove ?? false,
     },
   ].filter((role) => role.canView);
 
@@ -171,8 +168,8 @@ export function TermOverviewTab({ courseId, termId }: Props) {
         );
       },
       canAdd,
-      addLabel: membershipCapabilityText.add(labels).label,
-      addDescription: membershipCapabilityText.add(labels).description,
+      addLabel: memberListActionText.add(labels).label,
+      addDescription: memberListActionText.add(labels).description,
       onAddClick: () => setAddDialogFor(id),
       canRemove,
       removeLabel: labels.singular,
@@ -224,12 +221,12 @@ export function TermOverviewTab({ courseId, termId }: Props) {
 
         <RuntimeConfigEditor
           title="Term Runtime"
-          description={termCapabilityText.selectEnvironment.description}
+          description={termActionText.environment.select.description}
           imageSelection={term?.environment.image}
           resourcesSelection={term?.environment.resources}
           imageCatalog={imageCatalog?.catalog}
           resourceCatalog={resourceCatalog?.catalog}
-          canEdit={term?.capabilities.selectEnvironment ?? false}
+          canEdit={term?.actions.environment.select ?? false}
           errorMessage={
             updateEnvironment.error
               ? getErrorMessage(updateEnvironment.error)

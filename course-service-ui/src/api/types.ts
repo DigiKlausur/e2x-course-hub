@@ -57,9 +57,8 @@ export type EnvironmentUpdate = Omit<
 // ── Courses ──────────────────────────────────────────────────────────
 export type CourseMetadata = Schemas["CourseMetadata"];
 export type CourseMetadataUpdate = Schemas["CourseMetadataUpdate"];
-export type CourseCapabilities = Schemas["CourseCapabilities"];
-export type CourseCollectionCapabilities =
-  Schemas["CourseCollectionCapabilities"];
+export type CourseActions = Schemas["CourseActions"];
+export type LmsActions = Schemas["LmsActions"];
 
 export type CourseConfig = Omit<
   Schemas["CourseConfig"],
@@ -89,9 +88,7 @@ export type TermConfig = Omit<
   spawn_role_selections: SpawnRoleMap<SpawnRoleSelection>;
 };
 
-export type TermSummaryCapabilities = Schemas["TermSummaryCapabilities"];
-export type TermMembershipCapabilities = Schemas["TermMembershipCapabilities"];
-export type TermCapabilities = Schemas["TermCapabilities"];
+export type TermActions = Schemas["TermActions"];
 export type TermSummaryResponse = Schemas["TermSummaryResponse"];
 
 export type TermDetailResponse = Omit<
@@ -106,7 +103,7 @@ export type CreateTermRequest = Omit<Schemas["CreateTermRequest"], "term"> & {
 };
 
 // ── Membership ───────────────────────────────────────────────────────
-export type MembershipCapabilities = Schemas["MembershipCapabilities"];
+export type MemberListActions = Schemas["MemberListActions"];
 export type MembershipCollectionResponse =
   Schemas["MembershipCollectionResponse"];
 export type MembershipPatch = Schemas["MembershipPatch"];
@@ -124,7 +121,7 @@ export type ResourceTiers = Schemas["ResourceTierOptions"];
 export type ResourceCatalog = SpawnRoleMap<ResourceTiers>;
 export type ProfileCatalog = SpawnRoleMap<ProfileDetails>;
 
-export type InfrastructureCapabilities = Schemas["InfrastructureCapabilities"];
+export type CatalogActions = Schemas["CatalogActions"];
 
 export type ImageCatalogResponse = Schemas["ImageCatalogResponse"];
 

@@ -7,7 +7,7 @@ import { LMSAdminsTab } from "./tabs/LMSAdminsTab";
 import { CourseCreatorsTab } from "./tabs/CourseCreatorsTab";
 
 export function CoursesPage() {
-  const { data: { capabilities } = {} } = useCourses();
+  const { data: { actions } = {} } = useCourses();
 
   // Only offer a tab the user can actually use. As on the course page, the
   // routes below stay mounted so a bookmarked URL still resolves, and each tab
@@ -17,12 +17,12 @@ export function CoursesPage() {
     {
       label: memberLabels[MembershipRole.Admin].plural,
       to: "/lms-admins",
-      show: capabilities?.lmsAdmins.view ?? false,
+      show: actions?.members.lmsAdmins.list ?? false,
     },
     {
       label: memberLabels[MembershipRole.CourseCreator].plural,
       to: "/course-creators",
-      show: capabilities?.courseCreators.view ?? false,
+      show: actions?.members.courseCreators.list ?? false,
     },
   ].filter((tab) => tab.show);
 

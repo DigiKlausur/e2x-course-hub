@@ -13,7 +13,7 @@ import { DataTable } from "@components/ui/DataTable";
 import type { DataTableColumn } from "@components/ui/DataTable";
 import { CreateCourseDialog } from "@components/dialogs/CreateCourseDialog";
 import { getErrorMessage } from "@/lib/errorMessage";
-import { courseCollectionCapabilityText } from "@domain/capabilities";
+import { lmsActionText } from "@domain/actions";
 import type { CourseSummaryResponse } from "@/api/types";
 
 const PAGE_SIZE_KEY = "course-table-page-size";
@@ -60,18 +60,14 @@ function matchesQuery(course: CourseSummaryResponse, query: string): boolean {
 
 export function CourseListTab() {
   const navigate = useNavigate();
-  const {
-    data: { courses, capabilities } = {},
-    isLoading,
-    error,
-  } = useCourses();
+  const { data: { courses, actions } = {}, isLoading, error } = useCourses();
   const createCourse = useCreateCourse();
   const imageCatalog = useImageCatalog();
   const resourceCatalog = useResourceCatalog();
   const profileCatalog = useProfileCatalog();
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const canCreateCourse = capabilities?.createCourse ?? false;
+  const canCreateCourse = actions?.courses.create ?? false;
 
   const handleCreate = async (data: {
     courseId: string;
@@ -117,10 +113,10 @@ export function CourseListTab() {
               <Button
                 variant="primary"
                 onClick={() => setDialogOpen(true)}
-                title={courseCollectionCapabilityText.createCourse.description}
+                title={lmsActionText.courses.create.description}
                 className="px-3 py-2 text-xs"
               >
-                + {courseCollectionCapabilityText.createCourse.label}
+                + {lmsActionText.courses.create.label}
               </Button>
             </div>
           )}

@@ -12,7 +12,7 @@ export function TermPage() {
 
   const { data: courseMetadata } = useCourseMetadata(courseId!);
   const { data: term } = useTerm(courseId!, termId!);
-  const capabilities = term?.capabilities;
+  const actions = term?.actions;
 
   const base = `/course/${courseId}/term/${termId}`;
   // Same rule as CoursePage: only offer a tab the user can use.
@@ -21,7 +21,7 @@ export function TermPage() {
     {
       label: "Settings",
       to: `${base}/settings`,
-      show: capabilities?.removeTerm ?? false,
+      show: actions?.remove ?? false,
     },
   ].filter((tab) => tab.show);
 

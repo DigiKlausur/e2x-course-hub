@@ -4,7 +4,7 @@ import { ConfirmDialog } from "@components/ui/ConfirmDialog";
 import { DataTable } from "@components/ui/DataTable";
 import type { DataTableColumn } from "@components/ui/DataTable";
 import type { CurrentUser } from "@/api/types";
-import { membershipCapabilityText } from "@domain/capabilities";
+import { memberListActionText } from "@domain/actions";
 
 const PAGE_SIZE_KEY = "member-table-page-size";
 
@@ -79,7 +79,7 @@ export function MemberDataTable({
   isMutating,
 }: MemberDataTableProps) {
   const [removeDialog, setRemoveDialog] = useState<RemoveDialog>(null);
-  const removeText = membershipCapabilityText.remove({
+  const removeText = memberListActionText.remove({
     singular: removeLabel,
     plural: `${removeLabel}s`,
   });

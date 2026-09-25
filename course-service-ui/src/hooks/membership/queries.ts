@@ -6,8 +6,8 @@ import { MembershipRole } from "@domain/roles";
 
 /**
  * Permission guarded like the course and term lists below, so callers pass
- * `enabled` from the course collection's `capabilities.lmsAdmins.view` /
- * `capabilities.courseCreators.view`.
+ * `enabled` from the course collection's `actions.members.lmsAdmins.list` /
+ * `actions.members.courseCreators.list`.
  */
 export function useLMSAdmins(enabled = true) {
   return useQuery<MembershipCollectionResponse>({
@@ -30,7 +30,7 @@ export function useCourseCreators(enabled = true) {
 /**
  * Like the term membership endpoints below, this is permission guarded and
  * answers 403 rather than an empty list, so callers pass `enabled` from the
- * course's `capabilities.courseOwners.view`.
+ * course's `actions.members.courseOwners.list`.
  */
 export function useCourseOwners(courseId: string, enabled = true) {
   return useQuery<MembershipCollectionResponse>({
@@ -47,7 +47,7 @@ export function useCourseOwners(courseId: string, enabled = true) {
 /**
  * The term membership endpoints are permission guarded and answer 403 rather
  * than an empty list when the caller may not see a role. Callers therefore pass
- * `enabled` from the term's `capabilities.membership` flags, so a request is
+ * `enabled` from the term's `actions.members` flags, so a request is
  * only made when it can succeed.
  */
 export function useInstructors(

@@ -7,7 +7,7 @@ import { Alert } from "@components/ui/Alert";
 import { ConfirmDialog } from "@components/ui/ConfirmDialog";
 import { useDeleteTerm, useTerm } from "@hooks/course";
 import { getErrorMessage } from "@/lib/errorMessage";
-import { termCapabilityText } from "@domain/capabilities";
+import { termActionText } from "@domain/actions";
 
 interface Props {
   courseId: string;
@@ -21,7 +21,7 @@ export function TermSettingsTab({ courseId, termId }: Props) {
   const { data: term, isLoading } = useTerm(courseId, termId);
   const deleteTerm = useDeleteTerm(courseId, termId);
 
-  const canRemoveTerm = term?.capabilities.removeTerm ?? false;
+  const canRemoveTerm = term?.actions.remove ?? false;
 
   // Term ids repeat across courses, so the course id has to be part of the
   // confirmation for it to name one specific term.
@@ -47,7 +47,7 @@ export function TermSettingsTab({ courseId, termId }: Props) {
           <Card>
             <CardTitle>Danger Zone</CardTitle>
             <p className="text-sm text-gray-500 mb-4">
-              {termCapabilityText.removeTerm.description}
+              {termActionText.remove.description}
             </p>
 
             {deleteTerm.error && (
@@ -64,7 +64,7 @@ export function TermSettingsTab({ courseId, termId }: Props) {
               >
                 {deleteTerm.isPending
                   ? "Deleting…"
-                  : termCapabilityText.removeTerm.label}
+                  : termActionText.remove.label}
               </Button>
             </div>
 

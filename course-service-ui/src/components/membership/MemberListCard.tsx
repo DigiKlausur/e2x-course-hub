@@ -7,17 +7,17 @@ import { Alert } from "@components/ui/Alert";
 import { AddMembersDialog } from "@components/membership/AddMembersDialog";
 import { MemberDataTableWithCurrentUser } from "@components/membership/MemberDataTableWithCurrentUser";
 import { getErrorMessage } from "@/lib/errorMessage";
-import { membershipCapabilityText } from "@domain/capabilities";
+import { memberListActionText } from "@domain/actions";
 import type { MemberLabels } from "@domain/roles";
-import type { MembershipCapabilities, MembershipPatch } from "@api/types";
+import type { MemberListActions, MembershipPatch } from "@api/types";
 
 interface Props {
   labels: MemberLabels;
-  capabilities: MembershipCapabilities;
+  actions: MemberListActions;
   usernames: string[];
   isLoading: boolean;
   update: UseMutationResult<void, Error, MembershipPatch>;
-  /** Shown instead of the card when `capabilities.view` is false. */
+  /** Shown instead of the card when `actions.list` is false. */
   notAllowedMessage: string;
 }
 
@@ -29,7 +29,7 @@ interface Props {
  */
 export function MemberListCard({
   labels,
-  capabilities,
+  actions,
   usernames,
   isLoading,
   update,
@@ -38,9 +38,9 @@ export function MemberListCard({
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const selection = useSelection();
 
-  const addText = membershipCapabilityText.add(labels);
+  const addText = memberListActionText.add(labels);
 
-  if (!capabilities.view) {
+  if (!actions.list) {
     return <p className="text-gray-500">{notAllowedMessage}</p>;
   }
 
@@ -66,7 +66,7 @@ export function MemberListCard({
         )}
         <div className="flex items-center justify-between mb-4">
           <CardTitle>{labels.plural}</CardTitle>
-          {capabilities.add && (
+          {actions.add && (
             <Button
               variant="primary"
               onClick={() => setAddDialogOpen(true)}
@@ -97,7 +97,7 @@ export function MemberListCard({
               { onSuccess: selection.clear },
             );
           }}
-          canRemove={capabilities.remove}
+          canRemove={actions.remove}
           removeLabel={labels.singular}
           isMutating={update.isPending}
         />

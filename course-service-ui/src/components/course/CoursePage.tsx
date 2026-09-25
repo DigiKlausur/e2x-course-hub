@@ -11,7 +11,7 @@ export function CoursePage() {
 
   const { data: course, isLoading } = useCourse(courseId!);
   const metadata = course?.metadata;
-  const capabilities = course?.capabilities;
+  const actions = course?.actions;
 
   const base = `/course/${courseId}`;
   // Only offer a tab the user can actually use. The routes below stay mounted
@@ -22,12 +22,12 @@ export function CoursePage() {
     {
       label: memberLabels[MembershipRole.CourseOwner].plural,
       to: `${base}/owners`,
-      show: capabilities?.courseOwners.view ?? false,
+      show: actions?.members.courseOwners.list ?? false,
     },
     {
       label: "Settings",
       to: `${base}/settings`,
-      show: (capabilities?.editMetadata || capabilities?.removeCourse) ?? false,
+      show: (actions?.metadata.edit || actions?.remove) ?? false,
     },
   ].filter((tab) => tab.show);
 
