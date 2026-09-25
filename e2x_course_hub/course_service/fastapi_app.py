@@ -23,6 +23,7 @@ from .exception_handlers import api_error_handler
 from .infrastructure.router import router as infrastructure_router
 from .me.router import router as me_router
 from .membership.router import router as membership_router
+from .roles.router import router as roles_router
 from .settings import ServiceSettings
 from .terms.router import router as terms_router
 
@@ -68,6 +69,7 @@ app.include_router(terms_router, prefix=service_prefix)
 app.include_router(infrastructure_router, prefix=service_prefix)
 app.include_router(membership_router, prefix=service_prefix)
 app.include_router(me_router, prefix=service_prefix)
+app.include_router(roles_router, prefix=service_prefix)
 
 # ── Static files ─────────────────────────────────────────────────────
 app.mount(
