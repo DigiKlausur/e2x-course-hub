@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
+import { useBodyScrollLock } from "@hooks/ui";
 
 interface ModalProps {
   open: boolean;
@@ -24,6 +25,8 @@ export function Modal({
   footer,
   fixedHeight = false,
 }: ModalProps) {
+  useBodyScrollLock(open);
+
   if (!open) return null;
 
   return (
@@ -52,7 +55,7 @@ export function Modal({
         </div>
 
         <div
-          className={`px-6 py-5 overflow-y-auto ${fixedHeight ? "h-[60vh]" : "max-h-[60vh]"}`}
+          className={`px-6 py-5 overflow-y-auto overscroll-contain ${fixedHeight ? "h-[60vh]" : "max-h-[60vh]"}`}
         >
           {children}
         </div>

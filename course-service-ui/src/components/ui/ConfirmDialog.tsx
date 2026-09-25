@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { useBodyScrollLock } from "@hooks/ui";
 import { Button } from "./Button";
 
 export interface ConfirmDialogProps {
@@ -29,6 +30,7 @@ export function ConfirmDialog({
   isConfirming = false,
 }: ConfirmDialogProps) {
   const [inputValue, setInputValue] = useState("");
+  useBodyScrollLock(open);
 
   if (!open) return null;
 
