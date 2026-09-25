@@ -104,6 +104,10 @@ export type CreateTermRequest = Omit<Schemas["CreateTermRequest"], "term"> & {
 
 // ── Membership ───────────────────────────────────────────────────────
 export type MemberListActions = Schemas["MemberListActions"];
+
+// ── Roles ────────────────────────────────────────────────────────────
+export type RoleName = Schemas["RoleName"];
+export type RoleActionsResponse = Schemas["RoleActionsResponse"];
 export type MembershipCollectionResponse =
   Schemas["MembershipCollectionResponse"];
 export type MembershipPatch = Schemas["MembershipPatch"];

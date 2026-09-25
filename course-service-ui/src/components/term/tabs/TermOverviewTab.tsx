@@ -82,6 +82,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
   const roles = [
     {
       id: "students" as const,
+      role: MembershipRole.Student,
       labels: memberLabels[MembershipRole.Student],
       data: students?.usernames,
       isLoading: studentsLoading,
@@ -93,6 +94,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
     },
     {
       id: "teaching-assistants" as const,
+      role: MembershipRole.TeachingAssistant,
       labels: memberLabels[MembershipRole.TeachingAssistant],
       data: teachingAssistants?.usernames,
       isLoading: teachingAssistantsLoading,
@@ -104,6 +106,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
     },
     {
       id: "instructors" as const,
+      role: MembershipRole.Instructor,
       labels: memberLabels[MembershipRole.Instructor],
       data: instructors?.usernames,
       isLoading: instructorsLoading,
@@ -115,6 +118,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
     },
     {
       id: "observers" as const,
+      role: MembershipRole.Observer,
       labels: memberLabels[MembershipRole.Observer],
       data: observers?.usernames,
       isLoading: observersLoading,
@@ -139,6 +143,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
   const memberTabs = roles.map(
     ({
       id,
+      role,
       labels,
       data,
       isLoading,
@@ -148,6 +153,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
       canRemove,
     }) => ({
       id,
+      role,
       label: labels.plural,
       usernames: data ?? [],
       isLoading,
@@ -193,6 +199,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
         <AddMembersDialog
           open={addDialogFor !== null}
           roleLabel={activeRole?.labels.plural ?? "Unknown"}
+          role={activeRole?.role}
           onCancel={() => setAddDialogFor(null)}
           onConfirm={handleDialogConfirm}
         />
@@ -205,7 +212,7 @@ export function TermOverviewTab({ courseId, termId }: Props) {
 
         {roles.length === 0 ? (
           <p className="text-gray-500">
-            You are not allowed to view the members of this term.
+            You are not allowed to view the members of this semester.
           </p>
         ) : (
           <TabbedMemberDataTableWithCurrentUser tabs={memberTabs} />
@@ -216,11 +223,11 @@ export function TermOverviewTab({ courseId, termId }: Props) {
         <Card>
           <CardTitle>General Information</CardTitle>
           <Row label="Course">{courseId}</Row>
-          <Row label="Term">{termId}</Row>
+          <Row label="Semester">{termId}</Row>
         </Card>
 
         <RuntimeConfigEditor
-          title="Term Runtime"
+          title="Semester Runtime"
           description={termActionText.environment.select.description}
           imageSelection={term?.environment.image}
           resourcesSelection={term?.environment.resources}

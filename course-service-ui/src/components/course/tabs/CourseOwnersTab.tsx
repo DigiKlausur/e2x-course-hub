@@ -1,7 +1,7 @@
 import { MemberListCard } from "@components/membership/MemberListCard";
 import { useCourseOwners, useUpdateCourseOwners } from "@hooks/membership";
 import { useCourse } from "@hooks/course";
-import { MembershipRole, memberLabels } from "@domain/roles";
+import { MembershipRole } from "@domain/roles";
 
 const NO_ACTIONS = { list: false, add: false, remove: false };
 
@@ -22,7 +22,7 @@ export function CourseOwnersTab({ courseId }: Props) {
 
   return (
     <MemberListCard
-      labels={memberLabels[MembershipRole.CourseOwner]}
+      role={MembershipRole.CourseOwner}
       actions={actions}
       usernames={data?.usernames ?? []}
       isLoading={isLoading}

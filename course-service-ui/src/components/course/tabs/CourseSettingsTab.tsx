@@ -152,7 +152,7 @@ export function CourseSettingsTab({ courseId }: Props) {
               open={deleteDialogOpen}
               onClose={() => setDeleteDialogOpen(false)}
               title="Delete course"
-              message={`This permanently deletes ${courseId} and all of its terms, including their memberships. This cannot be undone.`}
+              message={`This permanently deletes ${courseId} and all of its semesters, including their memberships. This cannot be undone.`}
               confirmText="Delete Course"
               variant="destructive"
               // Course ids are unique hub-wide, so the id alone identifies

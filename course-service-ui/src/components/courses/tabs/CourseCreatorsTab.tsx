@@ -1,7 +1,7 @@
 import { MemberListCard } from "@components/membership/MemberListCard";
 import { useCourseCreators, useUpdateCourseCreators } from "@hooks/membership";
 import { useCourses } from "@hooks/course";
-import { MembershipRole, memberLabels } from "@domain/roles";
+import { MembershipRole } from "@domain/roles";
 
 const NO_ACTIONS = { list: false, add: false, remove: false };
 
@@ -18,7 +18,7 @@ export function CourseCreatorsTab() {
 
   return (
     <MemberListCard
-      labels={memberLabels[MembershipRole.CourseCreator]}
+      role={MembershipRole.CourseCreator}
       actions={actions}
       usernames={data?.usernames ?? []}
       isLoading={isLoading}

@@ -5,14 +5,15 @@ import { Card, CardTitle } from "@components/ui/Card";
 import { Button } from "@components/ui/Button";
 import { Alert } from "@components/ui/Alert";
 import { AddMembersDialog } from "@components/membership/AddMembersDialog";
+import { RoleInfoLink } from "@components/actions/RoleInfoLink";
 import { MemberDataTableWithCurrentUser } from "@components/membership/MemberDataTableWithCurrentUser";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { memberListActionText } from "@domain/actions";
-import type { MemberLabels } from "@domain/roles";
+import { type MembershipRole, memberLabels } from "@domain/roles";
 import type { MemberListActions, MembershipPatch } from "@api/types";
 
 interface Props {
-  labels: MemberLabels;
+  role: MembershipRole;
   actions: MemberListActions;
   usernames: string[];
   isLoading: boolean;
@@ -28,7 +29,7 @@ interface Props {
  * is used and whether the list is fetched at all.
  */
 export function MemberListCard({
-  labels,
+  role,
   actions,
   usernames,
   isLoading,
@@ -37,6 +38,7 @@ export function MemberListCard({
 }: Props) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const selection = useSelection();
+  const labels = memberLabels[role];
 
   const addText = memberListActionText.add(labels);
 
@@ -49,6 +51,7 @@ export function MemberListCard({
       <AddMembersDialog
         open={addDialogOpen}
         roleLabel={labels.singular}
+        role={role}
         onCancel={() => setAddDialogOpen(false)}
         onConfirm={(names) => {
           update.mutate({ add: names });
@@ -65,7 +68,10 @@ export function MemberListCard({
           </Alert>
         )}
         <div className="flex items-center justify-between mb-4">
-          <CardTitle>{labels.plural}</CardTitle>
+          <div className="flex items-baseline gap-4">
+            <CardTitle>{labels.plural}</CardTitle>
+            <RoleInfoLink role={role} />
+          </div>
           {actions.add && (
             <Button
               variant="primary"

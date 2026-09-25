@@ -33,12 +33,12 @@ export function TermSettingsTab({ courseId, termId }: Props) {
     <div className="grid grid-cols-[2fr_1fr] gap-6">
       <div>
         {/* Terms have no editable metadata: they are identified by their id and
-            carry only an environment. Runtime settings live in the Term Runtime
+            carry only an environment. Runtime settings live in the Semester Runtime
             tab, so this card is read-only. */}
         <Card>
           <CardTitle>Semester Settings</CardTitle>
           <Row label="Course">{courseId}</Row>
-          <Row label="Term">{termId}</Row>
+          <Row label="Semester">{termId}</Row>
         </Card>
       </div>
 
@@ -51,7 +51,7 @@ export function TermSettingsTab({ courseId, termId }: Props) {
             </p>
 
             {deleteTerm.error && (
-              <Alert className="mb-4" title="Could not delete the term">
+              <Alert className="mb-4" title="Could not delete the semester">
                 {getErrorMessage(deleteTerm.error)}
               </Alert>
             )}
@@ -71,9 +71,9 @@ export function TermSettingsTab({ courseId, termId }: Props) {
             <ConfirmDialog
               open={deleteDialogOpen}
               onClose={() => setDeleteDialogOpen(false)}
-              title="Delete term"
-              message={`This permanently deletes the term ${termId} of ${courseId}, including its memberships. This cannot be undone.`}
-              confirmText="Delete Term"
+              title="Delete semester"
+              message={`This permanently deletes the semester ${termId} of ${courseId}, including its memberships. This cannot be undone.`}
+              confirmText="Delete Semester"
               variant="destructive"
               requireConfirmationText={confirmationText}
               isConfirming={deleteTerm.isPending}

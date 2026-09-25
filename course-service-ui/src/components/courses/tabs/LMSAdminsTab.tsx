@@ -1,7 +1,7 @@
 import { MemberListCard } from "@components/membership/MemberListCard";
 import { useLMSAdmins, useUpdateLMSAdmins } from "@hooks/membership";
 import { useCourses } from "@hooks/course";
-import { MembershipRole, memberLabels } from "@domain/roles";
+import { MembershipRole } from "@domain/roles";
 
 const NO_ACTIONS = { list: false, add: false, remove: false };
 
@@ -18,7 +18,7 @@ export function LMSAdminsTab() {
 
   return (
     <MemberListCard
-      labels={memberLabels[MembershipRole.Admin]}
+      role={MembershipRole.Admin}
       actions={actions}
       usernames={data?.usernames ?? []}
       isLoading={isLoading}

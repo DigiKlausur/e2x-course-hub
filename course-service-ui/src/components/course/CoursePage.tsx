@@ -1,6 +1,8 @@
 import { Link, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { TabBar } from "@components/ui/TabBar";
+import { YourAccessButton } from "@components/actions/YourAccessButton";
 import { useCourse } from "@hooks/course";
+import { courseActionText } from "@domain/actions";
 import { MembershipRole, memberLabels } from "@domain/roles";
 import { CourseOverviewTab } from "./tabs/CourseOverviewTab";
 import { CourseOwnersTab } from "./tabs/CourseOwnersTab";
@@ -33,19 +35,28 @@ export function CoursePage() {
 
   return (
     <div>
-      <header className="bg-white border-b border-gray-200 px-10 py-8">
-        <div className="text-sm text-gray-400 mb-1">
-          <Link to="/" className="hover:text-hbrs-dark-blue hover:underline">
-            Courses
-          </Link>
-          {" / "}
-          <span className="text-gray-700 font-medium">{courseId}</span>
+      <header className="bg-white border-b border-gray-200 px-10 py-8 flex items-start justify-between gap-4">
+        <div>
+          <div className="text-sm text-gray-400 mb-1">
+            <Link to="/" className="hover:text-hbrs-dark-blue hover:underline">
+              Courses
+            </Link>
+            {" / "}
+            <span className="text-gray-700 font-medium">{courseId}</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 m-0">
+            {isLoading ? courseId : (metadata?.course_name ?? courseId)}
+          </h1>
+          {metadata?.description && (
+            <p className="mt-1 text-gray-500">{metadata.description}</p>
+          )}
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 m-0">
-          {isLoading ? courseId : (metadata?.course_name ?? courseId)}
-        </h1>
-        {metadata?.description && (
-          <p className="mt-1 text-gray-500">{metadata.description}</p>
+        {actions && (
+          <YourAccessButton
+            actions={actions}
+            texts={courseActionText}
+            scope="in this course"
+          />
         )}
       </header>
 

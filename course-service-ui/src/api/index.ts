@@ -3,6 +3,7 @@ export { courseAPI } from "./courses";
 export { infrastructureAPI } from "./infrastructure";
 export { membershipAPI } from "./membership";
 export { meAPI } from "./me";
+export { rolesAPI } from "./roles";
 
 // Export client utilities for advanced use
 export { requests, type ApiError } from "./client";

@@ -3,11 +3,15 @@ import { useMemo, useState } from "react";
 import { Button } from "@components/ui/Button";
 import { Card } from "@components/ui/Card";
 import { MemberDataTable } from "./MemberDataTable";
+import { RoleInfoLink } from "@components/actions/RoleInfoLink";
+import type { MembershipRole } from "@domain/roles";
 import type { CurrentUser } from "@api/types";
 
 export interface MemberTabConfig {
   id: string;
   label: string;
+  /** Offers the explanation of the role next to the tab's title. */
+  role?: MembershipRole;
   usernames: string[];
   isLoading?: boolean;
   selected: Set<string>;
@@ -72,7 +76,10 @@ export function TabbedMemberDataTable({
 
       {/* Tab header: title + add button */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-base font-semibold">{activeTab.label}</h3>
+        <div className="flex items-baseline gap-4">
+          <h3 className="text-base font-semibold">{activeTab.label}</h3>
+          {activeTab.role && <RoleInfoLink role={activeTab.role} />}
+        </div>
         {activeTab.canAdd && (
           <Button
             variant="primary"

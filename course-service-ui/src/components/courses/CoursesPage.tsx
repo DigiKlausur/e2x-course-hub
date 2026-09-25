@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { TabBar } from "@components/ui/TabBar";
+import { YourAccessButton } from "@components/actions/YourAccessButton";
 import { useCourses } from "@hooks/course";
+import { lmsActionText } from "@domain/actions";
 import { MembershipRole, memberLabels } from "@domain/roles";
 import { CourseListTab } from "./tabs/CourseListTab";
 import { LMSAdminsTab } from "./tabs/LMSAdminsTab";
@@ -28,9 +30,20 @@ export function CoursesPage() {
 
   return (
     <div>
-      <header className="bg-white border-b border-gray-200 px-10 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 m-0">Courses</h1>
-        <p className="mt-1 text-gray-500">Manage your courses and terms</p>
+      <header className="bg-white border-b border-gray-200 px-10 py-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 m-0">Courses</h1>
+          <p className="mt-1 text-gray-500">
+            Manage your courses and semesters
+          </p>
+        </div>
+        {actions && (
+          <YourAccessButton
+            actions={actions}
+            texts={lmsActionText}
+            scope="across the LMS"
+          />
+        )}
       </header>
 
       <TabBar tabs={tabs} />

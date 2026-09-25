@@ -46,8 +46,8 @@ export function CreateTermDialog({
     <Modal
       open={open}
       onClose={handleClose}
-      title="Create Term"
-      description="The new term will inherit the course's current runtime template settings."
+      title="Create Semester"
+      description="The new semester will inherit the course's current runtime template settings."
       footer={
         <>
           <Button
@@ -62,13 +62,15 @@ export function CreateTermDialog({
             onClick={handleSubmit}
             disabled={!isValid || isSubmitting}
           >
-            {isSubmitting ? "Creating…" : "Create Term"}
+            {isSubmitting ? "Creating…" : "Create Semester"}
           </Button>
         </>
       }
     >
       <div>
-        <label className="block text-sm font-semibold mb-1.5">Term ID</label>
+        <label className="block text-sm font-semibold mb-1.5">
+          Semester ID
+        </label>
         <input
           value={termId}
           onChange={(e) => setTermId(e.target.value)}
@@ -84,7 +86,7 @@ export function CreateTermDialog({
         )}
         {isDuplicate && (
           <p className="text-xs text-red-600 mt-1">
-            A term with this ID already exists.
+            A semester with this ID already exists.
           </p>
         )}
       </div>
