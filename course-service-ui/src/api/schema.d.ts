@@ -324,7 +324,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/roles/{role}/capabilities": {
+    "/v1/roles/{role}/actions": {
         parameters: {
             query?: never;
             header?: never;
@@ -332,12 +332,12 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Role Capabilities
+         * Get Role Actions
          * @description What a role can and cannot do, e.g. to explain it before adding someone to it.
          *
          *     The same for every course and term, so any logged-in user may ask.
          */
-        get: operations["get_role_capabilities_v1_roles__role__capabilities_get"];
+        get: operations["get_role_actions_v1_roles__role__actions_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -350,35 +350,29 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** CourseCapabilities */
-        CourseCapabilities: {
-            /** Editmetadata */
-            editMetadata: boolean;
-            /** Removecourse */
-            removeCourse: boolean;
-            /** Selectenvironment */
-            selectEnvironment: boolean;
-            courseOwners: components["schemas"]["MembershipCapabilities"];
-            /** Addterm */
-            addTerm: boolean;
+        /** CatalogActions */
+        CatalogActions: {
+            /** View */
+            view: boolean;
+            /** Manage */
+            manage: boolean;
         };
-        /**
-         * CourseCapabilityId
-         * @enum {string}
-         */
-        CourseCapabilityId: "viewCourse" | "viewMetadata" | "editMetadata" | "removeCourse" | "selectEnvironment" | "addTerm" | "courseOwners.view" | "courseOwners.add" | "courseOwners.remove";
-        /** CourseCollectionCapabilities */
-        CourseCollectionCapabilities: {
-            /** Createcourse */
-            createCourse: boolean;
-            lmsAdmins: components["schemas"]["MembershipCapabilities"];
-            courseCreators: components["schemas"]["MembershipCapabilities"];
+        /** CourseActions */
+        CourseActions: {
+            /** View */
+            view: boolean;
+            /** Remove */
+            remove: boolean;
+            metadata: components["schemas"]["CourseMetadataActions"];
+            environment: components["schemas"]["CourseEnvironmentActions"];
+            terms: components["schemas"]["CourseTermsActions"];
+            members: components["schemas"]["CourseMembersActions"];
         };
         /** CourseCollectionResponse */
         CourseCollectionResponse: {
             /** Courses */
             courses: components["schemas"]["CourseSummaryResponse"][];
-            capabilities: components["schemas"]["CourseCollectionCapabilities"];
+            actions: components["schemas"]["LmsActions"];
         };
         /** CourseConfig */
         CourseConfig: {
@@ -407,7 +401,16 @@ export interface components {
             environment: components["schemas"]["Environment"];
             /** Terms */
             terms: components["schemas"]["TermSummaryResponse"][];
-            capabilities: components["schemas"]["CourseCapabilities"];
+            actions: components["schemas"]["CourseActions"];
+        };
+        /** CourseEnvironmentActions */
+        CourseEnvironmentActions: {
+            /** Select */
+            select: boolean;
+        };
+        /** CourseMembersActions */
+        CourseMembersActions: {
+            courseOwners: components["schemas"]["MemberListActions"];
         };
         /**
          * CourseMetadata
@@ -430,6 +433,13 @@ export interface components {
              */
             description?: string | null;
         };
+        /** CourseMetadataActions */
+        CourseMetadataActions: {
+            /** View */
+            view: boolean;
+            /** Edit */
+            edit: boolean;
+        };
         /**
          * CourseMetadataUpdate
          * @description Request body for updating course metadata.
@@ -443,7 +453,12 @@ export interface components {
         /** CourseSummaryResponse */
         CourseSummaryResponse: {
             metadata: components["schemas"]["CourseMetadata"];
-            capabilities: components["schemas"]["CourseCapabilities"];
+            actions: components["schemas"]["CourseActions"];
+        };
+        /** CourseTermsActions */
+        CourseTermsActions: {
+            /** Add */
+            add: boolean;
         };
         /**
          * CreateTermRequest
@@ -495,7 +510,7 @@ export interface components {
         };
         /** ImageCatalogResponse */
         ImageCatalogResponse: {
-            capabilities: components["schemas"]["InfrastructureCapabilities"];
+            actions: components["schemas"]["CatalogActions"];
             catalog: components["schemas"]["ImageFamilyOptions"];
         };
         /**
@@ -546,47 +561,41 @@ export interface components {
             /** Message */
             message?: string | null;
         };
-        /** InfrastructureCapabilities */
-        InfrastructureCapabilities: {
-            /**
-             * Manage
-             * @default false
-             */
-            manage: boolean;
-            /**
-             * View
-             * @default false
-             */
-            view: boolean;
+        /** LmsActions */
+        LmsActions: {
+            courses: components["schemas"]["LmsCoursesActions"];
+            members: components["schemas"]["LmsMembersActions"];
+            catalogs: components["schemas"]["LmsCatalogsActions"];
         };
-        /**
-         * LmsCapabilityId
-         * @enum {string}
-         */
-        LmsCapabilityId: "createCourse" | "lmsAdmins.view" | "lmsAdmins.add" | "lmsAdmins.remove" | "courseCreators.view" | "courseCreators.add" | "courseCreators.remove" | "imageCatalog.view" | "imageCatalog.manage" | "resourceCatalog.view" | "resourceCatalog.manage" | "profileCatalog.view" | "profileCatalog.manage";
-        /** MembershipCapabilities */
-        MembershipCapabilities: {
-            /**
-             * Add
-             * @default false
-             */
+        /** LmsCatalogsActions */
+        LmsCatalogsActions: {
+            images: components["schemas"]["CatalogActions"];
+            resources: components["schemas"]["CatalogActions"];
+            profiles: components["schemas"]["CatalogActions"];
+        };
+        /** LmsCoursesActions */
+        LmsCoursesActions: {
+            /** Create */
+            create: boolean;
+        };
+        /** LmsMembersActions */
+        LmsMembersActions: {
+            lmsAdmins: components["schemas"]["MemberListActions"];
+            courseCreators: components["schemas"]["MemberListActions"];
+        };
+        /** MemberListActions */
+        MemberListActions: {
+            /** List */
+            list: boolean;
+            /** Add */
             add: boolean;
-            /**
-             * Remove
-             * @default false
-             */
+            /** Remove */
             remove: boolean;
-            /**
-             * View
-             * @default false
-             */
-            view: boolean;
         };
         /** MembershipCollectionResponse */
         MembershipCollectionResponse: {
             /** Usernames */
             usernames: string[];
-            capabilities: components["schemas"]["MembershipCapabilities"];
         };
         /**
          * MembershipPatch
@@ -606,7 +615,7 @@ export interface components {
         };
         /** ProfileCatalogResponse */
         ProfileCatalogResponse: {
-            capabilities: components["schemas"]["InfrastructureCapabilities"];
+            actions: components["schemas"]["CatalogActions"];
             /** Catalog */
             catalog: {
                 [key: string]: components["schemas"]["ProfileOptions"];
@@ -664,51 +673,27 @@ export interface components {
         };
         /** ResourceTiersResponse */
         ResourceTiersResponse: {
-            capabilities: components["schemas"]["InfrastructureCapabilities"];
+            actions: components["schemas"]["CatalogActions"];
             /** Catalog */
             catalog: {
                 [key: string]: components["schemas"]["ResourceTierOptions"];
             };
         };
         /**
-         * RoleCapabilitiesResponse
-         * @description Every capability and whether a role has it, grouped by the level each applies to.
-         *
-         *     Denied capabilities are included so a role can be explained by what it can
-         *     and cannot do. The order follows the definitions.
+         * RoleActionsResponse
+         * @description What a role can and cannot do at each level.
          */
-        RoleCapabilitiesResponse: {
+        RoleActionsResponse: {
             role: components["schemas"]["RoleName"];
-            /** Lms */
-            lms: components["schemas"]["RoleLmsCapability"][];
-            /** Course */
-            course: components["schemas"]["RoleCourseCapability"][];
-            /** Term */
-            term: components["schemas"]["RoleTermCapability"][];
-        };
-        /** RoleCourseCapability */
-        RoleCourseCapability: {
-            id: components["schemas"]["CourseCapabilityId"];
-            /** Granted */
-            granted: boolean;
-        };
-        /** RoleLmsCapability */
-        RoleLmsCapability: {
-            id: components["schemas"]["LmsCapabilityId"];
-            /** Granted */
-            granted: boolean;
+            lms: components["schemas"]["LmsActions"];
+            course: components["schemas"]["CourseActions"];
+            term: components["schemas"]["TermActions"];
         };
         /**
          * RoleName
          * @enum {string}
          */
         RoleName: "lms-admin" | "course-creator" | "course-owner" | "instructor" | "teaching-assistant" | "observer" | "student";
-        /** RoleTermCapability */
-        RoleTermCapability: {
-            id: components["schemas"]["TermCapabilityId"];
-            /** Granted */
-            granted: boolean;
-        };
         /**
          * SpawnRole
          * @description Enumeration of spawn roles for the e2x course hub.
@@ -728,21 +713,16 @@ export interface components {
             /** Profile Name */
             profile_name: string;
         };
-        /** TermCapabilities */
-        TermCapabilities: {
-            /** Viewterm */
-            viewTerm: boolean;
-            /** Removeterm */
-            removeTerm: boolean;
-            /** Selectenvironment */
-            selectEnvironment: boolean;
-            membership: components["schemas"]["TermMembershipCapabilities"];
+        /** TermActions */
+        TermActions: {
+            /** View */
+            view: boolean;
+            /** Remove */
+            remove: boolean;
+            environment: components["schemas"]["TermEnvironmentActions"];
+            spawn: components["schemas"]["TermSpawnActions"];
+            members: components["schemas"]["TermMembersActions"];
         };
-        /**
-         * TermCapabilityId
-         * @enum {string}
-         */
-        TermCapabilityId: "viewTerm" | "removeTerm" | "selectEnvironment" | "membership.instructors.view" | "membership.instructors.add" | "membership.instructors.remove" | "membership.teachingAssistants.view" | "membership.teachingAssistants.add" | "membership.teachingAssistants.remove" | "membership.students.view" | "membership.students.add" | "membership.students.remove" | "membership.observers.view" | "membership.observers.add" | "membership.observers.remove" | "spawnStudentEnvironment" | "spawnGraderEnvironment" | "spawnReadonlyGraderEnvironment";
         /**
          * TermConfig
          * @description Configuration for a specific term.
@@ -765,21 +745,28 @@ export interface components {
             /** Term Id */
             term_id: string;
             environment: components["schemas"]["Environment"];
-            capabilities: components["schemas"]["TermCapabilities"];
+            actions: components["schemas"]["TermActions"];
         };
-        /** TermMembershipCapabilities */
-        TermMembershipCapabilities: {
-            instructors: components["schemas"]["MembershipCapabilities"];
-            teachingAssistants: components["schemas"]["MembershipCapabilities"];
-            students: components["schemas"]["MembershipCapabilities"];
-            observers: components["schemas"]["MembershipCapabilities"];
+        /** TermEnvironmentActions */
+        TermEnvironmentActions: {
+            /** Select */
+            select: boolean;
         };
-        /** TermSummaryCapabilities */
-        TermSummaryCapabilities: {
-            /** Viewterm */
-            viewTerm: boolean;
-            /** Removeterm */
-            removeTerm: boolean;
+        /** TermMembersActions */
+        TermMembersActions: {
+            instructors: components["schemas"]["MemberListActions"];
+            teachingAssistants: components["schemas"]["MemberListActions"];
+            students: components["schemas"]["MemberListActions"];
+            observers: components["schemas"]["MemberListActions"];
+        };
+        /** TermSpawnActions */
+        TermSpawnActions: {
+            /** Student */
+            student: boolean;
+            /** Grader */
+            grader: boolean;
+            /** Readonlygrader */
+            readonlyGrader: boolean;
         };
         /** TermSummaryResponse */
         TermSummaryResponse: {
@@ -787,7 +774,7 @@ export interface components {
             course_id: string;
             /** Term Id */
             term_id: string;
-            capabilities: components["schemas"]["TermSummaryCapabilities"];
+            actions: components["schemas"]["TermActions"];
         };
         /** UserResponse */
         UserResponse: {
@@ -1768,7 +1755,7 @@ export interface operations {
             };
         };
     };
-    get_role_capabilities_v1_roles__role__capabilities_get: {
+    get_role_actions_v1_roles__role__actions_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1785,7 +1772,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RoleCapabilitiesResponse"];
+                    "application/json": components["schemas"]["RoleActionsResponse"];
                 };
             };
             /** @description Validation Error */

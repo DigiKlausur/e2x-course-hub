@@ -1326,14 +1326,14 @@
         }
       }
     },
-    "/v1/roles/{role}/capabilities": {
+    "/v1/roles/{role}/actions": {
       "get": {
         "tags": [
           "Roles"
         ],
-        "summary": "Get Role Capabilities",
+        "summary": "Get Role Actions",
         "description": "What a role can and cannot do, e.g. to explain it before adding someone to it.\n\nThe same for every course and term, so any logged-in user may ask.",
-        "operationId": "get_role_capabilities_v1_roles__role__capabilities_get",
+        "operationId": "get_role_actions_v1_roles__role__actions_get",
         "parameters": [
           {
             "name": "role",
@@ -1350,7 +1350,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RoleCapabilitiesResponse"
+                  "$ref": "#/components/schemas/RoleActionsResponse"
                 }
               }
             }
@@ -1371,73 +1371,57 @@
   },
   "components": {
     "schemas": {
-      "CourseCapabilities": {
+      "CatalogActions": {
         "properties": {
-          "editMetadata": {
+          "view": {
             "type": "boolean",
-            "title": "Editmetadata"
+            "title": "View"
           },
-          "removeCourse": {
+          "manage": {
             "type": "boolean",
-            "title": "Removecourse"
-          },
-          "selectEnvironment": {
-            "type": "boolean",
-            "title": "Selectenvironment"
-          },
-          "courseOwners": {
-            "$ref": "#/components/schemas/MembershipCapabilities"
-          },
-          "addTerm": {
-            "type": "boolean",
-            "title": "Addterm"
+            "title": "Manage"
           }
         },
         "type": "object",
         "required": [
-          "editMetadata",
-          "removeCourse",
-          "selectEnvironment",
-          "courseOwners",
-          "addTerm"
+          "view",
+          "manage"
         ],
-        "title": "CourseCapabilities"
+        "title": "CatalogActions"
       },
-      "CourseCapabilityId": {
-        "type": "string",
-        "enum": [
-          "viewCourse",
-          "viewMetadata",
-          "editMetadata",
-          "removeCourse",
-          "selectEnvironment",
-          "addTerm",
-          "courseOwners.view",
-          "courseOwners.add",
-          "courseOwners.remove"
-        ],
-        "title": "CourseCapabilityId"
-      },
-      "CourseCollectionCapabilities": {
+      "CourseActions": {
         "properties": {
-          "createCourse": {
+          "view": {
             "type": "boolean",
-            "title": "Createcourse"
+            "title": "View"
           },
-          "lmsAdmins": {
-            "$ref": "#/components/schemas/MembershipCapabilities"
+          "remove": {
+            "type": "boolean",
+            "title": "Remove"
           },
-          "courseCreators": {
-            "$ref": "#/components/schemas/MembershipCapabilities"
+          "metadata": {
+            "$ref": "#/components/schemas/CourseMetadataActions"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/CourseEnvironmentActions"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/CourseTermsActions"
+          },
+          "members": {
+            "$ref": "#/components/schemas/CourseMembersActions"
           }
         },
         "type": "object",
         "required": [
-          "createCourse",
-          "lmsAdmins",
-          "courseCreators"
+          "view",
+          "remove",
+          "metadata",
+          "environment",
+          "terms",
+          "members"
         ],
-        "title": "CourseCollectionCapabilities"
+        "title": "CourseActions"
       },
       "CourseCollectionResponse": {
         "properties": {
@@ -1448,14 +1432,14 @@
             "type": "array",
             "title": "Courses"
           },
-          "capabilities": {
-            "$ref": "#/components/schemas/CourseCollectionCapabilities"
+          "actions": {
+            "$ref": "#/components/schemas/LmsActions"
           }
         },
         "type": "object",
         "required": [
           "courses",
-          "capabilities"
+          "actions"
         ],
         "title": "CourseCollectionResponse"
       },
@@ -1512,8 +1496,8 @@
             "type": "array",
             "title": "Terms"
           },
-          "capabilities": {
-            "$ref": "#/components/schemas/CourseCapabilities"
+          "actions": {
+            "$ref": "#/components/schemas/CourseActions"
           }
         },
         "type": "object",
@@ -1521,9 +1505,34 @@
           "metadata",
           "environment",
           "terms",
-          "capabilities"
+          "actions"
         ],
         "title": "CourseDetailResponse"
+      },
+      "CourseEnvironmentActions": {
+        "properties": {
+          "select": {
+            "type": "boolean",
+            "title": "Select"
+          }
+        },
+        "type": "object",
+        "required": [
+          "select"
+        ],
+        "title": "CourseEnvironmentActions"
+      },
+      "CourseMembersActions": {
+        "properties": {
+          "courseOwners": {
+            "$ref": "#/components/schemas/MemberListActions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "courseOwners"
+        ],
+        "title": "CourseMembersActions"
       },
       "CourseMetadata": {
         "properties": {
@@ -1557,6 +1566,24 @@
         ],
         "title": "CourseMetadata",
         "description": "Metadata information about a course."
+      },
+      "CourseMetadataActions": {
+        "properties": {
+          "view": {
+            "type": "boolean",
+            "title": "View"
+          },
+          "edit": {
+            "type": "boolean",
+            "title": "Edit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "view",
+          "edit"
+        ],
+        "title": "CourseMetadataActions"
       },
       "CourseMetadataUpdate": {
         "properties": {
@@ -1592,16 +1619,29 @@
           "metadata": {
             "$ref": "#/components/schemas/CourseMetadata"
           },
-          "capabilities": {
-            "$ref": "#/components/schemas/CourseCapabilities"
+          "actions": {
+            "$ref": "#/components/schemas/CourseActions"
           }
         },
         "type": "object",
         "required": [
           "metadata",
-          "capabilities"
+          "actions"
         ],
         "title": "CourseSummaryResponse"
+      },
+      "CourseTermsActions": {
+        "properties": {
+          "add": {
+            "type": "boolean",
+            "title": "Add"
+          }
+        },
+        "type": "object",
+        "required": [
+          "add"
+        ],
+        "title": "CourseTermsActions"
       },
       "CreateTermRequest": {
         "properties": {
@@ -1721,8 +1761,8 @@
       },
       "ImageCatalogResponse": {
         "properties": {
-          "capabilities": {
-            "$ref": "#/components/schemas/InfrastructureCapabilities"
+          "actions": {
+            "$ref": "#/components/schemas/CatalogActions"
           },
           "catalog": {
             "$ref": "#/components/schemas/ImageFamilyOptions"
@@ -1730,7 +1770,7 @@
         },
         "type": "object",
         "required": [
-          "capabilities",
+          "actions",
           "catalog"
         ],
         "title": "ImageCatalogResponse"
@@ -1842,61 +1882,97 @@
         "title": "ImageTagInfo",
         "description": "Information about a specific image tag."
       },
-      "InfrastructureCapabilities": {
+      "LmsActions": {
         "properties": {
-          "manage": {
-            "type": "boolean",
-            "title": "Manage",
-            "default": false
+          "courses": {
+            "$ref": "#/components/schemas/LmsCoursesActions"
           },
-          "view": {
-            "type": "boolean",
-            "title": "View",
-            "default": false
+          "members": {
+            "$ref": "#/components/schemas/LmsMembersActions"
+          },
+          "catalogs": {
+            "$ref": "#/components/schemas/LmsCatalogsActions"
           }
         },
         "type": "object",
-        "title": "InfrastructureCapabilities"
-      },
-      "LmsCapabilityId": {
-        "type": "string",
-        "enum": [
-          "createCourse",
-          "lmsAdmins.view",
-          "lmsAdmins.add",
-          "lmsAdmins.remove",
-          "courseCreators.view",
-          "courseCreators.add",
-          "courseCreators.remove",
-          "imageCatalog.view",
-          "imageCatalog.manage",
-          "resourceCatalog.view",
-          "resourceCatalog.manage",
-          "profileCatalog.view",
-          "profileCatalog.manage"
+        "required": [
+          "courses",
+          "members",
+          "catalogs"
         ],
-        "title": "LmsCapabilityId"
+        "title": "LmsActions"
       },
-      "MembershipCapabilities": {
+      "LmsCatalogsActions": {
         "properties": {
+          "images": {
+            "$ref": "#/components/schemas/CatalogActions"
+          },
+          "resources": {
+            "$ref": "#/components/schemas/CatalogActions"
+          },
+          "profiles": {
+            "$ref": "#/components/schemas/CatalogActions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "images",
+          "resources",
+          "profiles"
+        ],
+        "title": "LmsCatalogsActions"
+      },
+      "LmsCoursesActions": {
+        "properties": {
+          "create": {
+            "type": "boolean",
+            "title": "Create"
+          }
+        },
+        "type": "object",
+        "required": [
+          "create"
+        ],
+        "title": "LmsCoursesActions"
+      },
+      "LmsMembersActions": {
+        "properties": {
+          "lmsAdmins": {
+            "$ref": "#/components/schemas/MemberListActions"
+          },
+          "courseCreators": {
+            "$ref": "#/components/schemas/MemberListActions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lmsAdmins",
+          "courseCreators"
+        ],
+        "title": "LmsMembersActions"
+      },
+      "MemberListActions": {
+        "properties": {
+          "list": {
+            "type": "boolean",
+            "title": "List"
+          },
           "add": {
             "type": "boolean",
-            "title": "Add",
-            "default": false
+            "title": "Add"
           },
           "remove": {
             "type": "boolean",
-            "title": "Remove",
-            "default": false
-          },
-          "view": {
-            "type": "boolean",
-            "title": "View",
-            "default": false
+            "title": "Remove"
           }
         },
         "type": "object",
-        "title": "MembershipCapabilities"
+        "required": [
+          "list",
+          "add",
+          "remove"
+        ],
+        "title": "MemberListActions"
       },
       "MembershipCollectionResponse": {
         "properties": {
@@ -1906,15 +1982,11 @@
             },
             "type": "array",
             "title": "Usernames"
-          },
-          "capabilities": {
-            "$ref": "#/components/schemas/MembershipCapabilities"
           }
         },
         "type": "object",
         "required": [
-          "usernames",
-          "capabilities"
+          "usernames"
         ],
         "title": "MembershipCollectionResponse"
       },
@@ -1943,8 +2015,8 @@
       },
       "ProfileCatalogResponse": {
         "properties": {
-          "capabilities": {
-            "$ref": "#/components/schemas/InfrastructureCapabilities"
+          "actions": {
+            "$ref": "#/components/schemas/CatalogActions"
           },
           "catalog": {
             "additionalProperties": {
@@ -1959,7 +2031,7 @@
         },
         "type": "object",
         "required": [
-          "capabilities",
+          "actions",
           "catalog"
         ],
         "title": "ProfileCatalogResponse"
@@ -2088,8 +2160,8 @@
       },
       "ResourceTiersResponse": {
         "properties": {
-          "capabilities": {
-            "$ref": "#/components/schemas/InfrastructureCapabilities"
+          "actions": {
+            "$ref": "#/components/schemas/CatalogActions"
           },
           "catalog": {
             "additionalProperties": {
@@ -2104,36 +2176,24 @@
         },
         "type": "object",
         "required": [
-          "capabilities",
+          "actions",
           "catalog"
         ],
         "title": "ResourceTiersResponse"
       },
-      "RoleCapabilitiesResponse": {
+      "RoleActionsResponse": {
         "properties": {
           "role": {
             "$ref": "#/components/schemas/RoleName"
           },
           "lms": {
-            "items": {
-              "$ref": "#/components/schemas/RoleLmsCapability"
-            },
-            "type": "array",
-            "title": "Lms"
+            "$ref": "#/components/schemas/LmsActions"
           },
           "course": {
-            "items": {
-              "$ref": "#/components/schemas/RoleCourseCapability"
-            },
-            "type": "array",
-            "title": "Course"
+            "$ref": "#/components/schemas/CourseActions"
           },
           "term": {
-            "items": {
-              "$ref": "#/components/schemas/RoleTermCapability"
-            },
-            "type": "array",
-            "title": "Term"
+            "$ref": "#/components/schemas/TermActions"
           }
         },
         "type": "object",
@@ -2143,42 +2203,8 @@
           "course",
           "term"
         ],
-        "title": "RoleCapabilitiesResponse",
-        "description": "Every capability and whether a role has it, grouped by the level each applies to.\n\nDenied capabilities are included so a role can be explained by what it can\nand cannot do. The order follows the definitions."
-      },
-      "RoleCourseCapability": {
-        "properties": {
-          "id": {
-            "$ref": "#/components/schemas/CourseCapabilityId"
-          },
-          "granted": {
-            "type": "boolean",
-            "title": "Granted"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "granted"
-        ],
-        "title": "RoleCourseCapability"
-      },
-      "RoleLmsCapability": {
-        "properties": {
-          "id": {
-            "$ref": "#/components/schemas/LmsCapabilityId"
-          },
-          "granted": {
-            "type": "boolean",
-            "title": "Granted"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "granted"
-        ],
-        "title": "RoleLmsCapability"
+        "title": "RoleActionsResponse",
+        "description": "What a role can and cannot do at each level."
       },
       "RoleName": {
         "type": "string",
@@ -2192,23 +2218,6 @@
           "student"
         ],
         "title": "RoleName"
-      },
-      "RoleTermCapability": {
-        "properties": {
-          "id": {
-            "$ref": "#/components/schemas/TermCapabilityId"
-          },
-          "granted": {
-            "type": "boolean",
-            "title": "Granted"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "granted"
-        ],
-        "title": "RoleTermCapability"
       },
       "SpawnRole": {
         "type": "string",
@@ -2239,56 +2248,35 @@
         "title": "SpawnRoleSelection",
         "description": "A selection of spawn options for a specific spawn role"
       },
-      "TermCapabilities": {
+      "TermActions": {
         "properties": {
-          "viewTerm": {
+          "view": {
             "type": "boolean",
-            "title": "Viewterm"
+            "title": "View"
           },
-          "removeTerm": {
+          "remove": {
             "type": "boolean",
-            "title": "Removeterm"
+            "title": "Remove"
           },
-          "selectEnvironment": {
-            "type": "boolean",
-            "title": "Selectenvironment"
+          "environment": {
+            "$ref": "#/components/schemas/TermEnvironmentActions"
           },
-          "membership": {
-            "$ref": "#/components/schemas/TermMembershipCapabilities"
+          "spawn": {
+            "$ref": "#/components/schemas/TermSpawnActions"
+          },
+          "members": {
+            "$ref": "#/components/schemas/TermMembersActions"
           }
         },
         "type": "object",
         "required": [
-          "viewTerm",
-          "removeTerm",
-          "selectEnvironment",
-          "membership"
+          "view",
+          "remove",
+          "environment",
+          "spawn",
+          "members"
         ],
-        "title": "TermCapabilities"
-      },
-      "TermCapabilityId": {
-        "type": "string",
-        "enum": [
-          "viewTerm",
-          "removeTerm",
-          "selectEnvironment",
-          "membership.instructors.view",
-          "membership.instructors.add",
-          "membership.instructors.remove",
-          "membership.teachingAssistants.view",
-          "membership.teachingAssistants.add",
-          "membership.teachingAssistants.remove",
-          "membership.students.view",
-          "membership.students.add",
-          "membership.students.remove",
-          "membership.observers.view",
-          "membership.observers.add",
-          "membership.observers.remove",
-          "spawnStudentEnvironment",
-          "spawnGraderEnvironment",
-          "spawnReadonlyGraderEnvironment"
-        ],
-        "title": "TermCapabilityId"
+        "title": "TermActions"
       },
       "TermConfig": {
         "properties": {
@@ -2329,8 +2317,8 @@
           "environment": {
             "$ref": "#/components/schemas/Environment"
           },
-          "capabilities": {
-            "$ref": "#/components/schemas/TermCapabilities"
+          "actions": {
+            "$ref": "#/components/schemas/TermActions"
           }
         },
         "type": "object",
@@ -2338,23 +2326,36 @@
           "course_id",
           "term_id",
           "environment",
-          "capabilities"
+          "actions"
         ],
         "title": "TermDetailResponse"
       },
-      "TermMembershipCapabilities": {
+      "TermEnvironmentActions": {
+        "properties": {
+          "select": {
+            "type": "boolean",
+            "title": "Select"
+          }
+        },
+        "type": "object",
+        "required": [
+          "select"
+        ],
+        "title": "TermEnvironmentActions"
+      },
+      "TermMembersActions": {
         "properties": {
           "instructors": {
-            "$ref": "#/components/schemas/MembershipCapabilities"
+            "$ref": "#/components/schemas/MemberListActions"
           },
           "teachingAssistants": {
-            "$ref": "#/components/schemas/MembershipCapabilities"
+            "$ref": "#/components/schemas/MemberListActions"
           },
           "students": {
-            "$ref": "#/components/schemas/MembershipCapabilities"
+            "$ref": "#/components/schemas/MemberListActions"
           },
           "observers": {
-            "$ref": "#/components/schemas/MembershipCapabilities"
+            "$ref": "#/components/schemas/MemberListActions"
           }
         },
         "type": "object",
@@ -2364,25 +2365,30 @@
           "students",
           "observers"
         ],
-        "title": "TermMembershipCapabilities"
+        "title": "TermMembersActions"
       },
-      "TermSummaryCapabilities": {
+      "TermSpawnActions": {
         "properties": {
-          "viewTerm": {
+          "student": {
             "type": "boolean",
-            "title": "Viewterm"
+            "title": "Student"
           },
-          "removeTerm": {
+          "grader": {
             "type": "boolean",
-            "title": "Removeterm"
+            "title": "Grader"
+          },
+          "readonlyGrader": {
+            "type": "boolean",
+            "title": "Readonlygrader"
           }
         },
         "type": "object",
         "required": [
-          "viewTerm",
-          "removeTerm"
+          "student",
+          "grader",
+          "readonlyGrader"
         ],
-        "title": "TermSummaryCapabilities"
+        "title": "TermSpawnActions"
       },
       "TermSummaryResponse": {
         "properties": {
@@ -2394,15 +2400,15 @@
             "type": "string",
             "title": "Term Id"
           },
-          "capabilities": {
-            "$ref": "#/components/schemas/TermSummaryCapabilities"
+          "actions": {
+            "$ref": "#/components/schemas/TermActions"
           }
         },
         "type": "object",
         "required": [
           "course_id",
           "term_id",
-          "capabilities"
+          "actions"
         ],
         "title": "TermSummaryResponse"
       },
