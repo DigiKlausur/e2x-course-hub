@@ -41,7 +41,6 @@ class CourseSpawnConfigRow(Base):
 
     spawn_role: Mapped[SpawnRole]
 
-    # Nullable: a spawn role may set only a resource tier or only a profile.
     resource: Mapped[str]
     profile: Mapped[str]
 
@@ -93,7 +92,6 @@ class TermSpawnConfigRow(Base):
 
     spawn_role: Mapped[SpawnRole]
 
-    # Nullable because this is an override.
     resource: Mapped[str]
     profile: Mapped[str]
 
