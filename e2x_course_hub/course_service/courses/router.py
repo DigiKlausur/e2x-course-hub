@@ -61,9 +61,13 @@ async def delete_course(
     course_id: str,
     user: CurrentUser,
     course_api: CourseAPIDep,
+    membership_api: MembershipAPIDep,
     session: DBSession,
 ):
+    course = course_api.get_course(user, course_id, session=session)
+    term_ids = list(course.terms.keys())
     course_api.remove_course(user, course_id, session=session)
+    await membership_api.remove_course_members(course_id, term_ids)
 
 
 # ── Metadata ─────────────────────────────────────────────────────────
@@ -99,18 +103,24 @@ async def get_course_environment(
     return course_assembler.environment(course)
 
 
-@router.patch("/{course_id}/environment", status_code=204)
+@router.patch("/{course_id}/environment", response_model=Environment)
 async def patch_course_environment(
     course_id: str,
     update: EnvironmentUpdate,
     user: CurrentUser,
     course_api: CourseAPIDep,
     session: DBSession,
-):
+    course_assembler: CourseAssemblerDep,
+) -> Environment:
     if update.image is not None:
         course_api.set_course_image(user, course_id, update.image, session=session)
     if update.resources is not None:
         course_api.set_course_resources(user, course_id, update.resources, session=session)
+    if update.profiles is not None:
+        course_api.set_course_profiles(user, course_id, update.profiles, session=session)
+    return course_assembler.environment(
+        course_api.get_course(user=user, course_id=course_id, session=session)
+    )
 
 
 @router.get("/{course_id}/terms", response_model=list[TermSummaryResponse])

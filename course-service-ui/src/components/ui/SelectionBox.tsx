@@ -6,6 +6,8 @@ interface SelectionBoxProps {
   description?: string;
   onChangeClick: () => void;
   infoContent?: ReactNode;
+  /** When false the current value is shown without the "Change" control. */
+  canChange?: boolean;
 }
 
 export function SelectionBox({
@@ -14,6 +16,7 @@ export function SelectionBox({
   description,
   onChangeClick,
   infoContent,
+  canChange = true,
 }: SelectionBoxProps) {
   return (
     <div className="mb-5">
@@ -25,15 +28,17 @@ export function SelectionBox({
             <div className="text-sm text-gray-500 mt-0.5">{description}</div>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onChangeClick}
-            className="bg-white text-hbrs-dark-blue border border-hbrs-dark-blue rounded-lg px-4 py-2 text-sm font-semibold hover:bg-hbrs-light-blue transition-colors"
-          >
-            Change
-          </button>
-        </div>
+        {canChange && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onChangeClick}
+              className="bg-white text-hbrs-dark-blue border border-hbrs-dark-blue rounded-lg px-4 py-2 text-sm font-semibold hover:bg-hbrs-light-blue transition-colors"
+            >
+              Change
+            </button>
+          </div>
+        )}
       </div>
       {infoContent && (
         <div className="mt-2 text-sm text-gray-500">{infoContent}</div>

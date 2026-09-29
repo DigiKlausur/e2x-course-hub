@@ -4,51 +4,45 @@ import { config } from "../config";
 import type { MembershipPatch, MembershipCollectionResponse } from "./types";
 
 const base_url = config.apiUrl;
-const hub_url = urlJoin(base_url, "hub");
+const lms_url = urlJoin(base_url, "lms");
 const courses_url = urlJoin(base_url, "courses");
 
 const course_url = (courseId: string) => urlJoin(courses_url, courseId);
 const term_url = (courseId: string, termId: string) =>
   urlJoin(course_url(courseId), "terms", termId);
 
+// Every membership PATCH answers 204 with no body.
+const fetchCollection = (url: string) =>
+  requests.get<MembershipCollectionResponse>(url);
+const patchCollection = (url: string, patch: MembershipPatch) =>
+  requests.patch<void>(url, patch);
+
 export const membershipAPI = {
-  hub: {
-    fetchHubAdmins: async (): Promise<MembershipCollectionResponse> => {
-      return requests.get(
-        urlJoin(hub_url, "admins"),
-      ) as Promise<MembershipCollectionResponse>;
+  lms: {
+    fetchLMSAdmins: async (): Promise<MembershipCollectionResponse> => {
+      return fetchCollection(urlJoin(lms_url, "admins"));
     },
-    updateHubAdmins: async (patch: MembershipPatch): Promise<void> => {
-      return requests.patch(urlJoin(hub_url, "admins"), patch) as Promise<void>;
+    updateLMSAdmins: async (patch: MembershipPatch): Promise<void> => {
+      return patchCollection(urlJoin(lms_url, "admins"), patch);
     },
     fetchCourseCreators: async (): Promise<MembershipCollectionResponse> => {
-      return requests.get(
-        urlJoin(hub_url, "course-creators"),
-      ) as Promise<MembershipCollectionResponse>;
+      return fetchCollection(urlJoin(lms_url, "course-creators"));
     },
     updateCourseCreators: async (patch: MembershipPatch): Promise<void> => {
-      return requests.patch(
-        urlJoin(hub_url, "course-creators"),
-        patch,
-      ) as Promise<void>;
+      return patchCollection(urlJoin(lms_url, "course-creators"), patch);
     },
   },
   course: {
     fetchOwners: async (
       courseId: string,
     ): Promise<MembershipCollectionResponse> => {
-      return requests.get(
-        urlJoin(course_url(courseId), "owners"),
-      ) as Promise<MembershipCollectionResponse>;
+      return fetchCollection(urlJoin(course_url(courseId), "owners"));
     },
     updateOwners: async (
       courseId: string,
       patch: MembershipPatch,
     ): Promise<void> => {
-      return requests.patch(
-        urlJoin(course_url(courseId), "owners"),
-        patch,
-      ) as Promise<void>;
+      return patchCollection(urlJoin(course_url(courseId), "owners"), patch);
     },
   },
   term: {
@@ -56,73 +50,69 @@ export const membershipAPI = {
       courseId: string,
       termId: string,
     ): Promise<MembershipCollectionResponse> => {
-      return requests.get(
+      return fetchCollection(
         urlJoin(term_url(courseId, termId), "instructors"),
-      ) as Promise<MembershipCollectionResponse>;
+      );
     },
     updateInstructors: async (
       courseId: string,
       termId: string,
       patch: MembershipPatch,
     ): Promise<void> => {
-      return requests.patch(
+      return patchCollection(
         urlJoin(term_url(courseId, termId), "instructors"),
         patch,
-      ) as Promise<void>;
+      );
     },
     fetchTeachingAssistants: async (
       courseId: string,
       termId: string,
     ): Promise<MembershipCollectionResponse> => {
-      return requests.get(
+      return fetchCollection(
         urlJoin(term_url(courseId, termId), "teaching-assistants"),
-      ) as Promise<MembershipCollectionResponse>;
+      );
     },
     updateTeachingAssistants: async (
       courseId: string,
       termId: string,
       patch: MembershipPatch,
     ): Promise<void> => {
-      return requests.patch(
+      return patchCollection(
         urlJoin(term_url(courseId, termId), "teaching-assistants"),
         patch,
-      ) as Promise<void>;
+      );
     },
     fetchStudents: async (
       courseId: string,
       termId: string,
     ): Promise<MembershipCollectionResponse> => {
-      return requests.get(
-        urlJoin(term_url(courseId, termId), "students"),
-      ) as Promise<MembershipCollectionResponse>;
+      return fetchCollection(urlJoin(term_url(courseId, termId), "students"));
     },
     updateStudents: async (
       courseId: string,
       termId: string,
       patch: MembershipPatch,
     ): Promise<void> => {
-      return requests.patch(
+      return patchCollection(
         urlJoin(term_url(courseId, termId), "students"),
         patch,
-      ) as Promise<void>;
+      );
     },
     fetchObservers: async (
       courseId: string,
       termId: string,
     ): Promise<MembershipCollectionResponse> => {
-      return requests.get(
-        urlJoin(term_url(courseId, termId), "observers"),
-      ) as Promise<MembershipCollectionResponse>;
+      return fetchCollection(urlJoin(term_url(courseId, termId), "observers"));
     },
     updateObservers: async (
       courseId: string,
       termId: string,
       patch: MembershipPatch,
     ): Promise<void> => {
-      return requests.patch(
+      return patchCollection(
         urlJoin(term_url(courseId, termId), "observers"),
         patch,
-      ) as Promise<void>;
+      );
     },
   },
 };

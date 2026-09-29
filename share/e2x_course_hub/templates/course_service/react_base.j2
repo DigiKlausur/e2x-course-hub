@@ -8,16 +8,12 @@
       // Inject server-side configuration into the client
       window.__APP_CONFIG__ = {
         baseUrl: "{{ service_prefix }}/app",
-        apiUrl: "{{ api_url }}",
-        user: {
-          name: "{{ user.name }}",
-          admin: {{ 'true' if user.admin else 'false' }}
-        }
+        apiUrl: "{{ api_url }}"
       };
     </script>
     <link rel="stylesheet" href="{{ service_prefix }}/static/course-service-ui/assets/main.css" />
     <script type="module" src="{{ service_prefix }}/static/course-service-ui/main.js"></script>
-    <link rel="icon" type="image/png" href="{{ service_prefix }}/static/course-service-ui/assets/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="{{ service_prefix }}/static/course-service-ui/favicon.ico" />
   </head>
   <body>
   <div id="root"></div>

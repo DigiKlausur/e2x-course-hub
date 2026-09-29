@@ -1,17 +1,20 @@
 from pydantic import BaseModel
 
-from ...schema.infrastructure import ImageSelection, ResourceSelection
+from ...schema.selection import ImageSelection
+from ...schema.types import SpawnRole
 
 
 class Environment(BaseModel):
     """Response body containing the environment configuration of a course or term."""
 
     image: ImageSelection
-    resources: ResourceSelection
+    resources: dict[SpawnRole, str] = {}
+    profiles: dict[SpawnRole, str] = {}
 
 
 class EnvironmentUpdate(BaseModel):
     """Request body for updating the environment configuration of a course or term."""
 
     image: ImageSelection | None = None
-    resources: ResourceSelection | None = None
+    resources: dict[SpawnRole, str] | None = None
+    profiles: dict[SpawnRole, str] | None = None

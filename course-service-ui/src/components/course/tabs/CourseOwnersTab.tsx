@@ -1,114 +1,34 @@
-import { useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
-import { Card, CardTitle } from "@components/ui/Card";
-import { Button } from "@components/ui/Button";
-import { AddMembersDialog } from "@components/membership/AddMembersDialog";
-import { MemberDataTableWithCurrentUser } from "@components/membership/MemberDataTableWithCurrentUser";
+import { MemberListCard } from "@components/membership/MemberListCard";
 import { useCourseOwners, useUpdateCourseOwners } from "@hooks/membership";
+import { useCourse } from "@hooks/course";
+import { MembershipRole } from "@domain/roles";
+
+const NO_ACTIONS = { list: false, add: false, remove: false };
 
 interface Props {
   courseId: string;
 }
 
-function toggleSelection(
-  setSelection: Dispatch<SetStateAction<Set<string>>>,
-  username: string,
-) {
-  setSelection((prev) => {
-    const next = new Set(prev);
-    if (next.has(username)) {
-      next.delete(username);
-    } else {
-      next.add(username);
-    }
-    return next;
-  });
-}
-
-function toggleSelectionForRows(
-  setSelection: Dispatch<SetStateAction<Set<string>>>,
-  select: boolean,
-  usernames: string[],
-) {
-  setSelection((prev) => {
-    const next = new Set(prev);
-    if (select) {
-      usernames.forEach((u) => next.add(u));
-    } else {
-      usernames.forEach((u) => next.delete(u));
-    }
-    return next;
-  });
-}
-
 export function CourseOwnersTab({ courseId }: Props) {
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  // Listing owners is permission guarded and answers 403, so the course's own
+  // actions decide whether the request is made at all.
+  const { data: course, isLoading: courseLoading } = useCourse(courseId);
+  const actions = course?.actions.members.courseOwners ?? NO_ACTIONS;
 
-  const { data, isLoading } = useCourseOwners(courseId);
+  const { data, isLoading } = useCourseOwners(courseId, actions.list);
   const update = useUpdateCourseOwners(courseId);
 
-  const usernames = data?.usernames ?? [];
-  const canManage = data?.capabilities?.manage ?? false;
+  if (courseLoading) return <p className="text-gray-500">Loading…</p>;
 
   return (
-    <div className="max-w-2xl">
-      <AddMembersDialog
-        open={addDialogOpen}
-        roleLabel="Owner"
-        onCancel={() => setAddDialogOpen(false)}
-        onConfirm={(names) => {
-          update.mutate({ add: names });
-          setAddDialogOpen(false);
-        }}
-      />
-      <Card>
-        <div className="flex items-center justify-between mb-4">
-          <CardTitle>Course Owners</CardTitle>
-          {canManage && (
-            <Button
-              variant="primary"
-              onClick={() => setAddDialogOpen(true)}
-              disabled={update.isPending}
-              className="px-3 py-2 text-xs"
-            >
-              + Add Owner
-            </Button>
-          )}
-        </div>
-        <MemberDataTableWithCurrentUser
-          rows={usernames}
-          isLoading={isLoading}
-          selected={selected}
-          onSelect={(username) => toggleSelection(setSelected, username)}
-          onSelectAll={(select, rows) =>
-            toggleSelectionForRows(setSelected, select, rows)
-          }
-          onRemove={(username) =>
-            update.mutate(
-              { remove: [username] },
-              {
-                onSuccess: () =>
-                  setSelected((prev) => {
-                    const next = new Set(prev);
-                    next.delete(username);
-                    return next;
-                  }),
-              },
-            )
-          }
-          onRemoveSelected={() => {
-            if (selected.size === 0) return;
-            update.mutate(
-              { remove: Array.from(selected) },
-              { onSuccess: () => setSelected(new Set()) },
-            );
-          }}
-          canRemove={canManage}
-          removeLabel="Owner"
-          isMutating={update.isPending}
-        />
-      </Card>
-    </div>
+    <MemberListCard
+      role={MembershipRole.CourseOwner}
+      actions={actions}
+      usernames={data?.usernames ?? []}
+      isLoading={isLoading}
+      update={update}
+      notAllowedMessage="You are not allowed to view the owners of this course."
+      roleContext={{ courseId }}
+    />
   );
 }

@@ -1,24 +1,20 @@
 from pydantic import BaseModel
 
-from ...schema.infrastructure import ImageCatalog, ResourceTiersByRole
-from ...schema.profile import AvailableProfileDetails
-
-
-class InfrastructureCapabilities(BaseModel):
-    manage: bool = False
-    view: bool = False
+from ...schema.catalog import ImageFamilyOptions, ProfileOptions, ResourceTierOptions
+from ...schema.types import SpawnRole
+from ..actions import CatalogActions
 
 
 class ImageCatalogResponse(BaseModel):
-    capabilities: InfrastructureCapabilities
-    catalog: ImageCatalog
+    actions: CatalogActions
+    catalog: ImageFamilyOptions
 
 
 class ResourceTiersResponse(BaseModel):
-    capabilities: InfrastructureCapabilities
-    catalog: ResourceTiersByRole
+    actions: CatalogActions
+    catalog: dict[SpawnRole, ResourceTierOptions]
 
 
 class ProfileCatalogResponse(BaseModel):
-    capabilities: InfrastructureCapabilities
-    catalog: AvailableProfileDetails
+    actions: CatalogActions
+    catalog: dict[SpawnRole, ProfileOptions]

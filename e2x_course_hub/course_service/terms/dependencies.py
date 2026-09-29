@@ -2,26 +2,19 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from e2x_course_hub.schema.course import TermConfig
-
+from ...errors import CourseNotFoundError, TermNotFoundError
+from ...schema.course import TermConfig
 from ..common.dependency_types import (
     CourseAPIDep,
     CurrentUser,
     DBSession,
-    MembershipAPIDep,
+    PermissionCheckerDep,
 )
 from .assembler import TermAssembler
 
 
-def get_term_assembler(
-    user: CurrentUser,
-    course_api: CourseAPIDep,
-    membership_api: MembershipAPIDep,
-) -> TermAssembler:
-    return TermAssembler(
-        course_permission_checker=course_api.permission_checker(user),
-        membership_permission_checker=membership_api.permission_checker(user),
-    )
+def get_term_assembler(permission_checker: PermissionCheckerDep) -> TermAssembler:
+    return TermAssembler(permission_checker=permission_checker)
 
 
 def load_term(
@@ -31,10 +24,13 @@ def load_term(
     course_api: CourseAPIDep,
     session: DBSession,
 ) -> TermConfig:
-    course = course_api.get_course(course_id=course_id, user=user, session=session)
+    try:
+        course = course_api.get_course(course_id=course_id, user=user, session=session)
+    except CourseNotFoundError:
+        raise CourseNotFoundError(course_id=course_id)
     term = course.terms.get(term_id) if course else None
     if term is None:
-        raise ValueError(f"Term with ID {term_id} not found in course {course_id}.")
+        raise TermNotFoundError(course_id=course_id, term_id=term_id)
     return term
 
 

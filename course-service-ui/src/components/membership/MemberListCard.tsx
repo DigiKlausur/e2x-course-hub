@@ -1,0 +1,118 @@
+import { useState } from "react";
+import type { UseMutationResult } from "@tanstack/react-query";
+import { useSelection } from "@hooks/ui";
+import { Card, CardTitle } from "@components/ui/Card";
+import { Button } from "@components/ui/Button";
+import { Alert } from "@components/ui/Alert";
+import { AddMembersDialog } from "@components/membership/AddMembersDialog";
+import { RoleInfoLink } from "@components/actions/RoleInfoLink";
+import type { RoleContext } from "@components/actions/RoleActionsModal";
+import { MemberDataTableWithCurrentUser } from "@components/membership/MemberDataTableWithCurrentUser";
+import { getErrorMessage } from "@/lib/errorMessage";
+import { memberListActionText } from "@domain/actions";
+import { type MembershipRole, memberLabels } from "@domain/roles";
+import type { MemberListActions, MembershipPatch } from "@api/types";
+
+interface Props {
+  role: MembershipRole;
+  actions: MemberListActions;
+  usernames: string[];
+  isLoading: boolean;
+  update: UseMutationResult<void, Error, MembershipPatch>;
+  /** Shown instead of the card when `actions.list` is false. */
+  notAllowedMessage: string;
+  /** The course the list belongs to, named in the explanation of the role. */
+  roleContext?: RoleContext;
+}
+
+/**
+ * A single member list with its add dialog and remove actions, shared by the
+ * course owners and the LMS wide lists (LMS admins, course creators). The
+ * caller owns the list query and update mutation, so it decides which endpoint
+ * is used and whether the list is fetched at all.
+ */
+export function MemberListCard({
+  role,
+  actions,
+  usernames,
+  isLoading,
+  update,
+  notAllowedMessage,
+  roleContext,
+}: Props) {
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const selection = useSelection();
+  const labels = memberLabels[role];
+
+  const addText = memberListActionText.add(labels);
+
+  if (!actions.list) {
+    return <p className="text-gray-500">{notAllowedMessage}</p>;
+  }
+
+  return (
+    <div className="max-w-2xl">
+      <AddMembersDialog
+        open={addDialogOpen}
+        roleLabel={labels.singular}
+        role={role}
+        roleContext={roleContext}
+        onCancel={() => setAddDialogOpen(false)}
+        onConfirm={(names) => {
+          update.mutate({ add: names });
+          setAddDialogOpen(false);
+        }}
+      />
+      <Card>
+        {update.error && (
+          <Alert
+            className="mb-4"
+            title={`Could not update the ${labels.plural.toLowerCase()}`}
+          >
+            {getErrorMessage(update.error)}
+          </Alert>
+        )}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-baseline gap-4">
+            <CardTitle>{labels.plural}</CardTitle>
+            <RoleInfoLink role={role} context={roleContext} />
+          </div>
+          {actions.add && (
+            <Button
+              variant="primary"
+              onClick={() => setAddDialogOpen(true)}
+              disabled={update.isPending}
+              className="px-3 py-2 text-xs"
+              title={addText.description}
+            >
+              + {addText.label}
+            </Button>
+          )}
+        </div>
+        <MemberDataTableWithCurrentUser
+          rows={usernames}
+          isLoading={isLoading}
+          selected={selection.selected}
+          onSelect={selection.toggle}
+          onSelectAll={selection.toggleRows}
+          onRemove={(username) =>
+            update.mutate(
+              { remove: [username] },
+              { onSuccess: () => selection.remove(username) },
+            )
+          }
+          onRemoveSelected={() => {
+            if (selection.selected.size === 0) return;
+            update.mutate(
+              { remove: Array.from(selection.selected) },
+              { onSuccess: selection.clear },
+            );
+          }}
+          canRemove={actions.remove}
+          removeLabel={labels.singular}
+          isMutating={update.isPending}
+        />
+      </Card>
+    </div>
+  );
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Alert } from "@components/ui/Alert";
 import { Card, CardTitle } from "@components/ui/Card";
 import { SelectionBox } from "@components/ui/SelectionBox";
 import { ImageSelectionDialog } from "@components/dialogs/ImageSelectionDialog";
@@ -8,9 +9,10 @@ import type {
   ImageSelection,
   ResourceCatalog,
   ResourcesSelection,
+  SpawnRole,
 } from "@api/types";
 
-type Dialog = "image" | "student" | "grader" | null;
+type Dialog = "image" | SpawnRole | null;
 
 interface Props {
   title: string;
@@ -20,8 +22,11 @@ interface Props {
   imageCatalog: ImageCatalog | undefined;
   resourceCatalog: ResourceCatalog | undefined;
   showTag?: boolean;
+  /** When false the configuration is shown read-only, with no way to open a dialog. */
+  canEdit?: boolean;
+  errorMessage?: string;
   onImageConfirm: (selection: ImageSelection) => void;
-  onResourceConfirm: (role: "student" | "grader", tier: string) => void;
+  onResourceConfirm: (role: SpawnRole, tier: string) => void;
 }
 
 export function RuntimeConfigEditor({
@@ -32,6 +37,8 @@ export function RuntimeConfigEditor({
   imageCatalog,
   resourceCatalog,
   showTag = true,
+  canEdit = true,
+  errorMessage,
   onImageConfirm,
   onResourceConfirm,
 }: Props) {
@@ -56,16 +63,30 @@ export function RuntimeConfigEditor({
   }
 
   const resourceDescription = (tier: typeof studentTier) =>
-    tier
-      ? `${tier.resources.cpu_limit} CPU · ${tier.resources.mem_limit} RAM`
+    tier?.metadata
+      ? Object.entries(tier.metadata)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(" · ")
       : undefined;
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <Card>
         <CardTitle>{title}</CardTitle>
         {description && (
           <p className="text-sm text-gray-500 mb-6">{description}</p>
+        )}
+
+        {errorMessage && (
+          <Alert className="mb-5" title="Could not save the change">
+            {errorMessage}
+          </Alert>
+        )}
+
+        {!canEdit && (
+          <Alert variant="info" className="mb-5">
+            You do not have permission to change this configuration.
+          </Alert>
         )}
 
         <SelectionBox
@@ -73,6 +94,7 @@ export function RuntimeConfigEditor({
           title={imageName}
           description={imageFamily?.description}
           onChangeClick={() => setOpenDialog("image")}
+          canChange={canEdit}
         />
 
         <SelectionBox
@@ -83,6 +105,7 @@ export function RuntimeConfigEditor({
           description={resourceDescription(studentTier)}
           onChangeClick={() => setOpenDialog("student")}
           infoContent={studentTier?.warning}
+          canChange={canEdit}
         />
 
         <SelectionBox
@@ -91,6 +114,7 @@ export function RuntimeConfigEditor({
           description={resourceDescription(graderTier)}
           onChangeClick={() => setOpenDialog("grader")}
           infoContent={graderTier?.warning}
+          canChange={canEdit}
         />
       </Card>
 

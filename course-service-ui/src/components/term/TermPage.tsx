@@ -1,9 +1,9 @@
 import { Link, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { TabBar } from "@components/ui/TabBar";
-import { useCourseMetadata } from "@hooks/course";
+import { YourAccessButton } from "@components/actions/YourAccessButton";
+import { termActionText } from "@domain/actions";
+import { useCourseMetadata, useTerm } from "@hooks/course";
 import { TermOverviewTab } from "./tabs/TermOverviewTab";
-import { TermMembersTab } from "./tabs/TermMembersTab";
-import { TermRuntimeTab } from "./tabs/TermRuntimeTab";
 import { TermSettingsTab } from "./tabs/TermSettingsTab";
 
 export function TermPage() {
@@ -13,37 +13,51 @@ export function TermPage() {
   }>();
 
   const { data: courseMetadata } = useCourseMetadata(courseId!);
+  const { data: term } = useTerm(courseId!, termId!);
+  const actions = term?.actions;
 
   const base = `/course/${courseId}/term/${termId}`;
+  // Same rule as CoursePage: only offer a tab the user can use.
   const tabs = [
-    { label: "Overview", to: base },
-    { label: "Members", to: `${base}/members` },
-    { label: "Term Runtime", to: `${base}/runtime` },
-    { label: "Settings", to: `${base}/settings` },
-  ];
+    { label: "Overview", to: base, show: true },
+    {
+      label: "Settings",
+      to: `${base}/settings`,
+      show: actions?.remove ?? false,
+    },
+  ].filter((tab) => tab.show);
 
   return (
     <div>
-      <header className="bg-white border-b border-gray-200 px-10 py-8">
-        <div className="text-sm text-gray-400 mb-1">
-          <Link to="/" className="hover:text-hbrs-dark-blue hover:underline">
-            Courses
-          </Link>
-          {" / "}
-          <Link
-            to={`/course/${courseId}`}
-            className="hover:text-hbrs-dark-blue hover:underline"
-          >
-            {courseId}
-          </Link>
-          {" / "}
-          <span className="text-gray-700 font-medium">{termId}</span>
+      <header className="bg-white border-b border-gray-200 px-10 py-8 flex items-start justify-between gap-4">
+        <div>
+          <div className="text-sm text-gray-400 mb-1">
+            <Link to="/" className="hover:text-hbrs-dark-blue hover:underline">
+              Courses
+            </Link>
+            {" / "}
+            <Link
+              to={`/course/${courseId}`}
+              className="hover:text-hbrs-dark-blue hover:underline"
+            >
+              {courseId}
+            </Link>
+            {" / "}
+            <span className="text-gray-700 font-medium">{termId}</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 m-0">
+            {courseId} · {termId}
+          </h1>
+          {courseMetadata?.course_name && (
+            <p className="mt-1 text-gray-500">{courseMetadata.course_name}</p>
+          )}
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 m-0">
-          {courseId} · {termId}
-        </h1>
-        {courseMetadata?.course_name && (
-          <p className="mt-1 text-gray-500">{courseMetadata.course_name}</p>
+        {actions && (
+          <YourAccessButton
+            actions={actions}
+            texts={termActionText}
+            scope={`in semester ${termId} of course ${courseId}`}
+          />
         )}
       </header>
 
@@ -54,14 +68,6 @@ export function TermPage() {
           <Route
             index
             element={<TermOverviewTab courseId={courseId!} termId={termId!} />}
-          />
-          <Route
-            path="members"
-            element={<TermMembersTab courseId={courseId!} termId={termId!} />}
-          />
-          <Route
-            path="runtime"
-            element={<TermRuntimeTab courseId={courseId!} termId={termId!} />}
           />
           <Route
             path="settings"

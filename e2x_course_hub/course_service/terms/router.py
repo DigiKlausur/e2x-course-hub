@@ -4,6 +4,7 @@ from ..common.dependency_types import (
     CourseAPIDep,
     CurrentUser,
     DBSession,
+    MembershipAPIDep,
 )
 from ..common.schemas import Environment, EnvironmentUpdate
 from .dependencies import LoadedTerm, TermAssemblerDep
@@ -36,9 +37,11 @@ async def delete_term(
     term_id: str,
     user: CurrentUser,
     course_api: CourseAPIDep,
+    membership_api: MembershipAPIDep,
     session: DBSession,
 ):
     course_api.remove_term(user, course_id, term_id, session=session)
+    await membership_api.remove_term_members(course_id, term_id)
 
 
 @router.get("", response_model=TermDetailResponse)
@@ -59,7 +62,7 @@ async def get_term_environment(
     return term_assembler.environment(term)
 
 
-@router.patch("/environment", status_code=204)
+@router.patch("/environment", response_model=Environment)
 async def patch_term_environment(
     course_id: str,
     term_id: str,
@@ -67,8 +70,14 @@ async def patch_term_environment(
     user: CurrentUser,
     course_api: CourseAPIDep,
     session: DBSession,
-):
+    term_assembler: TermAssemblerDep,
+) -> Environment:
     if update.image is not None:
         course_api.set_term_image(user, course_id, term_id, update.image, session=session)
     if update.resources is not None:
         course_api.set_term_resources(user, course_id, term_id, update.resources, session=session)
+    if update.profiles is not None:
+        course_api.set_term_profiles(user, course_id, term_id, update.profiles, session=session)
+    return term_assembler.environment(
+        course_api.get_term(user=user, course_id=course_id, term_id=term_id, session=session)
+    )

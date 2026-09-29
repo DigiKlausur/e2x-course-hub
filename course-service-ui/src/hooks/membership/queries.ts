@@ -4,23 +4,35 @@ import type { MembershipCollectionResponse } from "@api/types";
 import { membershipQueryKeys } from "./keys";
 import { MembershipRole } from "@domain/roles";
 
-export function useHubAdmins() {
+/**
+ * Permission guarded like the course and term lists below, so callers pass
+ * `enabled` from the course collection's `actions.members.lmsAdmins.list` /
+ * `actions.members.courseCreators.list`.
+ */
+export function useLMSAdmins(enabled = true) {
   return useQuery<MembershipCollectionResponse>({
-    queryKey: [...membershipQueryKeys.hub.roles[MembershipRole.Admin]()],
-    queryFn: () => membershipAPI.hub.fetchHubAdmins(),
+    queryKey: [...membershipQueryKeys.lms.roles[MembershipRole.Admin]()],
+    queryFn: () => membershipAPI.lms.fetchLMSAdmins(),
+    enabled,
   });
 }
 
-export function useCourseCreators() {
+export function useCourseCreators(enabled = true) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
-      ...membershipQueryKeys.hub.roles[MembershipRole.CourseCreator](),
+      ...membershipQueryKeys.lms.roles[MembershipRole.CourseCreator](),
     ],
-    queryFn: () => membershipAPI.hub.fetchCourseCreators(),
+    queryFn: () => membershipAPI.lms.fetchCourseCreators(),
+    enabled,
   });
 }
 
-export function useCourseOwners(courseId: string) {
+/**
+ * Like the term membership endpoints below, this is permission guarded and
+ * answers 403 rather than an empty list, so callers pass `enabled` from the
+ * course's `actions.members.courseOwners.list`.
+ */
+export function useCourseOwners(courseId: string, enabled = true) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.courses.roles[MembershipRole.CourseOwner](
@@ -28,10 +40,21 @@ export function useCourseOwners(courseId: string) {
       ),
     ],
     queryFn: () => membershipAPI.course.fetchOwners(courseId),
+    enabled,
   });
 }
 
-export function useInstructors(courseId: string, termId: string) {
+/**
+ * The term membership endpoints are permission guarded and answer 403 rather
+ * than an empty list when the caller may not see a role. Callers therefore pass
+ * `enabled` from the term's `actions.members` flags, so a request is
+ * only made when it can succeed.
+ */
+export function useInstructors(
+  courseId: string,
+  termId: string,
+  enabled = true,
+) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.terms.roles[MembershipRole.Instructor](
@@ -40,10 +63,11 @@ export function useInstructors(courseId: string, termId: string) {
       ),
     ],
     queryFn: () => membershipAPI.term.fetchInstructors(courseId, termId),
+    enabled,
   });
 }
 
-export function useObservers(courseId: string, termId: string) {
+export function useObservers(courseId: string, termId: string, enabled = true) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.terms.roles[MembershipRole.Observer](
@@ -52,10 +76,11 @@ export function useObservers(courseId: string, termId: string) {
       ),
     ],
     queryFn: () => membershipAPI.term.fetchObservers(courseId, termId),
+    enabled,
   });
 }
 
-export function useStudents(courseId: string, termId: string) {
+export function useStudents(courseId: string, termId: string, enabled = true) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.terms.roles[MembershipRole.Student](
@@ -64,10 +89,15 @@ export function useStudents(courseId: string, termId: string) {
       ),
     ],
     queryFn: () => membershipAPI.term.fetchStudents(courseId, termId),
+    enabled,
   });
 }
 
-export function useTeachingAssistants(courseId: string, termId: string) {
+export function useTeachingAssistants(
+  courseId: string,
+  termId: string,
+  enabled = true,
+) {
   return useQuery<MembershipCollectionResponse>({
     queryKey: [
       ...membershipQueryKeys.terms.roles[MembershipRole.TeachingAssistant](
@@ -76,5 +106,6 @@ export function useTeachingAssistants(courseId: string, termId: string) {
       ),
     ],
     queryFn: () => membershipAPI.term.fetchTeachingAssistants(courseId, termId),
+    enabled,
   });
 }

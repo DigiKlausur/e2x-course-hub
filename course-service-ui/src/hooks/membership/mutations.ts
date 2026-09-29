@@ -4,16 +4,16 @@ import type { MembershipPatch } from "@api/types";
 import { membershipQueryKeys } from "./keys";
 import { MembershipRole } from "@domain/roles";
 
-export function useUpdateHubAdmins() {
+export function useUpdateLMSAdmins() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (updates: MembershipPatch) => {
-      await membershipAPI.hub.updateHubAdmins(updates);
+      await membershipAPI.lms.updateLMSAdmins(updates);
     },
     onSuccess: () => {
       // Invalidate the course admins query to refetch the updated data
       queryClient.invalidateQueries({
-        queryKey: [...membershipQueryKeys.hub.roles[MembershipRole.Admin]()],
+        queryKey: [...membershipQueryKeys.lms.roles[MembershipRole.Admin]()],
       });
     },
     onError: (error) => {
@@ -26,13 +26,13 @@ export function useUpdateCourseCreators() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (updates: MembershipPatch) => {
-      await membershipAPI.hub.updateCourseCreators(updates);
+      await membershipAPI.lms.updateCourseCreators(updates);
     },
     onSuccess: () => {
       // Invalidate the course creators query to refetch the updated data
       queryClient.invalidateQueries({
         queryKey: [
-          ...membershipQueryKeys.hub.roles[MembershipRole.CourseCreator](),
+          ...membershipQueryKeys.lms.roles[MembershipRole.CourseCreator](),
         ],
       });
     },

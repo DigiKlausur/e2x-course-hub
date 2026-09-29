@@ -1,128 +1,60 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useCourses, useCreateCourse } from "@hooks/course";
-import {
-  useImageCatalog,
-  useProfileCatalog,
-  useResourceCatalog,
-} from "@hooks/catalog";
-import { buildDefaultCourseConfig } from "../../lib/buildDefaultCourseConfig";
-import { Button } from "@components/ui/Button";
-import { CreateCourseDialog } from "@components/dialogs/CreateCourseDialog";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { TabBar } from "@components/ui/TabBar";
+import { YourAccessButton } from "@components/actions/YourAccessButton";
+import { useCourses } from "@hooks/course";
+import { lmsActionText } from "@domain/actions";
+import { MembershipRole, memberLabels } from "@domain/roles";
+import { CourseListTab } from "./tabs/CourseListTab";
+import { LMSAdminsTab } from "./tabs/LMSAdminsTab";
+import { CourseCreatorsTab } from "./tabs/CourseCreatorsTab";
 
 export function CoursesPage() {
-  const navigate = useNavigate();
-  const {
-    data: { courses, capabilities } = {},
-    isLoading,
-    error,
-  } = useCourses();
-  const createCourse = useCreateCourse();
-  const imageCatalog = useImageCatalog();
-  const resourceCatalog = useResourceCatalog();
-  const profileCatalog = useProfileCatalog();
+  const { data: { actions } = {} } = useCourses();
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handleCreate = async (data: {
-    courseId: string;
-    courseName: string;
-    description: string;
-  }) => {
-    const config = buildDefaultCourseConfig({
-      ...data,
-      imageCatalog: imageCatalog.data?.catalog,
-      resourceCatalog: resourceCatalog.data?.catalog,
-      profileCatalog: profileCatalog.data?.catalog,
-    });
-    if (!config) return;
-    await createCourse.mutateAsync(config);
-    navigate(`/course/${data.courseId}`);
-  };
+  // Only offer a tab the user can actually use. As on the course page, the
+  // routes below stay mounted so a bookmarked URL still resolves, and each tab
+  // explains itself when the user may not view it.
+  const tabs = [
+    { label: "Courses", to: "/", show: true },
+    {
+      label: memberLabels[MembershipRole.Admin].plural,
+      to: "/lms-admins",
+      show: actions?.members.lmsAdmins.list ?? false,
+    },
+    {
+      label: memberLabels[MembershipRole.CourseCreator].plural,
+      to: "/course-creators",
+      show: actions?.members.courseCreators.list ?? false,
+    },
+  ].filter((tab) => tab.show);
 
   return (
     <div>
-      <header className="bg-white border-b border-gray-200 px-10 py-8">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 m-0">Courses</h1>
-            <p className="mt-1 text-gray-500">Manage your courses and terms</p>
-          </div>
-          <Button variant="primary" onClick={() => setDialogOpen(true)}>
-            + Create Course
-          </Button>
+      <header className="bg-white border-b border-gray-200 px-10 py-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 m-0">Courses</h1>
+          <p className="mt-1 text-gray-500">
+            Manage your courses and semesters
+          </p>
         </div>
+        {actions && (
+          <YourAccessButton
+            actions={actions}
+            texts={lmsActionText}
+            scope="across the whole LMS"
+          />
+        )}
       </header>
 
-      {capabilities?.createCourse === false ? (
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3">
-          <p>You are not allowed to create courses.</p>
-        </div>
-      ) : (
-        <CreateCourseDialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          existingCourseIds={courses?.map((c) => c.metadata.course_id) ?? []}
-          onCreate={handleCreate}
-          isSubmitting={createCourse.isPending}
-        />
-      )}
+      <TabBar tabs={tabs} />
 
       <div className="max-w-5xl mx-auto px-10 py-8">
-        {isLoading && <p className="text-gray-500">Loading courses…</p>}
-        {error && <p className="text-red-600">Failed to load courses.</p>}
-        {courses && (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-sky-50 text-left">
-                  <th className="px-6 py-3 font-semibold text-gray-700">
-                    Course ID
-                  </th>
-                  <th className="px-6 py-3 font-semibold text-gray-700">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 font-semibold text-gray-700">
-                    Description
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {courses.map((course) => (
-                  <tr
-                    key={course.metadata.course_id}
-                    className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 font-semibold">
-                      <Link
-                        to={`/course/${course.metadata.course_id}`}
-                        className="text-hbrs-dark-blue hover:text-hbrs-medium-blue hover:underline"
-                      >
-                        {course.metadata.course_id}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-gray-800">
-                      {course.metadata.course_name}
-                    </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {course.metadata.description ?? "—"}
-                    </td>
-                  </tr>
-                ))}
-                {courses.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="px-6 py-8 text-center text-gray-400"
-                    >
-                      No courses found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <Routes>
+          <Route index element={<CourseListTab />} />
+          <Route path="lms-admins" element={<LMSAdminsTab />} />
+          <Route path="course-creators" element={<CourseCreatorsTab />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
     </div>
   );

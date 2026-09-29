@@ -1,41 +1,62 @@
 import { Link, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { TabBar } from "@components/ui/TabBar";
-import { useCourseMetadata } from "@hooks/course";
+import { YourAccessButton } from "@components/actions/YourAccessButton";
+import { useCourse } from "@hooks/course";
+import { courseActionText } from "@domain/actions";
+import { MembershipRole, memberLabels } from "@domain/roles";
 import { CourseOverviewTab } from "./tabs/CourseOverviewTab";
-import { CourseTermsTab } from "./tabs/CourseTermsTab";
 import { CourseOwnersTab } from "./tabs/CourseOwnersTab";
-import { CourseTemplateTab } from "./tabs/CourseTemplateTab";
 import { CourseSettingsTab } from "./tabs/CourseSettingsTab";
 
 export function CoursePage() {
   const { courseId } = useParams<{ courseId: string }>();
 
-  const { data: metadata, isLoading } = useCourseMetadata(courseId!);
+  const { data: course, isLoading } = useCourse(courseId!);
+  const metadata = course?.metadata;
+  const actions = course?.actions;
 
   const base = `/course/${courseId}`;
+  // Only offer a tab the user can actually use. The routes below stay mounted
+  // regardless, so a bookmarked URL still resolves — each tab does its own
+  // permission check and explains itself rather than 404ing.
   const tabs = [
-    { label: "Overview", to: base },
-    { label: "Course Owners", to: `${base}/owners` },
-    { label: "Semesters", to: `${base}/terms` },
-    { label: "Image & Resource Defaults", to: `${base}/template` },
-    { label: "Settings", to: `${base}/settings` },
-  ];
+    { label: "Overview", to: base, show: true },
+    {
+      label: memberLabels[MembershipRole.CourseOwner].plural,
+      to: `${base}/owners`,
+      show: actions?.members.courseOwners.list ?? false,
+    },
+    {
+      label: "Settings",
+      to: `${base}/settings`,
+      show: (actions?.metadata.edit || actions?.remove) ?? false,
+    },
+  ].filter((tab) => tab.show);
 
   return (
     <div>
-      <header className="bg-white border-b border-gray-200 px-10 py-8">
-        <div className="text-sm text-gray-400 mb-1">
-          <Link to="/" className="hover:text-hbrs-dark-blue hover:underline">
-            Courses
-          </Link>
-          {" / "}
-          <span className="text-gray-700 font-medium">{courseId}</span>
+      <header className="bg-white border-b border-gray-200 px-10 py-8 flex items-start justify-between gap-4">
+        <div>
+          <div className="text-sm text-gray-400 mb-1">
+            <Link to="/" className="hover:text-hbrs-dark-blue hover:underline">
+              Courses
+            </Link>
+            {" / "}
+            <span className="text-gray-700 font-medium">{courseId}</span>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 m-0">
+            {isLoading ? courseId : (metadata?.course_name ?? courseId)}
+          </h1>
+          {metadata?.description && (
+            <p className="mt-1 text-gray-500">{metadata.description}</p>
+          )}
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 m-0">
-          {isLoading ? courseId : (metadata?.course_name ?? courseId)}
-        </h1>
-        {metadata?.description && (
-          <p className="mt-1 text-gray-500">{metadata.description}</p>
+        {actions && (
+          <YourAccessButton
+            actions={actions}
+            texts={courseActionText}
+            scope={`in course ${courseId}`}
+          />
         )}
       </header>
 
@@ -45,16 +66,8 @@ export function CoursePage() {
         <Routes>
           <Route index element={<CourseOverviewTab courseId={courseId!} />} />
           <Route
-            path="terms"
-            element={<CourseTermsTab courseId={courseId!} />}
-          />
-          <Route
             path="owners"
             element={<CourseOwnersTab courseId={courseId!} />}
-          />
-          <Route
-            path="template"
-            element={<CourseTemplateTab courseId={courseId!} />}
           />
           <Route
             path="settings"

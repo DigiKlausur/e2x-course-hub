@@ -7,6 +7,6 @@ const base_url = config.apiUrl;
 
 export const meAPI = {
   fetch: async (): Promise<CurrentUser> => {
-    return requests.get(urlJoin(base_url, "me")) as Promise<CurrentUser>;
+    return requests.get<CurrentUser>(urlJoin(base_url, "me"));
   },
 };

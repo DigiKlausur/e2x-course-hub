@@ -1,38 +1,26 @@
 from pydantic import BaseModel
 
 from ...schema.course import CourseMetadata
+from ..actions import CourseActions, LmsActions
 from ..common.schemas import Environment
 from ..terms.schemas import TermSummaryResponse
 
 
-class CourseCapabilities(BaseModel):
-    editMetadata: bool
-    removeCourse: bool
-    selectEnvironment: bool
-    viewCourseOwners: bool
-    manageCourseOwners: bool
-    addTerm: bool
-
-
 class CourseSummaryResponse(BaseModel):
     metadata: CourseMetadata
-    capabilities: CourseCapabilities
+    actions: CourseActions
 
 
 class CourseDetailResponse(BaseModel):
     metadata: CourseMetadata
     environment: Environment
     terms: list[TermSummaryResponse]
-    capabilities: CourseCapabilities
-
-
-class CourseCollectionCapabilities(BaseModel):
-    createCourse: bool
+    actions: CourseActions
 
 
 class CourseCollectionResponse(BaseModel):
     courses: list[CourseSummaryResponse]
-    capabilities: CourseCollectionCapabilities
+    actions: LmsActions
 
 
 class CourseMetadataUpdate(BaseModel):
