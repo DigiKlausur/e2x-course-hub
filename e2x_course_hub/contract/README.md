@@ -61,7 +61,7 @@ from e2x_course_hub.contract import (
     SpawnOffering,
     SpawnSelection,
     SpawnRole,
-    UnknownImageFamilyError,
+    CatalogError,
 )
 ```
 

@@ -1,4 +1,5 @@
 from ..schema.catalog import (
+    CatalogError,
     ImageFamilyOption,
     ImageFamilyOptions,
     ImageTagInfo,
@@ -19,6 +20,7 @@ from ..schema.types import SpawnRole, UserLike
 from .providers import InfrastructureCatalogProvider, SpawnOfferingProvider
 
 __all__ = [
+    "CatalogError",
     "CourseReference",
     "ImageFamilyOption",
     "ImageFamilyOptions",
