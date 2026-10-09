@@ -179,6 +179,7 @@ exported standalone with `python scripts/export_openapi.py`.
 | Terms                | `POST/GET/DELETE /courses/{course_id}/terms/{term_id}`, `GET/PATCH /courses/{course_id}/terms/{term_id}/environment` |
 | Infrastructure       | `GET /catalogs/image-catalog`, `GET /catalogs/resource-tiers`, `GET /catalogs/profile-catalog`             |
 | Membership           | `GET/PATCH /lms/admins`, `GET/PATCH /lms/course-creators`, `GET/PATCH /courses/{course_id}/owners`, `GET/PATCH /courses/{course_id}/terms/{term_id}/{instructors,teaching-assistants,students,observers}` |
+| Roles                | `GET /roles/{role}/actions`                                                                                |
 | Current user         | `GET /me`                                                                                                  |
 
 `course-service-ui` consumes this API with types generated from the OpenAPI schema
@@ -201,7 +202,9 @@ permissions for course/term management (`e2x_course_hub/api/course_permissions.p
 | Student             | Term   | (none — spawns only, no management permissions)                                        |
 
 Membership itself (who holds which role, per course/term) is managed separately through
-the membership API, backed by JupyterHub groups.
+the membership API, backed by JupyterHub groups. The membership, infrastructure catalog
+and spawn permission tables, and the group names behind each role, are in
+[`docs/source/reference/roles.md`](docs/source/reference/roles.md).
 
 ## Development
 

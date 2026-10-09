@@ -40,20 +40,20 @@ spawn time. The user's only spawn-time choice is *which course/term to launch* a
 
 4.  The user picks which offering (course/term) to launch.
 
-6.  spawner: start() translates the SpawnOffering to hardware and launches the container.
+5.  spawner: start() translates the SpawnOffering to hardware and launches the container.
 ```
 
 ## Modules
 
-| Module         | What's in it                                                                  |
-|----------------|-------------------------------------------------------------------------------|
-| `types.py`     | Shared primitives used across the other modules: `SpawnRole`, `UserLike`      |
-| `catalog.py`   | The infrastructure catalog (what *can* be run)                                |
-| `selection.py` | The offer/selection layer (what a user *may* launch and where)                |
-| `providers.py` | The two protocols that define the boundary                                    |
-| `errors.py`    | `CatalogError` and the typed lookup errors                                    |
+| Module                 | What's in it                                                          |
+|------------------------|-----------------------------------------------------------------------|
+| `contract/providers.py` | The two protocols that define the boundary                           |
+| `schema/types.py`      | Shared primitives used across the other modules: `SpawnRole`, `UserLike` |
+| `schema/catalog.py`    | The infrastructure catalog (what *can* be run), `CatalogError` and the typed lookup errors |
+| `schema/selection.py`  | The offer/selection layer (what a user *may* launch and where)        |
 
-Import from the package root — the submodules are an implementation detail:
+`e2x_course_hub.contract` re-exports the models from `schema/`. Import from there —
+the submodules are an implementation detail:
 
 ```python
 from e2x_course_hub.contract import (
@@ -61,7 +61,7 @@ from e2x_course_hub.contract import (
     SpawnOffering,
     SpawnSelection,
     SpawnRole,
-    CatalogError,
+    UnknownImageFamilyError,
 )
 ```
 
