@@ -5,9 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "e2x-course-hub"
 dynamic = ["version"]
-description = ''
+description = "A JupyterHub service for managing courses, terms, and course membership with role-based access control in multi-course teaching deployments."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "MIT"
 keywords = []
 authors = [
@@ -16,9 +16,10 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
   "pydantic>=2.0",
@@ -42,8 +43,8 @@ Source = "https://github.com/Digiklausur/e2x-course-hub"
 [project.optional-dependencies]
 dev = [
   "pre-commit",
-  # Pinned so every developer and CI format identically; bump deliberately and
-  # update the matching pin in .github/workflows/ci.yml.
+  # Pinned so every developer and CI format identically; bump deliberately.
+  # CI's ruff-action reads this pin, so there is no second copy to update.
   "ruff==0.16.7",
   "tbump",
   "build",

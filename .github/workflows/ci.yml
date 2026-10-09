@@ -35,8 +35,15 @@ jobs:
           args: "check --output-format=github"
 
   frontend:
-    name: Frontend and API contract
+    name: Frontend and API contract (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    # Installing the package and exporting the OpenAPI schema is the only
+    # exercise the Python code gets, so run it on every version pyproject.toml
+    # claims to support. The UI-only steps below run once, on the newest.
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v7
 
@@ -52,7 +59,7 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.14"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install UI dependencies
         run: npm ci
@@ -74,14 +81,17 @@ jobs:
           PYTHON: python
 
       - name: Lint
+        if: matrix.python-version == '3.14'
         run: npm run lint
         working-directory: course-service-ui
 
       - name: Check formatting
+        if: matrix.python-version == '3.14'
         run: npx prettier --check src
         working-directory: course-service-ui
 
       # Runs `tsc -b` and then the production bundle.
       - name: Typecheck and build
+        if: matrix.python-version == '3.14'
         run: npm run build
         working-directory: course-service-ui
