@@ -15,24 +15,24 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.14"
-
       # Ruff reads its config from pyproject.toml and never imports the package,
       # so this job deliberately skips installing the project — doing so would
       # drag in Node just to build the UI bundle (see the frontend job).
       #
-      # Pinned on purpose: formatter output changes between releases, so an
-      # unpinned install makes CI disagree with developers' local ruff without
-      # anything in the repository having changed. Keep in step with the pin in
-      # pyproject.toml's `dev` extra.
-      - name: Install ruff
-        run: pip install ruff==0.16.7
+      # The action installs the ruff version pinned in pyproject.toml's `dev`
+      # extra. That pin matters: formatter output changes between releases, so
+      # an unpinned ruff makes CI disagree with developers' local ruff without
+      # anything in the repository having changed.
+      - name: Check formatting
+        uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
+        with:
+          args: "format --check --diff"
 
-      - run: ruff check .
-
-      - run: ruff format --check .
+      - name: Lint
+        if: ${{ !cancelled() }}
+        uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
+        with:
+          args: "check --output-format=github"
 
   frontend:
     name: Frontend and API contract
