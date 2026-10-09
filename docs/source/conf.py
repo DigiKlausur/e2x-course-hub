@@ -15,7 +15,9 @@ sys.path.insert(0, str(Path("..", "..").resolve()))
 project = "e2x-course-hub"
 copyright = "2026, Tim Metzler"
 author = "Tim Metzler"
-release = "0.1.0"
+from e2x_course_hub.__about__ import __version__  # noqa: E402
+
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -41,7 +43,6 @@ exclude_patterns = []
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "pydata_sphinx_theme"
-html_static_path = ["_static"]
 
 # -- autodoc-pydantic configuration ------------------------------------------
 autodoc_pydantic_model_show_json = False
