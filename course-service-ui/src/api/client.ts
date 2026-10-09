@@ -54,11 +54,22 @@ const handleResponse = async (response: Response): Promise<unknown> => {
   return data;
 };
 
+/**
+ * Thin fetch wrappers.
+ *
+ * Each method is generic in its response type so call sites can name the
+ * schema-derived type directly instead of asserting one onto `unknown`. The
+ * response is still not validated at runtime — the guarantee comes from the
+ * types in `types.ts` being generated from the service's OpenAPI document, so
+ * a backend shape change turns into a compile error at the call site.
+ *
+ * Endpoints that answer 204 have no body; type those as `void`.
+ */
 export const requests = {
-  get: async (
+  get: async <T>(
     url: string,
     params: Record<string, string> | undefined = undefined,
-  ): Promise<unknown> => {
+  ): Promise<T> => {
     const settings: RequestInit = {
       ...baseSettings,
       method: "GET",
@@ -67,33 +78,53 @@ export const requests = {
       url += "?" + new URLSearchParams(params).toString();
     }
     const response = await fetch(url, settings);
-    return handleResponse(response);
+    return handleResponse(response) as Promise<T>;
   },
-  post: async (url: string, data: unknown): Promise<unknown> => {
+  post: async <T>(url: string, data: unknown): Promise<T> => {
     const settings: RequestInit = {
       ...baseSettings,
       method: "POST",
+      headers: {
+        ...baseSettings.headers,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(data),
     };
     const response = await fetch(url, settings);
-    return handleResponse(response);
+    return handleResponse(response) as Promise<T>;
   },
-  put: async (url: string, data: unknown): Promise<unknown> => {
+  put: async <T>(url: string, data: unknown): Promise<T> => {
     const settings: RequestInit = {
       ...baseSettings,
       method: "PUT",
+      headers: {
+        ...baseSettings.headers,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(data),
     };
     const response = await fetch(url, settings);
-    return handleResponse(response);
+    return handleResponse(response) as Promise<T>;
   },
-  del: async (url: string, data: unknown): Promise<unknown> => {
+  patch: async <T>(url: string, data: unknown): Promise<T> => {
+    const settings: RequestInit = {
+      ...baseSettings,
+      method: "PATCH",
+      headers: {
+        ...baseSettings.headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+    const response = await fetch(url, settings);
+    return handleResponse(response) as Promise<T>;
+  },
+  delete: async <T = void>(url: string): Promise<T> => {
     const settings: RequestInit = {
       ...baseSettings,
       method: "DELETE",
-      body: JSON.stringify(data),
     };
     const response = await fetch(url, settings);
-    return handleResponse(response);
+    return handleResponse(response) as Promise<T>;
   },
 };

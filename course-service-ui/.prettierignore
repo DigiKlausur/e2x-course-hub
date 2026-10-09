@@ -1,0 +1,3 @@
+# Generated from the service's OpenAPI document by `npm run generate:api-types`.
+# Never edit or reformat by hand — regenerate instead.
+src/api/schema.d.ts

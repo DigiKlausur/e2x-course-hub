@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Ruff reads its config from pyproject.toml and never imports the package,
+      # so this job deliberately skips installing the project — doing so would
+      # drag in Node just to build the UI bundle (see the frontend job).
+      #
+      # The action installs the ruff version pinned in pyproject.toml's `dev`
+      # extra. That pin matters: formatter output changes between releases, so
+      # an unpinned ruff makes CI disagree with developers' local ruff without
+      # anything in the repository having changed.
+      - name: Check formatting
+        uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
+        with:
+          args: "format --check --diff"
+
+      - name: Lint
+        if: ${{ !cancelled() }}
+        uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
+        with:
+          args: "check --output-format=github"
+
+  frontend:
+    name: Frontend and API contract (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    # Installing the package and exporting the OpenAPI schema is the only
+    # exercise the Python code gets, so run it on every version pyproject.toml
+    # claims to support. The UI-only steps below run once, on the newest.
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+
+      # Node must be set up before the Python install: the hatch-jupyter-builder
+      # hook in pyproject.toml shells out to npm, so `pip install .` aborts with
+      # "Could not find cmd (npm) in path" when Node is missing — even while
+      # only generating package metadata.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: course-service-ui/package-lock.json
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install UI dependencies
+        run: npm ci
+        working-directory: course-service-ui
+
+      # Installing the project makes e2x_course_hub importable for the OpenAPI
+      # export below, and exercises the packaging path as a side effect: the
+      # build hook bundles the UI exactly as a released wheel would.
+      - name: Install the course hub
+        run: pip install .
+
+      # Regenerates openapi.json and schema.d.ts and fails if either differs
+      # from what is committed, so a backend schema change cannot land without
+      # the matching client types.
+      - name: Check the generated API types are up to date
+        run: npm run check:api-types
+        working-directory: course-service-ui
+        env:
+          PYTHON: python
+
+      - name: Lint
+        if: matrix.python-version == '3.14'
+        run: npm run lint
+        working-directory: course-service-ui
+
+      - name: Check formatting
+        if: matrix.python-version == '3.14'
+        run: npx prettier --check src
+        working-directory: course-service-ui
+
+      # Runs `tsc -b` and then the production bundle.
+      - name: Typecheck and build
+        if: matrix.python-version == '3.14'
+        run: npm run build
+        working-directory: course-service-ui

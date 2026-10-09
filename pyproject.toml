@@ -5,9 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "e2x-course-hub"
 dynamic = ["version"]
-description = ''
+description = "A JupyterHub service for managing courses, terms, and course membership with role-based access control in multi-course teaching deployments."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = "MIT"
 keywords = []
 authors = [
@@ -16,17 +16,23 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: Implementation :: PyPy",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
   "pydantic>=2.0",
-  "jinja2",
-  "PyYAML"
+  "pydantic-settings>=2.0",
+  "jinja2>=3.1",
+  "PyYAML>=6.0",
+  "sqlalchemy>=2.0",
+  "fastapi>=0.100.0",
+  "uvicorn>=0.23",
+  "httpx>=0.24",
+  "python-multipart>=0.0.6",
+  "jupyterhub-fastapi-adapter>=0.1.0",
+  "e2x-hub-rbac>=0.3.0",
 ]
 
 [project.urls]
@@ -37,7 +43,9 @@ Source = "https://github.com/Digiklausur/e2x-course-hub"
 [project.optional-dependencies]
 dev = [
   "pre-commit",
-  "ruff",
+  # Pinned so every developer and CI format identically; bump deliberately.
+  # CI's ruff-action reads this pin, so there is no second copy to update.
+  "ruff==0.16.7",
   "tbump",
   "build",
   "twine",
@@ -45,6 +53,8 @@ dev = [
 docs = [
   "sphinx",
   "pydata-sphinx-theme",
+  "myst-parser",
+  "autodoc_pydantic>=2.0",
 ]
 
 [tool.hatch.version]
@@ -101,3 +111,8 @@ cmd = "twine check dist/*"
 [tool.ruff]
 line-length = 100
 lint.select = ["F", "E", "I"]
+# Ruff treats Markdown as a first-class file type and has "*.md" in its default
+# `include`, so it lints and reformats the Python blocks inside the docs. Those
+# blocks are illustrative and often deliberately partial, so keep Ruff to real
+# Python sources.
+extend-exclude = ["*.md"]

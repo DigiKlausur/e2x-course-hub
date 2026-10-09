@@ -1,10 +1,13 @@
 from logging import Logger, getLogger
 from typing import Optional
 
-from ..schema.server import Server
+from e2x_hub_rbac.backend.jupyterhub import HubAPI
+
+from ..contract.providers import InfrastructureCatalogProvider
+from ..db.repository import CourseRepository
 from .course_api import CourseAPI
-from .hub_api import HubAPI
-from .profile_api import ProfileAPI
+from .infrastructure_api import InfrastructureAPI
+from .membership_api import MembershipAPI
 
 
 class API:
@@ -12,32 +15,28 @@ class API:
 
     def __init__(
         self,
-        server_config_file: str,
         hub_api: HubAPI,
+        course_repository: CourseRepository,
+        infrastructure_provider: InfrastructureCatalogProvider,
         add_users_to_hub: bool = False,
+        delete_empty_groups: bool = False,
         logger: Optional[Logger] = None,
     ):
-        """Initialize the API with the given server configuration file.
-
-        Args:
-            server_config_file: Path to the server configuration YAML file
-            hub_api: Instance of the HubAPI class
-            add_users_to_hub: Whether to add users to JupyterHub when they are created in the course
-                service
-            logger: Optional logger for logging purposes
-        """
         if logger is None:
             logger = getLogger(__name__)
-        self.server_config_file = server_config_file
-        self.server = Server.from_config_file(server_config_file)
-        self.course_api = CourseAPI(
-            server=self.server,
-            hub_api=hub_api,
-            add_users_to_hub=add_users_to_hub,
+
+        self.courses = CourseAPI(
+            course_repository=course_repository,
+            infrastructure_catalog_provider=infrastructure_provider,
             logger=logger,
         )
-        self.profile_api = ProfileAPI(server=self.server, logger=logger)
-
-    def reload_server_config(self) -> None:
-        """Reload the server configuration from the configuration file."""
-        self.server = Server.from_config_file(self.server_config_file)
+        self.memberships = MembershipAPI(
+            group_backend=hub_api,
+            add_users_to_hub=add_users_to_hub,
+            delete_empty_groups=delete_empty_groups,
+            logger=logger,
+        )
+        self.infrastructure = InfrastructureAPI(
+            infrastructure_provider=infrastructure_provider,
+            logger=logger,
+        )
