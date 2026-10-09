@@ -1,5 +1,14 @@
 # e2x Course Hub
 
+[![CI](https://github.com/Digiklausur/e2x-course-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/Digiklausur/e2x-course-hub/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/e2x-course-hub)](https://pypi.org/project/e2x-course-hub/)
+[![Python versions](https://img.shields.io/pypi/pyversions/e2x-course-hub)](https://pypi.org/project/e2x-course-hub/)
+[![Documentation Status](https://readthedocs.org/projects/e2x-course-hub/badge/?version=latest)](https://e2x-course-hub.readthedocs.io/en/latest/index.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**Documentation:** <https://e2x-course-hub.readthedocs.io/en/latest/index.html> ·
+**PyPI:** <https://pypi.org/project/e2x-course-hub/>
+
 A JupyterHub service for running multi-course, multi-term teaching deployments. It manages courses, terms, and course membership; enforces who may do what
 via role-based access control; and tells a separate infrastructure spawner which
 courses/terms a user may launch and with which environment — without ever deciding
@@ -82,6 +91,12 @@ See [`e2x-course-hub-kubespawner`](https://github.com/DigiKlausur/e2x-course-hub
 for an example implementation based on KubeSpawner.
 
 ## Installation
+
+```bash
+pip install e2x-course-hub
+```
+
+To install the latest development version from GitHub instead:
 
 ```bash
 pip install git+https://github.com/Digiklausur/e2x-course-hub.git
