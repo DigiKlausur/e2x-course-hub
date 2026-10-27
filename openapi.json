@@ -1761,6 +1761,16 @@
                 "type": "null"
               }
             ]
+          },
+          "access_period": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StudentAccessPeriod"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

@@ -27,3 +27,4 @@ class CreateTermRequest(BaseModel):
     """Request body for creating a term."""
 
     term: TermConfig | None = None
+    access_period: StudentAccessPeriod | None = None

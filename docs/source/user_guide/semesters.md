@@ -8,7 +8,9 @@ and every semester has its own notebook image and resources.
 
 Course owners click **Create Semester** on the course's **Overview** tab and enter a
 semester ID such as `WS23`. The new semester starts with the course's semester
-template (see {doc}`courses`).
+template (see {doc}`courses`). Students can start notebook servers for it immediately,
+unless you switch on **Restrict student access** and set when it opens or closes (see
+**Set the student access period** below).
 
 ## The semester page
 
@@ -24,8 +26,8 @@ The **Overview** tab shows:
 
 - the members of the semester, with one tab each for **Students**, **Teaching
   Assistants**, **Instructors** and **Observers** (see {doc}`members`).
-- **General Information**: the course, the semester, when it was created and whether
-  students can currently start it (see **Set the student access period** below).
+- **General Information**: the course, the semester, when it was created and, under
+  **Student access**, whether and until when students can start notebook servers.
 - **Semester Runtime**: the notebook image, student resources and grader resources of
   this semester.
 
@@ -52,9 +54,13 @@ Which role may start which environment is listed in {doc}`../reference/roles`.
 
 ## Set the student access period
 
-Course owners and instructors can limit when students can start a semester. Open the
-semester's **Settings** tab and set **Opens** and **Closes** under **Student access
-period**. Times are entered in your browser's time zone.
+Course owners and instructors can limit when students can start notebook servers for a
+semester, either
+when creating it or later: on the semester's **Overview** tab, click **Change** next to
+**Student access** under **General Information**. Switch on **Restrict student
+access** and set **Opens**, **Closes** or both. Times are entered in your browser's
+time zone. Switching the restriction off lets students start notebook servers for the
+semester at any time again.
 
 - Leave **Opens** empty to open the semester immediately.
 - Leave **Closes** empty to keep it open indefinitely.

@@ -221,6 +221,7 @@ class CourseAPI(BaseAPI):
         course_id: str,
         term_id: str,
         term: Optional[TermConfig] = None,
+        access_period: Optional[StudentAccessPeriod] = None,
         session: Optional[Session] = None,
     ) -> TermConfig:
         """Add a new term with the specified ID and name.
@@ -230,6 +231,7 @@ class CourseAPI(BaseAPI):
             course_id: The course ID
             term_id: The term ID
             term: The TermConfig object containing the term configuration
+            access_period: When students may spawn the term; replaces the period in `term`
         Raises:
             TermExistsError: If a term with the same ID already exists
         Returns:
@@ -243,6 +245,9 @@ class CourseAPI(BaseAPI):
                 image=course.image,
                 spawn_role_selections=course.spawn_role_selections,
             )
+        if access_period is not None:
+            term.student_access_start = access_period.student_access_start
+            term.student_access_end = access_period.student_access_end
         self.assert_infrastructure_options_exist(course)
         updated_course_config = self.course_repository.add_term(
             course_id, term_id, term, session=session
