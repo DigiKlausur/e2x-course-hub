@@ -55,7 +55,9 @@ export type EnvironmentUpdate = Omit<
 };
 
 // ── Courses ──────────────────────────────────────────────────────────
-export type CourseMetadata = Schemas["CourseMetadata"];
+// The response variant: the UI only reads metadata, and only responses carry
+// the read-only creation date.
+export type CourseMetadata = Schemas["CourseMetadataResponse"];
 export type CourseMetadataUpdate = Schemas["CourseMetadataUpdate"];
 export type CourseActions = Schemas["CourseActions"];
 export type LmsActions = Schemas["LmsActions"];
@@ -89,6 +91,7 @@ export type TermConfig = Omit<
 };
 
 export type TermActions = Schemas["TermActions"];
+export type StudentAccessPeriod = Schemas["StudentAccessPeriod"];
 export type TermSummaryResponse = Schemas["TermSummaryResponse"];
 
 export type TermDetailResponse = Omit<

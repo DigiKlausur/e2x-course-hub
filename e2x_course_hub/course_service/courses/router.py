@@ -15,6 +15,7 @@ from .dependencies import CourseAssemblerDep, CourseCollectionAssemblerDep, Load
 from .schemas import (
     CourseCollectionResponse,
     CourseDetailResponse,
+    CourseMetadataResponse,
     CourseMetadataUpdate,
 )
 
@@ -43,7 +44,7 @@ async def get_course(
     return course_assembler.detail(course)
 
 
-@router.post("", response_model=CourseMetadata, status_code=201)
+@router.post("", response_model=CourseMetadataResponse, status_code=201)
 async def create_course(
     course: CourseConfig,
     user: CurrentUser,
@@ -71,14 +72,14 @@ async def delete_course(
 
 
 # ── Metadata ─────────────────────────────────────────────────────────
-@router.get("/{course_id}/metadata", response_model=CourseMetadata)
+@router.get("/{course_id}/metadata", response_model=CourseMetadataResponse)
 async def get_course_metadata(
     course: LoadedCourse,
 ) -> CourseMetadata:
     return course.metadata
 
 
-@router.patch("/{course_id}/metadata", response_model=CourseMetadata)
+@router.patch("/{course_id}/metadata", response_model=CourseMetadataResponse)
 async def update_course_metadata(
     course_id: str,
     body: CourseMetadataUpdate,

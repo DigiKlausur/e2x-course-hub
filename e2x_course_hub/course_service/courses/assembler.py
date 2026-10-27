@@ -7,6 +7,7 @@ from ..terms.assembler import TermAssembler
 from .schemas import (
     CourseCollectionResponse,
     CourseDetailResponse,
+    CourseMetadataResponse,
     CourseSummaryResponse,
 )
 
@@ -38,6 +39,17 @@ class CourseAssembler:
             profiles=course_config.get_profile_selections(),
         )
 
+    def metadata(self, course_metadata: CourseMetadata) -> CourseMetadataResponse:
+        """
+        Assemble the course metadata as returned by the API.
+
+        Args:
+            course_metadata (CourseMetadata): The course metadata.
+        Returns:
+            CourseMetadataResponse: The metadata including the read-only creation date.
+        """
+        return CourseMetadataResponse(**course_metadata.model_dump())
+
     def summary(self, course_metadata: CourseMetadata) -> CourseSummaryResponse:
         """
         Assemble a summary representation of the course metadata, including actions.
@@ -49,7 +61,7 @@ class CourseAssembler:
                 actions.
         """
         return CourseSummaryResponse(
-            metadata=course_metadata,
+            metadata=self.metadata(course_metadata),
             actions=self._actions(course_metadata.course_id),
         )
 
@@ -64,11 +76,11 @@ class CourseAssembler:
                 and actions.
         """
         return CourseDetailResponse(
-            metadata=course_config.metadata,
+            metadata=self.metadata(course_config.metadata),
             environment=self.environment(course_config),
             terms=[
-                self.term_assembler.summary(course_config.metadata.course_id, term_id)
-                for term_id in course_config.terms.keys()
+                self.term_assembler.summary(course_config.metadata.course_id, term_id, term_config)
+                for term_id, term_config in course_config.terms.items()
             ],
             actions=self._actions(course_config.metadata.course_id),
         )

@@ -19,6 +19,8 @@ import {
 } from "@hooks/membership";
 import { useSelection } from "@hooks/ui";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { formatDateTime } from "@/lib/dateTime";
+import { describeAccessPeriod } from "@domain/accessPeriod";
 import { MembershipRole, memberLabels } from "@domain/roles";
 import { memberListActionText, termActionText } from "@domain/actions";
 import type { ImageSelection, SpawnRole } from "@api/types";
@@ -228,6 +230,14 @@ export function TermOverviewTab({ courseId, termId }: Props) {
           <CardTitle>General Information</CardTitle>
           <Row label="Course">{courseId}</Row>
           <Row label="Semester">{termId}</Row>
+          <Row label="Created">
+            {term?.created_at ? formatDateTime(term.created_at) : "Unknown"}
+          </Row>
+          {term && (
+            <Row label="Student access">
+              {describeAccessPeriod(term.access_period)}
+            </Row>
+          )}
         </Card>
 
         <RuntimeConfigEditor

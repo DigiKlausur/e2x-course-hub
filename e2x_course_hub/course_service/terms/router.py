@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from ...schema.course import StudentAccessPeriod
 from ..common.dependency_types import (
     CourseAPIDep,
     CurrentUser,
@@ -79,5 +80,24 @@ async def patch_term_environment(
     if update.profiles is not None:
         course_api.set_term_profiles(user, course_id, term_id, update.profiles, session=session)
     return term_assembler.environment(
+        course_api.get_term(user=user, course_id=course_id, term_id=term_id, session=session)
+    )
+
+
+# PUT, not PATCH: an empty bound means "no limit", so both bounds are always replaced.
+@router.put("/access-period", response_model=StudentAccessPeriod)
+async def put_term_access_period(
+    course_id: str,
+    term_id: str,
+    access_period: StudentAccessPeriod,
+    user: CurrentUser,
+    course_api: CourseAPIDep,
+    session: DBSession,
+    term_assembler: TermAssemblerDep,
+) -> StudentAccessPeriod:
+    course_api.set_term_student_access_period(
+        user, course_id, term_id, access_period, session=session
+    )
+    return term_assembler.access_period(
         course_api.get_term(user=user, course_id=course_id, term_id=term_id, session=session)
     )

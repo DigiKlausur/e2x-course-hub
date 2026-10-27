@@ -1,6 +1,6 @@
 from e2x_hub_rbac.auth import PermissionChecker
 
-from ...schema.course import TermConfig
+from ...schema.course import StudentAccessPeriod, TermConfig
 from ..actions import TermActions, term_actions, user_can
 from ..common.schemas import Environment
 from .schemas import TermDetailResponse, TermSummaryResponse
@@ -29,13 +29,28 @@ class TermAssembler:
             profiles=term_config.get_profile_selections(),
         )
 
-    def summary(self, course_id: str, term_id: str) -> TermSummaryResponse:
+    def access_period(self, term_config: TermConfig) -> StudentAccessPeriod:
+        """
+        Assemble the student access period of a term.
+
+        Args:
+            term_config (TermConfig): The configuration of the term.
+        Returns:
+            StudentAccessPeriod: The period in which students may spawn the term.
+        """
+        return StudentAccessPeriod(
+            student_access_start=term_config.student_access_start,
+            student_access_end=term_config.student_access_end,
+        )
+
+    def summary(self, course_id: str, term_id: str, term_config: TermConfig) -> TermSummaryResponse:
         """
         Assemble a summary representation of the term metadata, including actions.
 
         Args:
             course_id (str): The ID of the course to which the term belongs.
             term_id (str): The ID of the term to summarize.
+            term_config (TermConfig): The configuration of the term.
         Returns:
             TermSummaryResponse: The assembled summary response containing term metadata and
                 actions.
@@ -43,6 +58,7 @@ class TermAssembler:
         return TermSummaryResponse(
             course_id=course_id,
             term_id=term_id,
+            created_at=term_config.created_at,
             actions=self._actions(course_id, term_id),
         )
 
@@ -62,6 +78,8 @@ class TermAssembler:
         return TermDetailResponse(
             course_id=course_id,
             term_id=term_id,
+            created_at=term_config.created_at,
             environment=self.environment(term_config),
+            access_period=self.access_period(term_config),
             actions=self._actions(course_id, term_id),
         )

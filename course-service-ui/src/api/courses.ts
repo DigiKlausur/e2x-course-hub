@@ -12,6 +12,7 @@ import type {
   Environment,
   EnvironmentUpdate,
   CreateTermRequest,
+  StudentAccessPeriod,
 } from "./types";
 
 const base_url = config.apiUrl;
@@ -87,6 +88,16 @@ export const courseAPI = {
     return requests.patch<Environment>(
       urlJoin(courses_url, courseId, "terms", termId, "environment"),
       updateData,
+    );
+  },
+  updateTermAccessPeriod: async (
+    courseId: string,
+    termId: string,
+    accessPeriod: StudentAccessPeriod,
+  ): Promise<StudentAccessPeriod> => {
+    return requests.put<StudentAccessPeriod>(
+      urlJoin(courses_url, courseId, "terms", termId, "access-period"),
+      accessPeriod,
     );
   },
   createTerm: async (

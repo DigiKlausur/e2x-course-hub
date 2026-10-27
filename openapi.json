@@ -47,7 +47,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CourseMetadata"
+                  "$ref": "#/components/schemas/CourseMetadataResponse"
                 }
               }
             }
@@ -164,7 +164,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CourseMetadata"
+                  "$ref": "#/components/schemas/CourseMetadataResponse"
                 }
               }
             }
@@ -214,7 +214,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CourseMetadata"
+                  "$ref": "#/components/schemas/CourseMetadataResponse"
                 }
               }
             }
@@ -622,6 +622,67 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Environment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/courses/{course_id}/terms/{term_id}/access-period": {
+      "put": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Put Term Access Period",
+        "operationId": "put_term_access_period_v1_courses__course_id__terms__term_id__access_period_put",
+        "parameters": [
+          {
+            "name": "course_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Course Id"
+            }
+          },
+          {
+            "name": "term_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Term Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentAccessPeriod"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentAccessPeriod"
                 }
               }
             }
@@ -1484,7 +1545,7 @@
       "CourseDetailResponse": {
         "properties": {
           "metadata": {
-            "$ref": "#/components/schemas/CourseMetadata"
+            "$ref": "#/components/schemas/CourseMetadataResponse"
           },
           "environment": {
             "$ref": "#/components/schemas/Environment"
@@ -1585,6 +1646,52 @@
         ],
         "title": "CourseMetadataActions"
       },
+      "CourseMetadataResponse": {
+        "properties": {
+          "course_id": {
+            "type": "string",
+            "title": "Course Id",
+            "description": "The id of the course."
+          },
+          "course_name": {
+            "type": "string",
+            "title": "Course Name",
+            "description": "The full name of the course"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "An optional text describing the course."
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "course_name",
+          "created_at"
+        ],
+        "title": "CourseMetadataResponse",
+        "description": "Course metadata as returned by the API, including the read-only creation date."
+      },
       "CourseMetadataUpdate": {
         "properties": {
           "course_name": {
@@ -1617,7 +1724,7 @@
       "CourseSummaryResponse": {
         "properties": {
           "metadata": {
-            "$ref": "#/components/schemas/CourseMetadata"
+            "$ref": "#/components/schemas/CourseMetadataResponse"
           },
           "actions": {
             "$ref": "#/components/schemas/CourseActions"
@@ -2248,6 +2355,52 @@
         "title": "SpawnRoleSelection",
         "description": "A selection of spawn options for a specific spawn role"
       },
+      "StudentAccessPeriod": {
+        "properties": {
+          "student_access_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Access Start",
+            "description": "From when students may spawn the term. Empty means immediately."
+          },
+          "student_access_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Access End",
+            "description": "Until when students may spawn the term. Empty means indefinitely."
+          }
+        },
+        "type": "object",
+        "title": "StudentAccessPeriod",
+        "description": "The period in which students may spawn a term. Staff are not restricted."
+      },
+      "TermAccessPeriodActions": {
+        "properties": {
+          "edit": {
+            "type": "boolean",
+            "title": "Edit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "edit"
+        ],
+        "title": "TermAccessPeriodActions"
+      },
       "TermActions": {
         "properties": {
           "view": {
@@ -2261,6 +2414,9 @@
           "environment": {
             "$ref": "#/components/schemas/TermEnvironmentActions"
           },
+          "accessPeriod": {
+            "$ref": "#/components/schemas/TermAccessPeriodActions"
+          },
           "spawn": {
             "$ref": "#/components/schemas/TermSpawnActions"
           },
@@ -2273,6 +2429,7 @@
           "view",
           "remove",
           "environment",
+          "accessPeriod",
           "spawn",
           "members"
         ],
@@ -2280,6 +2437,32 @@
       },
       "TermConfig": {
         "properties": {
+          "student_access_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Access Start",
+            "description": "From when students may spawn the term. Empty means immediately."
+          },
+          "student_access_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Access End",
+            "description": "Until when students may spawn the term. Empty means indefinitely."
+          },
           "image": {
             "$ref": "#/components/schemas/ImageSelection",
             "description": "Image configuration."
@@ -2314,8 +2497,23 @@
             "type": "string",
             "title": "Term Id"
           },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
           "environment": {
             "$ref": "#/components/schemas/Environment"
+          },
+          "access_period": {
+            "$ref": "#/components/schemas/StudentAccessPeriod"
           },
           "actions": {
             "$ref": "#/components/schemas/TermActions"
@@ -2325,7 +2523,9 @@
         "required": [
           "course_id",
           "term_id",
+          "created_at",
           "environment",
+          "access_period",
           "actions"
         ],
         "title": "TermDetailResponse"
@@ -2400,6 +2600,18 @@
             "type": "string",
             "title": "Term Id"
           },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
           "actions": {
             "$ref": "#/components/schemas/TermActions"
           }
@@ -2408,6 +2620,7 @@
         "required": [
           "course_id",
           "term_id",
+          "created_at",
           "actions"
         ],
         "title": "TermSummaryResponse"

@@ -24,7 +24,8 @@ The **Overview** tab shows:
 
 - the members of the semester, with one tab each for **Students**, **Teaching
   Assistants**, **Instructors** and **Observers** (see {doc}`members`).
-- **General Information**: the course and the semester.
+- **General Information**: the course, the semester, when it was created and whether
+  students can currently start it (see **Set the student access period** below).
 - **Semester Runtime**: the notebook image, student resources and grader resources of
   this semester.
 
@@ -48,6 +49,27 @@ they can start:
 | **Read-only grader environment** | The grader environment with the course directory read-only. |
 
 Which role may start which environment is listed in {doc}`../reference/roles`.
+
+## Set the student access period
+
+Course owners and instructors can limit when students can start a semester. Open the
+semester's **Settings** tab and set **Opens** and **Closes** under **Student access
+period**. Times are entered in your browser's time zone.
+
+- Leave **Opens** empty to open the semester immediately.
+- Leave **Closes** empty to keep it open indefinitely.
+- **Closes** must be after **Opens**.
+
+Outside the access period, the semester does not appear on the spawn page for
+students. Teaching assistants, instructors and observers are not restricted, so they
+can prepare the semester before it opens and grade after it closes.
+
+```{note}
+**Known limitation:** the access period only controls *starting* a notebook server.
+A student who started a server before the closing time keeps it until it is stopped,
+for example by JupyterHub's idle culler. Running servers are not stopped when the
+access period closes.
+```
 
 ## Delete a semester
 

@@ -37,8 +37,8 @@ Every API checks its own permission table. The tables are defined in
 | ------------------ | --------------------------------------------------------------------------- |
 | LMS admin          | Everything                                                                  |
 | Course creator     | Create courses, view courses                                                |
-| Course owner       | Manage the course (metadata, environment, delete), create terms, manage its terms (environment, delete) |
-| Instructor         | View the course and its metadata, manage the term (environment, delete)     |
+| Course owner       | Manage the course (metadata, environment, delete), create terms, manage its terms (environment, student access period, delete) |
+| Instructor         | View the course and its metadata, manage the term (environment, student access period, delete) |
 | Teaching assistant | View the course, its metadata and the term                                  |
 | Observer           | View the course, its metadata and the term                                  |
 | Student            | None                                                                        |

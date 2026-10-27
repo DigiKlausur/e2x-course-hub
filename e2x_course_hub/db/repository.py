@@ -1,5 +1,6 @@
 import uuid
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from typing import Dict, Generator, List, Optional
 
 from sqlalchemy.orm import Session, sessionmaker
@@ -70,6 +71,9 @@ class CourseRepository:
         return TermConfig(
             image=image,
             spawn_role_selections=spawn_role_selections,
+            student_access_start=row.student_access_start,
+            student_access_end=row.student_access_end,
+            created_at=row.created_at,
         )
 
     @staticmethod
@@ -92,6 +96,7 @@ class CourseRepository:
                 course_id=row.course_id,
                 course_name=row.course_name,
                 description=row.description,
+                created_at=row.created_at,
             ),
             image=ImageSelection(
                 family=row.image_family,
@@ -140,6 +145,7 @@ class CourseRepository:
             description=config.metadata.description,
             image_family=config.image.family,
             image_tag=config.image.tag,
+            created_at=datetime.now(timezone.utc),
             spawn_configs=CourseRepository._build_course_spawn_configs(config),
         )
 
@@ -166,6 +172,9 @@ class CourseRepository:
             term_id=term_id,
             image_family=config.image.family if config.image else None,
             image_tag=config.image.tag if config.image else None,
+            student_access_start=config.student_access_start,
+            student_access_end=config.student_access_end,
+            created_at=datetime.now(timezone.utc),
             spawn_configs=CourseRepository._build_term_spawn_configs(config),
         )
 
@@ -272,16 +281,15 @@ class CourseRepository:
 
             # Rebuild terms (flush deletes before inserts to avoid
             # UNIQUE constraint violations from INSERT-before-DELETE ordering).
+            # The rebuilt rows keep the creation date of the terms they replace.
+            created_at = {term.term_id: term.created_at for term in row.terms}
             row.terms.clear()
             s.flush()
             for term_id, term_config in config.terms.items():
-                row.terms.append(
-                    self._config_to_term_row(
-                        course_id,
-                        term_id,
-                        term_config,
-                    )
-                )
+                term_row = self._config_to_term_row(course_id, term_id, term_config)
+                if term_id in created_at:
+                    term_row.created_at = created_at[term_id]
+                row.terms.append(term_row)
 
             s.flush()
             s.refresh(row)
@@ -373,6 +381,9 @@ class CourseRepository:
                 else:
                     term.image_family = config.image.family
                     term.image_tag = config.image.tag
+
+                term.student_access_start = config.student_access_start
+                term.student_access_end = config.student_access_end
 
                 # Replace spawn-role overrides.
                 term.spawn_configs.clear()
