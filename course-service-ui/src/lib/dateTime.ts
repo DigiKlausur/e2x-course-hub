@@ -13,13 +13,21 @@ export function formatDateTime(iso: string): string {
   return displayFormat.format(new Date(iso));
 }
 
-const pad = (n: number) => String(n).padStart(2, "0");
+export const pad = (n: number) => String(n).padStart(2, "0");
 
-/** A timestamp as the value of a `datetime-local` input, or `""` when empty. */
+/** Times are picked in steps of this many minutes. */
+export const MINUTE_STEP = 5;
+
+/**
+ * A timestamp as a `datetime-local` value ("YYYY-MM-DDTHH:mm"), or `""` when
+ * empty. Minutes are rounded down to the picker's step, so what the form shows
+ * is what it saves.
+ */
 export function toDateTimeLocal(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const minutes = d.getMinutes() - (d.getMinutes() % MINUTE_STEP);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(minutes)}`;
 }
 
 /** A `datetime-local` value (local time) as a UTC timestamp, or `null` when empty. */

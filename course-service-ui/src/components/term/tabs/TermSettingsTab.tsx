@@ -5,7 +5,6 @@ import { Row } from "@components/ui/Row";
 import { Button } from "@components/ui/Button";
 import { Alert } from "@components/ui/Alert";
 import { ConfirmDialog } from "@components/ui/ConfirmDialog";
-import { StudentAccessPeriodCard } from "@components/term/StudentAccessPeriodCard";
 import { useDeleteTerm, useTerm } from "@hooks/course";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { termActionText } from "@domain/actions";
@@ -23,7 +22,6 @@ export function TermSettingsTab({ courseId, termId }: Props) {
   const deleteTerm = useDeleteTerm(courseId, termId);
 
   const canRemoveTerm = term?.actions.remove ?? false;
-  const canEditAccessPeriod = term?.actions.accessPeriod.edit ?? false;
 
   // Term ids repeat across courses, so the course id has to be part of the
   // confirmation for it to name one specific term.
@@ -35,21 +33,13 @@ export function TermSettingsTab({ courseId, termId }: Props) {
     <div className="grid grid-cols-[2fr_1fr] gap-6">
       <div>
         {/* Terms have no editable metadata: they are identified by their id.
-            Runtime settings live in the Semester Runtime card on the overview,
-            so this card is read-only. */}
+            The runtime and the student access period are edited on the
+            overview, so this card is read-only. */}
         <Card>
           <CardTitle>Semester Settings</CardTitle>
           <Row label="Course">{courseId}</Row>
           <Row label="Semester">{termId}</Row>
         </Card>
-
-        {term && canEditAccessPeriod && (
-          <StudentAccessPeriodCard
-            courseId={courseId}
-            termId={termId}
-            accessPeriod={term.access_period}
-          />
-        )}
       </div>
 
       <div>

@@ -26,7 +26,7 @@ export const termActionText = {
     edit: {
       label: "Change student access period",
       description:
-        "Choose when students can start this semester. Staff are not restricted.",
+        "Choose when students can start notebook servers for this semester. Staff are not restricted.",
     },
   },
   spawn: {

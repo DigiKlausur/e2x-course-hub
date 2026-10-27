@@ -506,6 +506,7 @@ export interface components {
          */
         CreateTermRequest: {
             term?: components["schemas"]["TermConfig"] | null;
+            access_period?: components["schemas"]["StudentAccessPeriod"] | null;
         };
         /**
          * Environment
