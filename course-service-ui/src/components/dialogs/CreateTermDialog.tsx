@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import { Modal } from "@components/ui/Modal";
 import { Button } from "@components/ui/Button";
+import { Alert } from "@components/ui/Alert";
 import { StudentAccessPeriodFields } from "@components/term/StudentAccessPeriodFields";
+import { getErrorMessage } from "@/lib/errorMessage";
+import { semesterTemplateTitle } from "@domain/actions";
+import type { ApiError } from "@api/client";
 import {
   accessPeriodDraftError,
   fromAccessPeriodDraft,
@@ -19,6 +23,29 @@ interface Props {
     accessPeriod: StudentAccessPeriod | null,
   ) => Promise<void>;
   isSubmitting: boolean;
+  /** The error of the last failed create, shown at the top of the dialog. */
+  error?: unknown;
+}
+
+const IMAGE_FAMILY_NOT_FOUND = "urn:e2x-course-hub:image-family-not-found";
+
+function CreateTermErrorAlert({ error }: { error: unknown }) {
+  const response = (error as ApiError).response;
+  if (response?.type === IMAGE_FAMILY_NOT_FOUND) {
+    return (
+      <Alert className="mb-4">
+        This semester could not be created because the course's default notebook
+        image '{String(response.extra?.family_name)}' is no longer available.
+        Select a new default under <strong>{semesterTemplateTitle}</strong>,
+        then try again.
+      </Alert>
+    );
+  }
+  return (
+    <Alert className="mb-4" title="Could not create the semester">
+      {getErrorMessage(error)}
+    </Alert>
+  );
 }
 
 export function CreateTermDialog({
@@ -27,6 +54,7 @@ export function CreateTermDialog({
   existingTermIds,
   onCreate,
   isSubmitting,
+  error,
 }: Props) {
   const [termId, setTermId] = useState("");
   const [accessPeriod, setAccessPeriod] = useState(undecidedAccessPeriodDraft);
@@ -52,10 +80,14 @@ export function CreateTermDialog({
 
   const handleSubmit = async () => {
     if (!isValid) return;
-    await onCreate(
-      termId.trim(),
-      accessPeriod.restricted ? fromAccessPeriodDraft(accessPeriod) : null,
-    );
+    try {
+      await onCreate(
+        termId.trim(),
+        accessPeriod.restricted ? fromAccessPeriodDraft(accessPeriod) : null,
+      );
+    } catch {
+      return; // Stay open; the error is shown through the `error` prop.
+    }
     handleClose();
   };
 
@@ -84,6 +116,8 @@ export function CreateTermDialog({
         </>
       }
     >
+      {error ? <CreateTermErrorAlert error={error} /> : null}
+
       <div>
         <label className="block text-sm font-semibold mb-1.5">
           Semester ID

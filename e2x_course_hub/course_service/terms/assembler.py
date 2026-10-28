@@ -24,7 +24,7 @@ class TermAssembler:
                 and profiles.
         """
         return Environment(
-            image=term_config.image,
+            image=term_config.image.model_dump(),
             resources=term_config.get_resource_selections(),
             profiles=term_config.get_profile_selections(),
         )

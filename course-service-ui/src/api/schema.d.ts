@@ -393,8 +393,6 @@ export interface components {
         };
         /** CourseConfig */
         CourseConfig: {
-            /** @description Image configuration. */
-            image: components["schemas"]["ImageSelection"];
             /**
              * Spawn Role Selections
              * @description Per-spawn role selection configuration.
@@ -404,6 +402,11 @@ export interface components {
             };
             /** @description Metadata information about the course. */
             metadata: components["schemas"]["CourseMetadata"];
+            /**
+             * Image Family
+             * @description Image family for new terms; each gets the family's default tag.
+             */
+            image_family: string;
             /**
              * Terms
              * @description Per-term configuration overrides.
@@ -502,18 +505,19 @@ export interface components {
         };
         /**
          * CreateTermRequest
-         * @description Request body for creating a term.
+         * @description Request body for creating a term. The term's environment comes from the course.
          */
         CreateTermRequest: {
-            term?: components["schemas"]["TermConfig"] | null;
             access_period?: components["schemas"]["StudentAccessPeriod"] | null;
         };
         /**
          * Environment
          * @description Response body containing the environment configuration of a course or term.
+         *
+         *     A course has no image tag; each new term gets the family's default tag.
          */
         Environment: {
-            image: components["schemas"]["ImageSelection"];
+            image: components["schemas"]["PartialImageSelection"];
             /**
              * Resources
              * @default {}
@@ -532,9 +536,11 @@ export interface components {
         /**
          * EnvironmentUpdate
          * @description Request body for updating the environment configuration of a course or term.
+         *
+         *     A course ignores the image tag; a term without one gets the family's default tag.
          */
         EnvironmentUpdate: {
-            image?: components["schemas"]["ImageSelection"] | null;
+            image?: components["schemas"]["PartialImageSelection"] | null;
             /** Resources */
             resources?: {
                 [key: string]: string;
@@ -653,6 +659,16 @@ export interface components {
              * @description Usernames to remove.
              */
             remove?: string[];
+        };
+        /**
+         * PartialImageSelection
+         * @description A partial selection of an image family and an optional tag.
+         */
+        PartialImageSelection: {
+            /** Family */
+            family: string;
+            /** Tag */
+            tag?: string | null;
         };
         /** ProfileCatalogResponse */
         ProfileCatalogResponse: {
@@ -801,8 +817,6 @@ export interface components {
              * @description Until when students may spawn the term. Empty means indefinitely.
              */
             student_access_end?: string | null;
-            /** @description Image configuration. */
-            image: components["schemas"]["ImageSelection"];
             /**
              * Spawn Role Selections
              * @description Per-spawn role selection configuration.
@@ -810,6 +824,8 @@ export interface components {
             spawn_role_selections: {
                 [key: string]: components["schemas"]["SpawnRoleSelection"];
             };
+            /** @description Image configuration. */
+            image: components["schemas"]["ImageSelection"];
         };
         /** TermDetailResponse */
         TermDetailResponse: {

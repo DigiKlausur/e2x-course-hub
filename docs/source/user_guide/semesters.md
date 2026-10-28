@@ -8,9 +8,10 @@ and every semester has its own notebook image and resources.
 
 Course owners click **Create Semester** on the course's **Overview** tab and enter a
 semester ID such as `WS23`. The new semester starts with the course's semester
-template (see {doc}`courses`). Students can start notebook servers for it immediately,
-unless you switch on **Restrict student access** and set when it opens or closes (see
-**Set the student access period** below).
+template and the current default version of its image family (see {doc}`courses`).
+Under **Student access**, choose **Unrestricted** to let students start notebook
+servers at any time, or **Restricted** to set when it opens or closes (see **Set the
+student access period** below).
 
 ## The semester page
 
@@ -57,10 +58,10 @@ Which role may start which environment is listed in {doc}`../reference/roles`.
 Course owners and instructors can limit when students can start notebook servers for a
 semester, either
 when creating it or later: on the semester's **Overview** tab, click **Change** next to
-**Student access** under **General Information**. Switch on **Restrict student
-access** and set **Opens**, **Closes** or both. Times are entered in your browser's
-time zone. Switching the restriction off lets students start notebook servers for the
-semester at any time again.
+**Student access** under **General Information**. Choose **Restricted** and set
+**Opens**, **Closes** or both. Times are entered in your browser's time zone. Choosing
+**Unrestricted** lets students start notebook servers for the semester at any time
+again.
 
 - Leave **Opens** empty to open the semester immediately.
 - Leave **Closes** empty to keep it open indefinitely.

@@ -10,23 +10,10 @@ from .types import SpawnRole
 class SpawnRoleConfigMixin(BaseModel):
     """Shared configuration for anything that maps spawn roles to selections."""
 
-    image: ImageSelection = Field(
-        ...,
-        description="Image configuration.",
-    )
     spawn_role_selections: dict[SpawnRole, SpawnRoleSelection] = Field(
         ...,
         description="Per-spawn role selection configuration.",
     )
-
-    def get_spawn_selection(self, spawn_role: SpawnRole) -> SpawnSelection:
-        selection = self.spawn_role_selections[spawn_role]
-        return SpawnSelection(
-            spawn_role=spawn_role,
-            image=self.image,
-            resource_tier_name=selection.resource_tier_name,
-            profile_name=selection.profile_name,
-        )
 
     def get_resource_selections(self) -> dict[SpawnRole, str]:
         return {role: sel.resource_tier_name for role, sel in self.spawn_role_selections.items()}
@@ -69,6 +56,11 @@ class StudentAccessPeriod(BaseModel):
 class TermConfig(SpawnRoleConfigMixin, StudentAccessPeriod):
     """Configuration for a specific term."""
 
+    image: ImageSelection = Field(
+        ...,
+        description="Image configuration.",
+    )
+
     # Hidden from the API schema: TermConfig is only used as request input, and
     # the term responses expose created_at themselves.
     created_at: SkipJsonSchema[datetime | None] = Field(
@@ -76,6 +68,15 @@ class TermConfig(SpawnRoleConfigMixin, StudentAccessPeriod):
         description="When the term was created. Set by the database, ignored on write. "
         "Empty for terms created before this was recorded.",
     )
+
+    def get_spawn_selection(self, spawn_role: SpawnRole) -> SpawnSelection:
+        selection = self.spawn_role_selections[spawn_role]
+        return SpawnSelection(
+            spawn_role=spawn_role,
+            image=self.image,
+            resource_tier_name=selection.resource_tier_name,
+            profile_name=selection.profile_name,
+        )
 
 
 class CourseMetadata(BaseModel):
@@ -99,6 +100,11 @@ class CourseMetadata(BaseModel):
 
 class CourseConfig(SpawnRoleConfigMixin):
     metadata: CourseMetadata = Field(..., description="Metadata information about the course.")
+    image_family: str = Field(
+        ...,
+        min_length=1,
+        description="Image family for new terms; each gets the family's default tag.",
+    )
     terms: dict[str, TermConfig] = Field(
         default_factory=dict,
         description="Per-term configuration overrides.",

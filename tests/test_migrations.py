@@ -43,6 +43,8 @@ def test_pre_migration_db_is_upgraded_and_keeps_its_data(db_url):
     repository = get_course_repository_from_db_url(db_url)
 
     course = repository.get_course("c1")
+    assert course.image_family == "python"
+    assert course.terms["t1"].image.tag == "latest"
     assert course.metadata.created_at is None
     assert course.terms["t1"].created_at is None
     assert course.terms["t1"].student_access_start is None

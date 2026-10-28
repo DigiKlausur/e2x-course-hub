@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Card, CardTitle } from "@components/ui/Card";
 import { Row } from "@components/ui/Row";
 import { Button } from "@components/ui/Button";
-import { Alert } from "@components/ui/Alert";
 import { DataTable } from "@components/ui/DataTable";
 import type { DataTableColumn } from "@components/ui/DataTable";
 import { createdAtColumn } from "@components/ui/createdAtColumn";
@@ -17,7 +16,7 @@ import {
   useUpdateCourseEnvironment,
 } from "@hooks/course";
 import { getErrorMessage } from "@/lib/errorMessage";
-import { courseActionText } from "@domain/actions";
+import { courseActionText, semesterTemplateTitle } from "@domain/actions";
 import type {
   ImageSelection,
   SpawnRole,
@@ -102,17 +101,15 @@ export function CourseOverviewTab({ courseId }: Props) {
         <Card>
           <CreateTermDialog
             open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
+            onClose={() => {
+              setDialogOpen(false);
+              createTerm.reset();
+            }}
             existingTermIds={termIds}
             onCreate={handleCreate}
             isSubmitting={createTerm.isPending}
+            error={createTerm.error}
           />
-
-          {createTerm.error && (
-            <Alert className="mb-4" title="Could not create the semester">
-              {getErrorMessage(createTerm.error)}
-            </Alert>
-          )}
 
           <CardTitle>Semesters</CardTitle>
 
@@ -152,7 +149,7 @@ export function CourseOverviewTab({ courseId }: Props) {
         </Card>
 
         <RuntimeConfigEditor
-          title="Current Semester Template"
+          title={semesterTemplateTitle}
           description={courseActionText.environment.select.description}
           imageSelection={course.environment.image}
           resourcesSelection={course.environment.resources}

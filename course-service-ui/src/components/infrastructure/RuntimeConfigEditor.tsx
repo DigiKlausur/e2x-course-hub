@@ -124,6 +124,7 @@ export function RuntimeConfigEditor({
           onClose={() => setOpenDialog(null)}
           imageSelection={imageSelection ?? null}
           imageCatalog={imageCatalog}
+          showTag={showTag}
           onConfirm={(sel) => {
             onImageConfirm(sel);
             setOpenDialog(null);

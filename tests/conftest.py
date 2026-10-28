@@ -19,7 +19,7 @@ def make_term(**fields) -> TermConfig:
 def make_course(course_id: str = "c1", terms: dict[str, TermConfig] | None = None) -> CourseConfig:
     return CourseConfig(
         metadata=CourseMetadata(course_id=course_id, course_name="Course"),
-        image=IMAGE,
+        image_family=IMAGE.family,
         spawn_role_selections=SELECTIONS,
         terms=terms or {},
     )

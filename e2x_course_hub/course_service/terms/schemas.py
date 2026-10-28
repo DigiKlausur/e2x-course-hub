@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from ...schema.course import StudentAccessPeriod, TermConfig
+from ...schema.course import StudentAccessPeriod
 from ..actions import TermActions
 from ..common.schemas import Environment
 
@@ -24,7 +24,6 @@ class TermDetailResponse(BaseModel):
 
 
 class CreateTermRequest(BaseModel):
-    """Request body for creating a term."""
+    """Request body for creating a term. The term's environment comes from the course."""
 
-    term: TermConfig | None = None
     access_period: StudentAccessPeriod | None = None

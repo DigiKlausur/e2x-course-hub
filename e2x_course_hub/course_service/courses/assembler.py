@@ -1,6 +1,7 @@
 from e2x_hub_rbac.auth import PermissionChecker
 
 from ...schema.course import CourseConfig, CourseMetadata
+from ...schema.selection import PartialImageSelection
 from ..actions import CourseActions, LmsActions, course_actions, lms_actions, user_can
 from ..common.schemas import Environment
 from ..terms.assembler import TermAssembler
@@ -34,7 +35,7 @@ class CourseAssembler:
             Environment: The assembled environment response containing image and resources.
         """
         return Environment(
-            image=course_config.image,
+            image=PartialImageSelection(family=course_config.image_family),
             resources=course_config.get_resource_selections(),
             profiles=course_config.get_profile_selections(),
         )

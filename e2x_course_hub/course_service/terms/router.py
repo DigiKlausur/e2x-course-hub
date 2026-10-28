@@ -27,11 +27,8 @@ async def create_term(
     term_assembler: TermAssemblerDep,
     body: CreateTermRequest | None = None,
 ):
-    term_config = body.term if body else None
     access_period = body.access_period if body else None
-    added_term = course_api.add_term(
-        user, course_id, term_id, term_config, access_period, session=session
-    )
+    added_term = course_api.add_term(user, course_id, term_id, access_period, session=session)
     return term_assembler.detail(course_id, term_id, added_term)
 
 
