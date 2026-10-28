@@ -27,25 +27,53 @@ interface Props {
   error?: unknown;
 }
 
-const IMAGE_FAMILY_NOT_FOUND = "urn:e2x-course-hub:image-family-not-found";
+const NOT_CREATED =
+  "This semester could not be created because the course's default";
 
+const SELECT_NEW_DEFAULT = (
+  <>
+    Select a new default under <strong>{semesterTemplateTitle}</strong>, then
+    try again.
+  </>
+);
+
+/** The error of a failed create; a default the catalog no longer has gets a message saying what to do. */
 function CreateTermErrorAlert({ error }: { error: unknown }) {
   const response = (error as ApiError).response;
-  if (response?.type === IMAGE_FAMILY_NOT_FOUND) {
-    return (
-      <Alert className="mb-4">
-        This semester could not be created because the course's default notebook
-        image '{String(response.extra?.family_name)}' is no longer available.
-        Select a new default under <strong>{semesterTemplateTitle}</strong>,
-        then try again.
-      </Alert>
-    );
+  const extra = response?.extra ?? {};
+  const role = String(extra.spawn_role);
+
+  switch (response?.type) {
+    case "urn:e2x-course-hub:image-family-not-found":
+      return (
+        <Alert className="mb-4">
+          {NOT_CREATED} notebook image '{String(extra.family_name)}' is no
+          longer available. {SELECT_NEW_DEFAULT}
+        </Alert>
+      );
+    case "urn:e2x-course-hub:resource-tier-not-found":
+      return (
+        <Alert className="mb-4">
+          {NOT_CREATED} <strong>{role} resources</strong> '
+          {String(extra.tier_name)}' are no longer available.{" "}
+          {SELECT_NEW_DEFAULT}
+        </Alert>
+      );
+    case "urn:e2x-course-hub:profile-not-found":
+      return (
+        <Alert className="mb-4">
+          {NOT_CREATED} <strong>{role} profile</strong> '
+          {String(extra.profile_name)}' is no longer available. Please contact
+          your administrator.
+        </Alert>
+      );
+    default:
+      return (
+        <Alert className="mb-4" title="Could not create the semester">
+          {getErrorMessage(error)}
+        </Alert>
+      );
   }
-  return (
-    <Alert className="mb-4" title="Could not create the semester">
-      {getErrorMessage(error)}
-    </Alert>
-  );
 }
 
 export function CreateTermDialog({

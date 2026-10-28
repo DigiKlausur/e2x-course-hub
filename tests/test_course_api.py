@@ -5,10 +5,14 @@ import pytest
 from conftest import make_course
 
 from e2x_course_hub.api.course_api import CourseAPI
-from e2x_course_hub.errors import ImageFamilyNotFoundError
+from e2x_course_hub.errors import (
+    ImageFamilyNotFoundError,
+    ProfileNotFoundError,
+    ResourceTierNotFoundError,
+)
 from e2x_course_hub.schema.catalog import InfrastructureCatalogOptions
 from e2x_course_hub.schema.course import StudentAccessPeriod
-from e2x_course_hub.schema.selection import ImageSelection
+from e2x_course_hub.schema.selection import ImageSelection, SpawnRoleSelection
 from e2x_course_hub.schema.types import SpawnRole
 
 START = datetime(2026, 11, 2, 9, 0, tzinfo=timezone.utc)
@@ -64,6 +68,38 @@ def test_add_term_with_an_image_family_missing_from_the_catalog_fails(repository
 
     with pytest.raises(ImageFamilyNotFoundError):
         _course_api(repository).add_term(OWNER, "c1", "t1")
+
+
+def _make_course_with_student_selection(selection: SpawnRoleSelection):
+    course = make_course()
+    course.spawn_role_selections[SpawnRole.STUDENT] = selection
+    return course
+
+
+def test_add_term_with_a_resource_tier_missing_from_the_catalog_fails(repository):
+    repository.create_course(
+        _make_course_with_student_selection(
+            SpawnRoleSelection(resource_tier_name="retired", profile_name="default")
+        )
+    )
+
+    with pytest.raises(ResourceTierNotFoundError) as error:
+        _course_api(repository).add_term(OWNER, "c1", "t1")
+
+    assert error.value.extra == {"tier_name": "retired", "spawn_role": SpawnRole.STUDENT}
+
+
+def test_add_term_with_a_profile_missing_from_the_catalog_fails(repository):
+    repository.create_course(
+        _make_course_with_student_selection(
+            SpawnRoleSelection(resource_tier_name="small", profile_name="retired")
+        )
+    )
+
+    with pytest.raises(ProfileNotFoundError) as error:
+        _course_api(repository).add_term(OWNER, "c1", "t1")
+
+    assert error.value.extra == {"profile_name": "retired", "spawn_role": SpawnRole.STUDENT}
 
 
 def test_add_term_without_access_period_is_unrestricted(repository):

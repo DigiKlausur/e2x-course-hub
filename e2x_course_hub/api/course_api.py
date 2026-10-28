@@ -12,10 +12,16 @@ from ..errors import (
     CourseExistsError,
     CourseNotFoundError,
     ImageFamilyNotFoundError,
+    ProfileNotFoundError,
+    ResourceTierNotFoundError,
     TermExistsError,
     TermNotFoundError,
 )
-from ..schema.catalog import InfrastructureCatalogOptions
+from ..schema.catalog import (
+    InfrastructureCatalogOptions,
+    UnknownProfileError,
+    UnknownResourceTierError,
+)
 from ..schema.course import CourseConfig, CourseMetadata, StudentAccessPeriod, TermConfig
 from ..schema.selection import (
     ImageSelection,
@@ -70,15 +76,20 @@ class CourseAPI(BaseAPI):
         """Assert that the resource tiers and profiles exist in the catalog.
 
         Raises:
-            ValueError: If a resource tier or profile does not exist in the catalog
+            ResourceTierNotFoundError: If a resource tier does not exist in the catalog
+            ProfileNotFoundError: If a profile does not exist in the catalog
         """
         for spawn_role, spawn_selection in spawn_role_selections.items():
-            self.infrastructure_options.assert_resource_tier_exists(
-                spawn_role, spawn_selection.resource_tier_name
-            )
-            self.infrastructure_options.assert_profile_exists(
-                spawn_role, spawn_selection.profile_name
-            )
+            tier_name = spawn_selection.resource_tier_name
+            profile_name = spawn_selection.profile_name
+            try:
+                self.infrastructure_options.assert_resource_tier_exists(spawn_role, tier_name)
+            except UnknownResourceTierError:
+                raise ResourceTierNotFoundError(tier_name, spawn_role)
+            try:
+                self.infrastructure_options.assert_profile_exists(spawn_role, profile_name)
+            except UnknownProfileError:
+                raise ProfileNotFoundError(profile_name, spawn_role)
 
     def _get_course(self, course_id: str, session: Optional[Session] = None) -> CourseConfig:
         """Get a course by ID, raises CourseNotFoundError if not found."""
