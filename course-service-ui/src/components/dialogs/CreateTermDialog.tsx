@@ -5,7 +5,7 @@ import { StudentAccessPeriodFields } from "@components/term/StudentAccessPeriodF
 import {
   accessPeriodDraftError,
   fromAccessPeriodDraft,
-  toAccessPeriodDraft,
+  undecidedAccessPeriodDraft,
 } from "@domain/accessPeriod";
 import type { StudentAccessPeriod } from "@api/types";
 
@@ -29,7 +29,7 @@ export function CreateTermDialog({
   isSubmitting,
 }: Props) {
   const [termId, setTermId] = useState("");
-  const [accessPeriod, setAccessPeriod] = useState(toAccessPeriodDraft);
+  const [accessPeriod, setAccessPeriod] = useState(undecidedAccessPeriodDraft);
 
   const normalizedExisting = useMemo(
     () => new Set(existingTermIds.map((id) => id.trim().toLowerCase())),
@@ -46,7 +46,7 @@ export function CreateTermDialog({
   const handleClose = () => {
     if (isSubmitting) return;
     setTermId("");
-    setAccessPeriod(toAccessPeriodDraft());
+    setAccessPeriod(undecidedAccessPeriodDraft);
     onClose();
   };
 

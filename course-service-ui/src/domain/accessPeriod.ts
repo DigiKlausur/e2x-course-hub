@@ -38,12 +38,22 @@ export function describeAccessPeriod(
   }
 }
 
-/** The form state of an access period; `start` and `end` are `datetime-local` values. */
+/**
+ * The form state of an access period; `start` and `end` are `datetime-local` values.
+ * `restricted` is `null` until the user has chosen, so the choice cannot be overlooked.
+ */
 export interface AccessPeriodDraft {
-  restricted: boolean;
+  restricted: boolean | null;
   start: string;
   end: string;
 }
+
+/** The draft for a new semester, where nothing is chosen yet. */
+export const undecidedAccessPeriodDraft: AccessPeriodDraft = {
+  restricted: null,
+  start: "",
+  end: "",
+};
 
 export function toAccessPeriodDraft(
   period?: StudentAccessPeriod,
@@ -70,6 +80,9 @@ export function fromAccessPeriodDraft(
 export function accessPeriodDraftError(
   draft: AccessPeriodDraft,
 ): string | null {
+  if (draft.restricted === null) {
+    return "Choose whether to restrict student access.";
+  }
   if (!draft.restricted) return null;
   if (!draft.start && !draft.end) {
     return "Set an opening time, a closing time, or both.";
