@@ -1,12 +1,23 @@
 import { useMemo, useState } from "react";
 import { Modal } from "@components/ui/Modal";
 import { Button } from "@components/ui/Button";
+import { StudentAccessPeriodFields } from "@components/term/StudentAccessPeriodFields";
+import {
+  accessPeriodDraftError,
+  fromAccessPeriodDraft,
+  undecidedAccessPeriodDraft,
+} from "@domain/accessPeriod";
+import type { StudentAccessPeriod } from "@api/types";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   existingTermIds: string[];
-  onCreate: (termId: string) => Promise<void>;
+  /** `accessPeriod` is `null` when student access is not restricted. */
+  onCreate: (
+    termId: string,
+    accessPeriod: StudentAccessPeriod | null,
+  ) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -18,6 +29,7 @@ export function CreateTermDialog({
   isSubmitting,
 }: Props) {
   const [termId, setTermId] = useState("");
+  const [accessPeriod, setAccessPeriod] = useState(undecidedAccessPeriodDraft);
 
   const normalizedExisting = useMemo(
     () => new Set(existingTermIds.map((id) => id.trim().toLowerCase())),
@@ -28,17 +40,22 @@ export function CreateTermDialog({
     termId.trim().length > 0 &&
     normalizedExisting.has(termId.trim().toLowerCase());
   const isValidId = /^[A-Za-z0-9][A-Za-z0-9-_]+$/.test(termId.trim());
-  const isValid = isValidId && !isDuplicate;
+  const isValid =
+    isValidId && !isDuplicate && accessPeriodDraftError(accessPeriod) === null;
 
   const handleClose = () => {
     if (isSubmitting) return;
     setTermId("");
+    setAccessPeriod(undecidedAccessPeriodDraft);
     onClose();
   };
 
   const handleSubmit = async () => {
     if (!isValid) return;
-    await onCreate(termId.trim());
+    await onCreate(
+      termId.trim(),
+      accessPeriod.restricted ? fromAccessPeriodDraft(accessPeriod) : null,
+    );
     handleClose();
   };
 
@@ -89,6 +106,14 @@ export function CreateTermDialog({
             A semester with this ID already exists.
           </p>
         )}
+      </div>
+
+      <div className="mt-5">
+        <StudentAccessPeriodFields
+          value={accessPeriod}
+          onChange={setAccessPeriod}
+          disabled={isSubmitting}
+        />
       </div>
     </Modal>
   );

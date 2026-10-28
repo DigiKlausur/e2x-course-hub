@@ -6,6 +6,7 @@ import { Button } from "@components/ui/Button";
 import { Alert } from "@components/ui/Alert";
 import { DataTable } from "@components/ui/DataTable";
 import type { DataTableColumn } from "@components/ui/DataTable";
+import { createdAtColumn } from "@components/ui/createdAtColumn";
 import { CreateTermDialog } from "@components/dialogs/CreateTermDialog";
 import { RuntimeConfigEditor } from "@components/infrastructure/RuntimeConfigEditor";
 import { useImageCatalog, useResourceCatalog } from "@hooks/catalog";
@@ -20,6 +21,7 @@ import { courseActionText } from "@domain/actions";
 import type {
   ImageSelection,
   SpawnRole,
+  StudentAccessPeriod,
   TermSummaryResponse,
 } from "@api/types";
 
@@ -49,6 +51,7 @@ function buildSemesterColumns(
         ),
       sortAccessor: (term) => term.term_id.toLowerCase(),
     },
+    createdAtColumn((term) => term.created_at),
   ];
 }
 
@@ -74,8 +77,14 @@ export function CourseOverviewTab({ courseId }: Props) {
   const canAddTerm = course.actions.terms.add;
   const semesterColumns = buildSemesterColumns(courseId);
 
-  const handleCreate = async (termId: string) => {
-    await createTerm.mutateAsync({ termId, termConfig: {} });
+  const handleCreate = async (
+    termId: string,
+    accessPeriod: StudentAccessPeriod | null,
+  ) => {
+    await createTerm.mutateAsync({
+      termId,
+      termConfig: accessPeriod ? { access_period: accessPeriod } : {},
+    });
     navigate(`/course/${courseId}/term/${termId}`);
   };
 

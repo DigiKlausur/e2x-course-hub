@@ -130,6 +130,23 @@ export interface paths {
         patch: operations["patch_term_environment_v1_courses__course_id__terms__term_id__environment_patch"];
         trace?: never;
     };
+    "/v1/courses/{course_id}/terms/{term_id}/access-period": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Term Access Period */
+        put: operations["put_term_access_period_v1_courses__course_id__terms__term_id__access_period_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/catalogs/image-catalog": {
         parameters: {
             query?: never;
@@ -397,7 +414,7 @@ export interface components {
         };
         /** CourseDetailResponse */
         CourseDetailResponse: {
-            metadata: components["schemas"]["CourseMetadata"];
+            metadata: components["schemas"]["CourseMetadataResponse"];
             environment: components["schemas"]["Environment"];
             /** Terms */
             terms: components["schemas"]["TermSummaryResponse"][];
@@ -441,6 +458,29 @@ export interface components {
             edit: boolean;
         };
         /**
+         * CourseMetadataResponse
+         * @description Course metadata as returned by the API, including the read-only creation date.
+         */
+        CourseMetadataResponse: {
+            /**
+             * Course Id
+             * @description The id of the course.
+             */
+            course_id: string;
+            /**
+             * Course Name
+             * @description The full name of the course
+             */
+            course_name: string;
+            /**
+             * Description
+             * @description An optional text describing the course.
+             */
+            description?: string | null;
+            /** Created At */
+            created_at: string | null;
+        };
+        /**
          * CourseMetadataUpdate
          * @description Request body for updating course metadata.
          */
@@ -452,7 +492,7 @@ export interface components {
         };
         /** CourseSummaryResponse */
         CourseSummaryResponse: {
-            metadata: components["schemas"]["CourseMetadata"];
+            metadata: components["schemas"]["CourseMetadataResponse"];
             actions: components["schemas"]["CourseActions"];
         };
         /** CourseTermsActions */
@@ -466,6 +506,7 @@ export interface components {
          */
         CreateTermRequest: {
             term?: components["schemas"]["TermConfig"] | null;
+            access_period?: components["schemas"]["StudentAccessPeriod"] | null;
         };
         /**
          * Environment
@@ -713,6 +754,27 @@ export interface components {
             /** Profile Name */
             profile_name: string;
         };
+        /**
+         * StudentAccessPeriod
+         * @description The period in which students may spawn a term. Staff are not restricted.
+         */
+        StudentAccessPeriod: {
+            /**
+             * Student Access Start
+             * @description From when students may spawn the term. Empty means immediately.
+             */
+            student_access_start?: string | null;
+            /**
+             * Student Access End
+             * @description Until when students may spawn the term. Empty means indefinitely.
+             */
+            student_access_end?: string | null;
+        };
+        /** TermAccessPeriodActions */
+        TermAccessPeriodActions: {
+            /** Edit */
+            edit: boolean;
+        };
         /** TermActions */
         TermActions: {
             /** View */
@@ -720,6 +782,7 @@ export interface components {
             /** Remove */
             remove: boolean;
             environment: components["schemas"]["TermEnvironmentActions"];
+            accessPeriod: components["schemas"]["TermAccessPeriodActions"];
             spawn: components["schemas"]["TermSpawnActions"];
             members: components["schemas"]["TermMembersActions"];
         };
@@ -728,6 +791,16 @@ export interface components {
          * @description Configuration for a specific term.
          */
         TermConfig: {
+            /**
+             * Student Access Start
+             * @description From when students may spawn the term. Empty means immediately.
+             */
+            student_access_start?: string | null;
+            /**
+             * Student Access End
+             * @description Until when students may spawn the term. Empty means indefinitely.
+             */
+            student_access_end?: string | null;
             /** @description Image configuration. */
             image: components["schemas"]["ImageSelection"];
             /**
@@ -744,7 +817,10 @@ export interface components {
             course_id: string;
             /** Term Id */
             term_id: string;
+            /** Created At */
+            created_at: string | null;
             environment: components["schemas"]["Environment"];
+            access_period: components["schemas"]["StudentAccessPeriod"];
             actions: components["schemas"]["TermActions"];
         };
         /** TermEnvironmentActions */
@@ -774,6 +850,8 @@ export interface components {
             course_id: string;
             /** Term Id */
             term_id: string;
+            /** Created At */
+            created_at: string | null;
             actions: components["schemas"]["TermActions"];
         };
         /** UserResponse */
@@ -842,7 +920,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CourseMetadata"];
+                    "application/json": components["schemas"]["CourseMetadataResponse"];
                 };
             };
             /** @description Validation Error */
@@ -933,7 +1011,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CourseMetadata"];
+                    "application/json": components["schemas"]["CourseMetadataResponse"];
                 };
             };
             /** @description Validation Error */
@@ -968,7 +1046,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CourseMetadata"];
+                    "application/json": components["schemas"]["CourseMetadataResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1232,6 +1310,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Environment"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_term_access_period_v1_courses__course_id__terms__term_id__access_period_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                term_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudentAccessPeriod"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentAccessPeriod"];
                 };
             };
             /** @description Validation Error */

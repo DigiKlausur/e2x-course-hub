@@ -1,9 +1,32 @@
+from datetime import datetime, timezone
 from typing import List, Optional
 
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.types import TypeDecorator
 
 from ..schema.types import SpawnRole
+
+
+class UTCDateTime(TypeDecorator):
+    """A timezone-aware datetime, stored as naive UTC.
+
+    SQLite drops timezone information, so values are converted to UTC on the
+    way in and marked as UTC on the way out.
+    """
+
+    impl = DateTime
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        return value.astimezone(timezone.utc).replace(tzinfo=None)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        return value.replace(tzinfo=timezone.utc)
 
 
 class Base(DeclarativeBase):
@@ -20,6 +43,9 @@ class CourseRow(Base):
     # Default image selection
     image_family: Mapped[str]
     image_tag: Mapped[str]
+
+    # Set by the repository; empty for courses created before this column existed.
+    created_at: Mapped[Optional[datetime]] = mapped_column(UTCDateTime)
 
     spawn_configs: Mapped[List["CourseSpawnConfigRow"]] = relationship(
         back_populates="course",
@@ -66,6 +92,13 @@ class TermRow(Base):
 
     image_family: Mapped[str]
     image_tag: Mapped[str]
+
+    # When students may spawn this term; empty means no limit on that side.
+    student_access_start: Mapped[Optional[datetime]] = mapped_column(UTCDateTime)
+    student_access_end: Mapped[Optional[datetime]] = mapped_column(UTCDateTime)
+
+    # Set by the repository; empty for terms created before this column existed.
+    created_at: Mapped[Optional[datetime]] = mapped_column(UTCDateTime)
 
     spawn_configs: Mapped[List["TermSpawnConfigRow"]] = relationship(
         back_populates="term",

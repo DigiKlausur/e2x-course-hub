@@ -11,6 +11,7 @@ import { Button } from "@components/ui/Button";
 import { Alert } from "@components/ui/Alert";
 import { DataTable } from "@components/ui/DataTable";
 import type { DataTableColumn } from "@components/ui/DataTable";
+import { createdAtColumn } from "@components/ui/createdAtColumn";
 import { CreateCourseDialog } from "@components/dialogs/CreateCourseDialog";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { lmsActionText } from "@domain/actions";
@@ -48,6 +49,7 @@ const columns: DataTableColumn<CourseSummaryResponse>[] = [
       </span>
     ),
   },
+  createdAtColumn((course) => course.metadata.created_at),
 ];
 
 function matchesQuery(course: CourseSummaryResponse, query: string): boolean {

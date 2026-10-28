@@ -20,6 +20,7 @@ class CoursePermission(PermissionEnum):
     TERM_SELECT_IMAGE = ("term.select_image", Scope.TERM)
     TERM_SELECT_RESOURCES = ("term.select_resources", Scope.TERM)
     TERM_SELECT_PROFILES = ("term.select_profiles", Scope.TERM)
+    TERM_EDIT_ACCESS_PERIOD = ("term.edit_access_period", Scope.TERM)
 
 
 class CoursePermissionSets:
@@ -41,6 +42,7 @@ class CoursePermissionSets:
             CoursePermission.TERM_SELECT_IMAGE,
             CoursePermission.TERM_SELECT_RESOURCES,
             CoursePermission.TERM_SELECT_PROFILES,
+            CoursePermission.TERM_EDIT_ACCESS_PERIOD,
         ]
     )
 
@@ -71,6 +73,7 @@ class CoursePermissionSets:
             CoursePermission.TERM_SELECT_IMAGE,
             CoursePermission.TERM_SELECT_RESOURCES,
             CoursePermission.TERM_SELECT_PROFILES,
+            CoursePermission.TERM_EDIT_ACCESS_PERIOD,
         ]
     )
 

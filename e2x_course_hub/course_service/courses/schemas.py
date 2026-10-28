@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 from ...schema.course import CourseMetadata
@@ -6,13 +8,19 @@ from ..common.schemas import Environment
 from ..terms.schemas import TermSummaryResponse
 
 
+class CourseMetadataResponse(CourseMetadata):
+    """Course metadata as returned by the API, including the read-only creation date."""
+
+    created_at: datetime | None
+
+
 class CourseSummaryResponse(BaseModel):
-    metadata: CourseMetadata
+    metadata: CourseMetadataResponse
     actions: CourseActions
 
 
 class CourseDetailResponse(BaseModel):
-    metadata: CourseMetadata
+    metadata: CourseMetadataResponse
     environment: Environment
     terms: list[TermSummaryResponse]
     actions: CourseActions

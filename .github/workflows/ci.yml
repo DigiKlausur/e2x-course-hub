@@ -37,8 +37,8 @@ jobs:
   frontend:
     name: Frontend and API contract (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
-    # Installing the package and exporting the OpenAPI schema is the only
-    # exercise the Python code gets, so run it on every version pyproject.toml
+    # Installing the package, running the tests and exporting the OpenAPI schema
+    # exercise the Python code, so run them on every version pyproject.toml
     # claims to support. The UI-only steps below run once, on the newest.
     strategy:
       fail-fast: false
@@ -69,7 +69,10 @@ jobs:
       # export below, and exercises the packaging path as a side effect: the
       # build hook bundles the UI exactly as a released wheel would.
       - name: Install the course hub
-        run: pip install .
+        run: pip install . pytest
+
+      - name: Run the tests
+        run: python -m pytest tests
 
       # Regenerates openapi.json and schema.d.ts and fails if either differs
       # from what is committed, so a backend schema change cannot land without

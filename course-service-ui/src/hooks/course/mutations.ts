@@ -9,6 +9,7 @@ import type {
   CourseConfig,
   EnvironmentUpdate,
   CreateTermRequest,
+  StudentAccessPeriod,
 } from "@api/types";
 
 import { courseKeys } from "./keys";
@@ -125,6 +126,15 @@ export function useUpdateTermEnvironment(courseId: string, termId: string) {
   return useMutation({
     mutationFn: (updateData: EnvironmentUpdate) =>
       courseAPI.updateTermEnvironment(courseId, termId, updateData),
+    onSuccess: () => invalidateTerm(queryClient, courseId, termId),
+  });
+}
+
+export function useUpdateTermAccessPeriod(courseId: string, termId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (accessPeriod: StudentAccessPeriod) =>
+      courseAPI.updateTermAccessPeriod(courseId, termId, accessPeriod),
     onSuccess: () => invalidateTerm(queryClient, courseId, termId),
   });
 }

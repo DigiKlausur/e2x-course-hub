@@ -32,9 +32,9 @@ export function TermSettingsTab({ courseId, termId }: Props) {
   return (
     <div className="grid grid-cols-[2fr_1fr] gap-6">
       <div>
-        {/* Terms have no editable metadata: they are identified by their id and
-            carry only an environment. Runtime settings live in the Semester Runtime
-            tab, so this card is read-only. */}
+        {/* Terms have no editable metadata: they are identified by their id.
+            The runtime and the student access period are edited on the
+            overview, so this card is read-only. */}
         <Card>
           <CardTitle>Semester Settings</CardTitle>
           <Row label="Course">{courseId}</Row>

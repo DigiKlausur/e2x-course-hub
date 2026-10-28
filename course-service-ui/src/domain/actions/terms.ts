@@ -21,6 +21,14 @@ export const termActionText = {
         "Choose the notebook image and resources used for this semester.",
     },
   },
+  accessPeriod: {
+    title: "Student access period",
+    edit: {
+      label: "Change student access period",
+      description:
+        "Choose when students can start notebook servers for this semester. Staff are not restricted.",
+    },
+  },
   spawn: {
     title: "Start environments",
     student: {

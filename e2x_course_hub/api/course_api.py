@@ -10,7 +10,7 @@ from ..contract.providers import InfrastructureCatalogProvider
 from ..db.repository import CourseRepository
 from ..errors import CourseExistsError, CourseNotFoundError, TermExistsError, TermNotFoundError
 from ..schema.catalog import InfrastructureCatalogOptions
-from ..schema.course import CourseConfig, CourseMetadata, TermConfig
+from ..schema.course import CourseConfig, CourseMetadata, StudentAccessPeriod, TermConfig
 from ..schema.selection import (
     ImageSelection,
     PartialImageSelection,
@@ -221,6 +221,7 @@ class CourseAPI(BaseAPI):
         course_id: str,
         term_id: str,
         term: Optional[TermConfig] = None,
+        access_period: Optional[StudentAccessPeriod] = None,
         session: Optional[Session] = None,
     ) -> TermConfig:
         """Add a new term with the specified ID and name.
@@ -230,6 +231,7 @@ class CourseAPI(BaseAPI):
             course_id: The course ID
             term_id: The term ID
             term: The TermConfig object containing the term configuration
+            access_period: When students may spawn the term; replaces the period in `term`
         Raises:
             TermExistsError: If a term with the same ID already exists
         Returns:
@@ -243,6 +245,9 @@ class CourseAPI(BaseAPI):
                 image=course.image,
                 spawn_role_selections=course.spawn_role_selections,
             )
+        if access_period is not None:
+            term.student_access_start = access_period.student_access_start
+            term.student_access_end = access_period.student_access_end
         self.assert_infrastructure_options_exist(course)
         updated_course_config = self.course_repository.add_term(
             course_id, term_id, term, session=session
@@ -533,4 +538,26 @@ class CourseAPI(BaseAPI):
             term.spawn_role_selections[spawn_role] = SpawnRoleSelection(
                 resource_tier_name=tier_name, profile_name=current_selection.profile_name
             )
+        self.course_repository.update_course(course_id, course, session=session)
+
+    @require_permission(CoursePermission.TERM_EDIT_ACCESS_PERIOD)
+    def set_term_student_access_period(
+        self,
+        user: UserLike,
+        course_id: str,
+        term_id: str,
+        access_period: StudentAccessPeriod,
+        session: Optional[Session] = None,
+    ):
+        """Set the period in which students may spawn the specified term.
+
+        Args:
+            user: The user setting the access period
+            course_id: The course ID
+            term_id: The term ID
+            access_period: The new access period; empty bounds mean no limit on that side
+        """
+        course, term = self._get_course_and_term(course_id, term_id, session=session)
+        term.student_access_start = access_period.student_access_start
+        term.student_access_end = access_period.student_access_end
         self.course_repository.update_course(course_id, course, session=session)

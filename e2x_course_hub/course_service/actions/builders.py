@@ -23,6 +23,7 @@ from .models import (
     LmsCoursesActions,
     LmsMembersActions,
     MemberListActions,
+    TermAccessPeriodActions,
     TermActions,
     TermEnvironmentActions,
     TermMembersActions,
@@ -114,6 +115,9 @@ def term_actions(can: Can) -> TermActions:
                 CoursePermission.TERM_SELECT_RESOURCES,
                 CoursePermission.TERM_SELECT_PROFILES,
             ),
+        ),
+        accessPeriod=TermAccessPeriodActions(
+            edit=can(CoursePermission.TERM_EDIT_ACCESS_PERIOD),
         ),
         spawn=TermSpawnActions(
             student=can(SpawnPermission.SPAWN_STUDENT_PROFILE),

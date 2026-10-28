@@ -4,7 +4,7 @@ from typing import Generator
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from .models import Base
+from .migrations import upgrade_db
 
 _engine: Engine | None = None
 _SessionFactory: sessionmaker | None = None
@@ -13,7 +13,7 @@ _SessionFactory: sessionmaker | None = None
 def init_db(db_url: str = "sqlite:///courses.db") -> Engine:
     global _engine, _SessionFactory
     _engine = create_engine(db_url)
-    Base.metadata.create_all(_engine)
+    upgrade_db(_engine)
     _SessionFactory = sessionmaker(bind=_engine)
     return _engine
 

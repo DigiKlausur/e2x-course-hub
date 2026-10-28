@@ -8,7 +8,9 @@ and every semester has its own notebook image and resources.
 
 Course owners click **Create Semester** on the course's **Overview** tab and enter a
 semester ID such as `WS23`. The new semester starts with the course's semester
-template (see {doc}`courses`).
+template (see {doc}`courses`). Students can start notebook servers for it immediately,
+unless you switch on **Restrict student access** and set when it opens or closes (see
+**Set the student access period** below).
 
 ## The semester page
 
@@ -24,7 +26,8 @@ The **Overview** tab shows:
 
 - the members of the semester, with one tab each for **Students**, **Teaching
   Assistants**, **Instructors** and **Observers** (see {doc}`members`).
-- **General Information**: the course and the semester.
+- **General Information**: the course, the semester, when it was created and, under
+  **Student access**, whether and until when students can start notebook servers.
 - **Semester Runtime**: the notebook image, student resources and grader resources of
   this semester.
 
@@ -48,6 +51,31 @@ they can start:
 | **Read-only grader environment** | The grader environment with the course directory read-only. |
 
 Which role may start which environment is listed in {doc}`../reference/roles`.
+
+## Set the student access period
+
+Course owners and instructors can limit when students can start notebook servers for a
+semester, either
+when creating it or later: on the semester's **Overview** tab, click **Change** next to
+**Student access** under **General Information**. Switch on **Restrict student
+access** and set **Opens**, **Closes** or both. Times are entered in your browser's
+time zone. Switching the restriction off lets students start notebook servers for the
+semester at any time again.
+
+- Leave **Opens** empty to open the semester immediately.
+- Leave **Closes** empty to keep it open indefinitely.
+- **Closes** must be after **Opens**.
+
+Outside the access period, the semester does not appear on the spawn page for
+students. Teaching assistants, instructors and observers are not restricted, so they
+can prepare the semester before it opens and grade after it closes.
+
+```{note}
+**Known limitation:** the access period only controls *starting* a notebook server.
+A student who started a server before the closing time keeps it until it is stopped,
+for example by JupyterHub's idle culler. Running servers are not stopped when the
+access period closes.
+```
 
 ## Delete a semester
 

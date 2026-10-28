@@ -27,6 +27,7 @@ dependencies = [
   "jinja2>=3.1",
   "PyYAML>=6.0",
   "sqlalchemy>=2.0",
+  "alembic>=1.17",
   "fastapi>=0.100.0",
   "uvicorn>=0.23",
   "httpx>=0.24",
@@ -43,6 +44,7 @@ Source = "https://github.com/Digiklausur/e2x-course-hub"
 [project.optional-dependencies]
 dev = [
   "pre-commit",
+  "pytest",
   # Pinned so every developer and CI format identically; bump deliberately.
   # CI's ruff-action reads this pin, so there is no second copy to update.
   "ruff==0.16.7",

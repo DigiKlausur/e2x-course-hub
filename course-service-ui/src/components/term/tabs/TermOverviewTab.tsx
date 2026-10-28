@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Card, CardTitle } from "@components/ui/Card";
 import { Row } from "@components/ui/Row";
 import { Alert } from "@components/ui/Alert";
+import { SelectionBox } from "@components/ui/SelectionBox";
+import { StudentAccessPeriodDialog } from "@components/dialogs/StudentAccessPeriodDialog";
 import { RuntimeConfigEditor } from "@components/infrastructure/RuntimeConfigEditor";
 import { AddMembersDialog } from "@components/membership/AddMembersDialog";
 import { TabbedMemberDataTableWithCurrentUser } from "@components/membership/TabbedMemberDataTableWithCurrentUser";
@@ -19,6 +21,8 @@ import {
 } from "@hooks/membership";
 import { useSelection } from "@hooks/ui";
 import { getErrorMessage } from "@/lib/errorMessage";
+import { formatDateTime } from "@/lib/dateTime";
+import { describeAccessPeriod } from "@domain/accessPeriod";
 import { MembershipRole, memberLabels } from "@domain/roles";
 import { memberListActionText, termActionText } from "@domain/actions";
 import type { ImageSelection, SpawnRole } from "@api/types";
@@ -33,6 +37,7 @@ interface Props {
 
 export function TermOverviewTab({ courseId, termId }: Props) {
   const [addDialogFor, setAddDialogFor] = useState<DialogTarget | null>(null);
+  const [accessPeriodDialogOpen, setAccessPeriodDialogOpen] = useState(false);
 
   // The term reports which membership lists this user may see and change.
   // Fetching a list without the matching permission answers 403, so the view
@@ -228,7 +233,29 @@ export function TermOverviewTab({ courseId, termId }: Props) {
           <CardTitle>General Information</CardTitle>
           <Row label="Course">{courseId}</Row>
           <Row label="Semester">{termId}</Row>
+          <Row label="Created">
+            {term?.created_at ? formatDateTime(term.created_at) : "Unknown"}
+          </Row>
+          {term && (
+            <div className="mt-4">
+              <SelectionBox
+                label="Student access"
+                title={describeAccessPeriod(term.access_period)}
+                canChange={term.actions.accessPeriod.edit}
+                onChangeClick={() => setAccessPeriodDialogOpen(true)}
+              />
+            </div>
+          )}
         </Card>
+
+        {term && accessPeriodDialogOpen && (
+          <StudentAccessPeriodDialog
+            courseId={courseId}
+            termId={termId}
+            accessPeriod={term.access_period}
+            onClose={() => setAccessPeriodDialogOpen(false)}
+          />
+        )}
 
         <RuntimeConfigEditor
           title="Semester Runtime"

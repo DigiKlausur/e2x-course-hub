@@ -85,9 +85,14 @@ class TermMembersActions(BaseModel):
     observers: MemberListActions
 
 
+class TermAccessPeriodActions(BaseModel):
+    edit: bool
+
+
 class TermActions(BaseModel):
     view: bool
     remove: bool
     environment: TermEnvironmentActions
+    accessPeriod: TermAccessPeriodActions
     spawn: TermSpawnActions
     members: TermMembersActions

@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from e2x_hub_rbac.api import BaseAPI
 from e2x_hub_rbac.auth import UserLike
 
@@ -7,6 +9,7 @@ from ..schema.selection import CourseReference, SpawnOffering, SpawnSelection
 from .spawn_permissions import (
     PERMISSION_TO_SPAWN,
     SPAWN_ROLE_PERMISSIONS,
+    SpawnPermission,
 )
 
 
@@ -20,6 +23,7 @@ class SpawnOfferingAPI(BaseAPI, SpawnOfferingProvider):
         if course is None:
             raise ValueError(f"Course with ID '{course_id}' not found.")
 
+        now = datetime.now(timezone.utc)
         spawn_offerings = []
         for term_id in course.terms:
             for permission, (spawn_role, course_readonly) in PERMISSION_TO_SPAWN.items():
@@ -29,6 +33,11 @@ class SpawnOfferingAPI(BaseAPI, SpawnOfferingProvider):
                     )  # Ensure term exists
                     if term is None:
                         continue  # Skip if term does not exist
+                    if (
+                        permission == SpawnPermission.SPAWN_STUDENT_PROFILE
+                        and not term.is_student_access_open(now)
+                    ):
+                        continue  # Students may only spawn within the access period
                     image = term.image
 
                     spawn_selection = SpawnSelection(
