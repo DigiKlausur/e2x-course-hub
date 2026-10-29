@@ -17,11 +17,7 @@ from ..errors import (
     TermExistsError,
     TermNotFoundError,
 )
-from ..schema.catalog import (
-    InfrastructureCatalogOptions,
-    UnknownProfileError,
-    UnknownResourceTierError,
-)
+from ..schema.catalog import InfrastructureCatalogOptions
 from ..schema.course import CourseConfig, CourseMetadata, StudentAccessPeriod, TermConfig
 from ..schema.selection import (
     ImageSelection,
@@ -63,33 +59,23 @@ class CourseAPI(BaseAPI):
         Args:
             course: The CourseConfig object containing the course configuration
         Raises:
-            ValueError: If any of the specified infrastructure options do not exist in the catalog
-        """
-        self.infrastructure_options.image_family_options.assert_family_and_tag_exists(
-            course.image_family, tag=None
-        )
-        self._assert_spawn_role_selections_exist(course.spawn_role_selections)
-
-    def _assert_spawn_role_selections_exist(
-        self, spawn_role_selections: dict[SpawnRole, SpawnRoleSelection]
-    ):
-        """Assert that the resource tiers and profiles exist in the catalog.
-
-        Raises:
+            ImageFamilyNotFoundError: If the image family does not exist in the catalog
             ResourceTierNotFoundError: If a resource tier does not exist in the catalog
             ProfileNotFoundError: If a profile does not exist in the catalog
         """
-        for spawn_role, spawn_selection in spawn_role_selections.items():
-            tier_name = spawn_selection.resource_tier_name
-            profile_name = spawn_selection.profile_name
-            try:
-                self.infrastructure_options.assert_resource_tier_exists(spawn_role, tier_name)
-            except UnknownResourceTierError:
-                raise ResourceTierNotFoundError(tier_name, spawn_role)
-            try:
-                self.infrastructure_options.assert_profile_exists(spawn_role, profile_name)
-            except UnknownProfileError:
-                raise ProfileNotFoundError(profile_name, spawn_role)
+        unavailable = self.infrastructure_options.find_unavailable(
+            PartialImageSelection(family=course.image_family), course.spawn_role_selections
+        )
+        if not unavailable:
+            return
+        first = unavailable[0]
+        match first.kind:
+            case "image_family":
+                raise ImageFamilyNotFoundError(first.name)
+            case "resource_tier":
+                raise ResourceTierNotFoundError(first.name, str(first.spawn_role))
+            case "profile":
+                raise ProfileNotFoundError(first.name, str(first.spawn_role))
 
     def _get_course(self, course_id: str, session: Optional[Session] = None) -> CourseConfig:
         """Get a course by ID, raises CourseNotFoundError if not found."""
@@ -265,15 +251,16 @@ class CourseAPI(BaseAPI):
         Raises:
             TermExistsError: If a term with the same ID already exists
             ImageFamilyNotFoundError: If the course's image family is not in the catalog
+            ResourceTierNotFoundError: If a course's resource tier is not in the catalog
+            ProfileNotFoundError: If a course's profile is not in the catalog
         Returns:
             The TermConfig object for the newly added term
         """
         course = self._get_course(course_id, session=session)
         if term_id in course.terms:
             raise TermExistsError(course_id, term_id)
+        self.assert_infrastructure_options_exist(course)
         families = self.infrastructure_options.image_family_options.families
-        if course.image_family not in families:
-            raise ImageFamilyNotFoundError(course.image_family)
         term = TermConfig(
             image=ImageSelection(
                 family=course.image_family,
@@ -284,7 +271,6 @@ class CourseAPI(BaseAPI):
         if access_period is not None:
             term.student_access_start = access_period.student_access_start
             term.student_access_end = access_period.student_access_end
-        self._assert_spawn_role_selections_exist(term.spawn_role_selections)
         updated_course_config = self.course_repository.add_term(
             course_id, term_id, term, session=session
         )
