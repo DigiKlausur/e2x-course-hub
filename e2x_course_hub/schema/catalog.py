@@ -211,7 +211,7 @@ class InfrastructureCatalogOptions(BaseModel):
 
     def find_unavailable(
         self,
-        image: PartialImageSelection,
+        image: ImageSelection | PartialImageSelection,
         spawn_role_selections: dict[SpawnRole, SpawnRoleSelection],
     ) -> list[UnavailableSelection]:
         """List what is missing from the catalog; a tag is only checked if its family exists."""
@@ -219,7 +219,9 @@ class InfrastructureCatalogOptions(BaseModel):
         unavailable = []
         if _fails(lambda: images.assert_family_and_tag_exists(image.family, tag=None)):
             unavailable.append(UnavailableSelection(kind="image_family", name=image.family))
-        elif _fails(lambda: images.assert_family_and_tag_exists(image.family, image.tag)):
+        elif image.tag is not None and _fails(
+            lambda: images.assert_family_and_tag_exists(image.family, image.tag)
+        ):
             unavailable.append(UnavailableSelection(kind="image_tag", name=image.tag))
         for role, selection in spawn_role_selections.items():
             tier, profile = selection.resource_tier_name, selection.profile_name

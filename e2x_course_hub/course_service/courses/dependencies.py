@@ -4,6 +4,7 @@ from fastapi import Depends
 
 from ...schema.course import CourseConfig
 from ..common.dependency_types import (
+    CatalogDep,
     CourseAPIDep,
     CurrentUser,
     DBSession,
@@ -16,8 +17,11 @@ from .assembler import CourseAssembler, CourseCollectionAssembler
 def get_course_assembler(
     permission_checker: PermissionCheckerDep,
     term_assembler: TermAssemblerDep,
+    catalog: CatalogDep,
 ) -> CourseAssembler:
-    return CourseAssembler(permission_checker=permission_checker, term_assembler=term_assembler)
+    return CourseAssembler(
+        permission_checker=permission_checker, term_assembler=term_assembler, catalog=catalog
+    )
 
 
 def get_course_collection_assembler(

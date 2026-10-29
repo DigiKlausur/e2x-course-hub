@@ -532,6 +532,11 @@ export interface components {
             profiles: {
                 [key: string]: string;
             };
+            /**
+             * Unavailable
+             * @default []
+             */
+            unavailable: components["schemas"]["UnavailableSelection"][];
         };
         /**
          * EnvironmentUpdate
@@ -869,6 +874,26 @@ export interface components {
             /** Created At */
             created_at: string | null;
             actions: components["schemas"]["TermActions"];
+            /**
+             * Unavailable
+             * @default []
+             */
+            unavailable: components["schemas"]["UnavailableSelection"][];
+        };
+        /**
+         * UnavailableSelection
+         * @description A selected image family, image tag, resource tier or profile that is not in the catalog.
+         */
+        UnavailableSelection: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "image_family" | "image_tag" | "resource_tier" | "profile";
+            /** Name */
+            name: string;
+            /** @description Set for resource tiers and profiles. */
+            spawn_role?: components["schemas"]["SpawnRole"] | null;
         };
         /** UserResponse */
         UserResponse: {

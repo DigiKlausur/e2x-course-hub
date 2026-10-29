@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from ...schema.catalog import UnavailableSelection
 from ...schema.selection import PartialImageSelection
 from ...schema.types import SpawnRole
 
@@ -13,6 +14,7 @@ class Environment(BaseModel):
     image: PartialImageSelection
     resources: dict[SpawnRole, str] = {}
     profiles: dict[SpawnRole, str] = {}
+    unavailable: list[UnavailableSelection] = []
 
 
 class EnvironmentUpdate(BaseModel):

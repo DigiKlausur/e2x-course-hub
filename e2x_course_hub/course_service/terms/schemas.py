@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from ...schema.catalog import UnavailableSelection
 from ...schema.course import StudentAccessPeriod
 from ..actions import TermActions
 from ..common.schemas import Environment
@@ -12,6 +13,7 @@ class TermSummaryResponse(BaseModel):
     term_id: str
     created_at: datetime | None
     actions: TermActions
+    unavailable: list[UnavailableSelection] = []
 
 
 class TermDetailResponse(BaseModel):

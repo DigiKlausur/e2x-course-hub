@@ -1795,6 +1795,14 @@
             "type": "object",
             "title": "Profiles",
             "default": {}
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/components/schemas/UnavailableSelection"
+            },
+            "type": "array",
+            "title": "Unavailable",
+            "default": []
           }
         },
         "type": "object",
@@ -2644,6 +2652,14 @@
           },
           "actions": {
             "$ref": "#/components/schemas/TermActions"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/components/schemas/UnavailableSelection"
+            },
+            "type": "array",
+            "title": "Unavailable",
+            "default": []
           }
         },
         "type": "object",
@@ -2654,6 +2670,42 @@
           "actions"
         ],
         "title": "TermSummaryResponse"
+      },
+      "UnavailableSelection": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "image_family",
+              "image_tag",
+              "resource_tier",
+              "profile"
+            ],
+            "title": "Kind"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "spawn_role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpawnRole"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set for resource tiers and profiles."
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "name"
+        ],
+        "title": "UnavailableSelection",
+        "description": "A selected image family, image tag, resource tier or profile that is not in the catalog."
       },
       "UserResponse": {
         "properties": {
