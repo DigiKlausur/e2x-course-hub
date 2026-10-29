@@ -3,11 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Card, CardTitle } from "@components/ui/Card";
 import { Row } from "@components/ui/Row";
 import { Button } from "@components/ui/Button";
+import { Badge } from "@components/ui/Badge";
 import { DataTable } from "@components/ui/DataTable";
 import type { DataTableColumn } from "@components/ui/DataTable";
 import { createdAtColumn } from "@components/ui/createdAtColumn";
 import { CreateTermDialog } from "@components/dialogs/CreateTermDialog";
 import { RuntimeConfigEditor } from "@components/infrastructure/RuntimeConfigEditor";
+import { UnavailableSemestersAlert } from "@components/course/UnavailableSemestersAlert";
 import { useImageCatalog, useResourceCatalog } from "@hooks/catalog";
 import {
   useCourseMetadata,
@@ -35,19 +37,25 @@ function buildSemesterColumns(
     {
       id: "term_id",
       header: "Semester",
-      cell: (term) =>
-        term.actions.view ? (
-          <Link
-            to={`/course/${courseId}/term/${term.term_id}`}
-            className="font-semibold text-hbrs-dark-blue hover:text-hbrs-medium-blue hover:underline"
-          >
-            {term.term_id}
-          </Link>
-        ) : (
-          // Opening a term requires TERM_VIEW; without it the page would only
-          // 403, so show the id as plain text instead of a dead link.
-          <span className="font-semibold text-gray-400">{term.term_id}</span>
-        ),
+      cell: (term) => (
+        <span className="flex items-center gap-2">
+          {term.actions.view ? (
+            <Link
+              to={`/course/${courseId}/term/${term.term_id}`}
+              className="font-semibold text-hbrs-dark-blue hover:text-hbrs-medium-blue hover:underline"
+            >
+              {term.term_id}
+            </Link>
+          ) : (
+            // Opening a term requires TERM_VIEW; without it the page would only
+            // 403, so show the id as plain text instead of a dead link.
+            <span className="font-semibold text-gray-400">{term.term_id}</span>
+          )}
+          {term.unavailable.length > 0 && (
+            <Badge variant="warning">Runtime unavailable</Badge>
+          )}
+        </span>
+      ),
       sortAccessor: (term) => term.term_id.toLowerCase(),
     },
     createdAtColumn((term) => term.created_at),
@@ -98,6 +106,8 @@ export function CourseOverviewTab({ courseId }: Props) {
   return (
     <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[2fr_1fr]">
       <div>
+        <UnavailableSemestersAlert courseId={courseId} terms={terms} />
+
         <Card>
           <CreateTermDialog
             open={dialogOpen}
@@ -157,6 +167,8 @@ export function CourseOverviewTab({ courseId }: Props) {
           resourceCatalog={resourceCatalog?.catalog}
           canEdit={course.actions.environment.select}
           showTag={false}
+          unavailable={course.environment.unavailable}
+          unavailableTitle="New semesters can't be created from this template"
           errorMessage={
             updateEnvironment.error
               ? getErrorMessage(updateEnvironment.error)

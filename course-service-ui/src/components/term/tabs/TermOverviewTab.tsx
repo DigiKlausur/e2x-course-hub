@@ -265,6 +265,8 @@ export function TermOverviewTab({ courseId, termId }: Props) {
           imageCatalog={imageCatalog?.catalog}
           resourceCatalog={resourceCatalog?.catalog}
           canEdit={term?.actions.environment.select ?? false}
+          unavailable={term?.environment.unavailable}
+          unavailableTitle="Notebook servers can't be started for this semester"
           errorMessage={
             updateEnvironment.error
               ? getErrorMessage(updateEnvironment.error)

@@ -5,7 +5,9 @@ import { Alert } from "@components/ui/Alert";
 import { StudentAccessPeriodFields } from "@components/term/StudentAccessPeriodFields";
 import { getErrorMessage } from "@/lib/errorMessage";
 import { semesterTemplateTitle } from "@domain/actions";
+import { describeUnavailable, isChangeableInUi } from "@domain/unavailable";
 import type { ApiError } from "@api/client";
+import type { SpawnRole, UnavailableSelection } from "@api/types";
 import {
   accessPeriodDraftError,
   fromAccessPeriodDraft,
@@ -27,53 +29,49 @@ interface Props {
   error?: unknown;
 }
 
-const NOT_CREATED =
-  "This semester could not be created because the course's default";
+/** The kind of selection and the `extra` key of its name, per not-found error type. */
+const UNAVAILABLE_ERRORS = {
+  "urn:e2x-course-hub:image-family-not-found": ["image_family", "family_name"],
+  "urn:e2x-course-hub:resource-tier-not-found": ["resource_tier", "tier_name"],
+  "urn:e2x-course-hub:profile-not-found": ["profile", "profile_name"],
+} as const;
 
-const SELECT_NEW_DEFAULT = (
-  <>
-    Select a new default under <strong>{semesterTemplateTitle}</strong>, then
-    try again.
-  </>
-);
-
-/** The error of a failed create; a default the catalog no longer has gets a message saying what to do. */
-function CreateTermErrorAlert({ error }: { error: unknown }) {
+/** The template selection a failed create names as missing from the catalog, if any. */
+function unavailableFromError(error: unknown): UnavailableSelection | null {
   const response = (error as ApiError).response;
+  const entry =
+    UNAVAILABLE_ERRORS[response?.type as keyof typeof UNAVAILABLE_ERRORS];
+  if (!entry) return null;
+  const [kind, nameKey] = entry;
   const extra = response?.extra ?? {};
-  const role = String(extra.spawn_role);
+  return {
+    kind,
+    name: String(extra[nameKey]),
+    spawn_role: extra.spawn_role as SpawnRole | undefined,
+  };
+}
 
-  switch (response?.type) {
-    case "urn:e2x-course-hub:image-family-not-found":
-      return (
-        <Alert className="mb-4">
-          {NOT_CREATED} notebook image '{String(extra.family_name)}' is no
-          longer available. {SELECT_NEW_DEFAULT}
-        </Alert>
-      );
-    case "urn:e2x-course-hub:resource-tier-not-found":
-      return (
-        <Alert className="mb-4">
-          {NOT_CREATED} <strong>{role} resources</strong> '
-          {String(extra.tier_name)}' are no longer available.{" "}
-          {SELECT_NEW_DEFAULT}
-        </Alert>
-      );
-    case "urn:e2x-course-hub:profile-not-found":
-      return (
-        <Alert className="mb-4">
-          {NOT_CREATED} <strong>{role} profile</strong> '
-          {String(extra.profile_name)}' is no longer available. Please contact
-          your administrator.
-        </Alert>
-      );
-    default:
-      return (
-        <Alert className="mb-4" title="Could not create the semester">
-          {getErrorMessage(error)}
-        </Alert>
-      );
-  }
+/** The error of a failed create; a selection the catalog no longer has gets a message saying what to do. */
+function CreateTermErrorAlert({ error }: { error: unknown }) {
+  const item = unavailableFromError(error);
+  return (
+    <Alert className="mb-4" title="Could not create the semester">
+      {item ? (
+        <>
+          {describeUnavailable(item)}
+          {isChangeableInUi(item) && (
+            <>
+              {" "}
+              Select a new one under <strong>{semesterTemplateTitle}</strong>,
+              then try again.
+            </>
+          )}
+        </>
+      ) : (
+        getErrorMessage(error)
+      )}
+    </Alert>
+  );
 }
 
 export function CreateTermDialog({
