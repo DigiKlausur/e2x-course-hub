@@ -8,7 +8,15 @@ from sqlalchemy.orm import Session
 
 from ..contract.providers import InfrastructureCatalogProvider
 from ..db.repository import CourseRepository
-from ..errors import CourseExistsError, CourseNotFoundError, TermExistsError, TermNotFoundError
+from ..errors import (
+    CourseExistsError,
+    CourseNotFoundError,
+    ImageFamilyNotFoundError,
+    ProfileNotFoundError,
+    ResourceTierNotFoundError,
+    TermExistsError,
+    TermNotFoundError,
+)
 from ..schema.catalog import InfrastructureCatalogOptions
 from ..schema.course import CourseConfig, CourseMetadata, StudentAccessPeriod, TermConfig
 from ..schema.selection import (
@@ -51,16 +59,23 @@ class CourseAPI(BaseAPI):
         Args:
             course: The CourseConfig object containing the course configuration
         Raises:
-            ValueError: If any of the specified infrastructure options do not exist in the catalog
+            ImageFamilyNotFoundError: If the image family does not exist in the catalog
+            ResourceTierNotFoundError: If a resource tier does not exist in the catalog
+            ProfileNotFoundError: If a profile does not exist in the catalog
         """
-        self.infrastructure_options.assert_image_selection_exists(course.image)
-        for spawn_role, spawn_selection in course.spawn_role_selections.items():
-            self.infrastructure_options.assert_resource_tier_exists(
-                spawn_role, spawn_selection.resource_tier_name
-            )
-            self.infrastructure_options.assert_profile_exists(
-                spawn_role, spawn_selection.profile_name
-            )
+        unavailable = self.infrastructure_options.find_unavailable(
+            PartialImageSelection(family=course.image_family), course.spawn_role_selections
+        )
+        if not unavailable:
+            return
+        first = unavailable[0]
+        match first.kind:
+            case "image_family":
+                raise ImageFamilyNotFoundError(first.name)
+            case "resource_tier":
+                raise ResourceTierNotFoundError(first.name, str(first.spawn_role))
+            case "profile":
+                raise ProfileNotFoundError(first.name, str(first.spawn_role))
 
     def _get_course(self, course_id: str, session: Optional[Session] = None) -> CourseConfig:
         """Get a course by ID, raises CourseNotFoundError if not found."""
@@ -220,35 +235,42 @@ class CourseAPI(BaseAPI):
         user: UserLike,
         course_id: str,
         term_id: str,
-        term: Optional[TermConfig] = None,
         access_period: Optional[StudentAccessPeriod] = None,
         session: Optional[Session] = None,
     ) -> TermConfig:
-        """Add a new term with the specified ID and name.
+        """Add a new term with the course's image family, resources and profiles.
+
+        The term gets the image family's current default tag, so new terms never
+        start with an outdated tag.
 
         Args:
             user: The user adding the term
             course_id: The course ID
             term_id: The term ID
-            term: The TermConfig object containing the term configuration
-            access_period: When students may spawn the term; replaces the period in `term`
+            access_period: When students may spawn the term; empty means no limit
         Raises:
             TermExistsError: If a term with the same ID already exists
+            ImageFamilyNotFoundError: If the course's image family is not in the catalog
+            ResourceTierNotFoundError: If a course's resource tier is not in the catalog
+            ProfileNotFoundError: If a course's profile is not in the catalog
         Returns:
             The TermConfig object for the newly added term
         """
         course = self._get_course(course_id, session=session)
         if term_id in course.terms:
             raise TermExistsError(course_id, term_id)
-        if not term:
-            term = TermConfig(
-                image=course.image,
-                spawn_role_selections=course.spawn_role_selections,
-            )
+        self.assert_infrastructure_options_exist(course)
+        families = self.infrastructure_options.image_family_options.families
+        term = TermConfig(
+            image=ImageSelection(
+                family=course.image_family,
+                tag=families[course.image_family].default_tag,
+            ),
+            spawn_role_selections=course.spawn_role_selections,
+        )
         if access_period is not None:
             term.student_access_start = access_period.student_access_start
             term.student_access_end = access_period.student_access_end
-        self.assert_infrastructure_options_exist(course)
         updated_course_config = self.course_repository.add_term(
             course_id, term_id, term, session=session
         )
@@ -288,73 +310,25 @@ class CourseAPI(BaseAPI):
         return term
 
     @require_permission(CoursePermission.COURSE_SELECT_IMAGE)
-    def get_course_image(
-        self, user: UserLike, course_id: str, session: Optional[Session] = None
-    ) -> ImageSelection:
-        """Retrieve the image for the specified course.
-
-        Args:
-            user: The user requesting the course image
-            course_id: The course ID
-        Returns:
-            ImageSelection object containing the course image information
-        """
-        course = self._get_course(course_id, session=session)
-        image_families = self.infrastructure_options.image_family_options
-        catalog_default_image = image_families.default_family
-        if course.image:
-            return course.image
-        return ImageSelection(
-            family=catalog_default_image,
-            tag=image_families.families[catalog_default_image].default_tag,
-        )
-
-    @require_permission(CoursePermission.COURSE_VIEW)
-    def get_course_spawn_selections(
-        self, user: UserLike, course_id: str, session: Optional[Session] = None
-    ) -> dict[SpawnRole, SpawnSelection]:
-        """Retrieve the spawn selections for the specified course.
-
-        Args:
-            user: The user requesting the course spawn selections
-            course_id: The course ID
-        Returns:
-            A dictionary mapping spawn roles to their respective SpawnSelection objects for the
-              course
-        """
-        course = self._get_course(course_id, session=session)
-        spawn_selections = {}
-        for spawn_role in SpawnRole:
-            course_selection = course.get_spawn_selection(spawn_role)
-            default_selection = self.infrastructure_options.get_default_spawn_selection(spawn_role)
-            spawn_selections[spawn_role] = course_selection.with_fallback(default_selection)
-        return spawn_selections
-
-    @require_permission(CoursePermission.COURSE_SELECT_IMAGE)
     def set_course_image(
         self,
         user: UserLike,
         course_id: str,
-        image_selection: PartialImageSelection,
+        image_family: str,
         session: Optional[Session] = None,
     ):
-        """Set the default image for the specified course.
+        """Set the image family that new terms of the specified course get.
 
         Args:
             user: The user setting the course image
             course_id: The course ID
-            image_selection: The image selection object containing the new image information
+            image_family: The image family; new terms get its default tag
         """
         course = self._get_course(course_id, session=session)
-        resolved_image_selection = ImageSelection(
-            family=image_selection.family,
-            tag=image_selection.tag
-            or self.infrastructure_options.image_family_options.families[
-                image_selection.family
-            ].default_tag,
+        self.infrastructure_options.image_family_options.assert_family_and_tag_exists(
+            image_family, tag=None
         )
-        self.infrastructure_options.assert_image_selection_exists(resolved_image_selection)
-        course.image = resolved_image_selection
+        course.image_family = image_family
         self.course_repository.update_course(course_id, course, session=session)
 
     @require_permission(CoursePermission.COURSE_SELECT_RESOURCES)
@@ -454,8 +428,8 @@ class CourseAPI(BaseAPI):
         Returns:
             ImageSelection object containing the term image information
         """
-        course, term = self._get_course_and_term(course_id, term_id, session=session)
-        return term.image or course.image
+        _, term = self._get_course_and_term(course_id, term_id, session=session)
+        return term.image
 
     @require_permission(CoursePermission.TERM_SELECT_IMAGE)
     def set_term_image(
@@ -499,15 +473,12 @@ class CourseAPI(BaseAPI):
         Returns:
             A dictionary mapping spawn roles to their respective SpawnSelection objects for the term
         """
-        course, term = self._get_course_and_term(course_id, term_id, session=session)
+        _, term = self._get_course_and_term(course_id, term_id, session=session)
         spawn_selections = {}
         for spawn_role in SpawnRole:
             term_selection = term.get_spawn_selection(spawn_role)
-            course_selection = course.get_spawn_selection(spawn_role)
             default_selection = self.infrastructure_options.get_default_spawn_selection(spawn_role)
-            spawn_selections[spawn_role] = term_selection.with_fallback(
-                course_selection.with_fallback(default_selection)
-            )
+            spawn_selections[spawn_role] = term_selection.with_fallback(default_selection)
         return spawn_selections
 
     @require_permission(CoursePermission.TERM_SELECT_RESOURCES)

@@ -114,7 +114,7 @@ async def patch_course_environment(
     course_assembler: CourseAssemblerDep,
 ) -> Environment:
     if update.image is not None:
-        course_api.set_course_image(user, course_id, update.image, session=session)
+        course_api.set_course_image(user, course_id, update.image.family, session=session)
     if update.resources is not None:
         course_api.set_course_resources(user, course_id, update.resources, session=session)
     if update.profiles is not None:

@@ -4,12 +4,15 @@ import { Card, CardTitle } from "@components/ui/Card";
 import { SelectionBox } from "@components/ui/SelectionBox";
 import { ImageSelectionDialog } from "@components/dialogs/ImageSelectionDialog";
 import { ResourceSelectionDialog } from "@components/dialogs/ResourceSelectionDialog";
+import { spawnRoleLabels } from "@domain/roles";
+import { describeUnavailable, isChangeableInUi } from "@domain/unavailable";
 import type {
   ImageCatalog,
   ImageSelection,
   ResourceCatalog,
   ResourcesSelection,
   SpawnRole,
+  UnavailableSelection,
 } from "@api/types";
 
 type Dialog = "image" | SpawnRole | null;
@@ -25,6 +28,9 @@ interface Props {
   /** When false the configuration is shown read-only, with no way to open a dialog. */
   canEdit?: boolean;
   errorMessage?: string;
+  /** Selections no longer in the catalog, listed in a warning under `unavailableTitle`. */
+  unavailable?: UnavailableSelection[];
+  unavailableTitle?: string;
   onImageConfirm: (selection: ImageSelection) => void;
   onResourceConfirm: (role: SpawnRole, tier: string) => void;
 }
@@ -39,6 +45,8 @@ export function RuntimeConfigEditor({
   showTag = true,
   canEdit = true,
   errorMessage,
+  unavailable = [],
+  unavailableTitle,
   onImageConfirm,
   onResourceConfirm,
 }: Props) {
@@ -83,6 +91,21 @@ export function RuntimeConfigEditor({
           </Alert>
         )}
 
+        {unavailable.length > 0 && (
+          <Alert variant="warning" className="mb-5" title={unavailableTitle}>
+            <ul className="list-disc pl-5">
+              {unavailable.map((item) => (
+                <li key={`${item.kind}-${item.spawn_role}`}>
+                  {describeUnavailable(item)}
+                </li>
+              ))}
+            </ul>
+            {canEdit && unavailable.some(isChangeableInUi) && (
+              <p className="mt-1">Choose a new one below.</p>
+            )}
+          </Alert>
+        )}
+
         {!canEdit && (
           <Alert variant="info" className="mb-5">
             You do not have permission to change this configuration.
@@ -98,7 +121,7 @@ export function RuntimeConfigEditor({
         />
 
         <SelectionBox
-          label="Student Resources"
+          label={`${spawnRoleLabels.student} Resources`}
           title={
             studentTier?.display_name ?? resourcesSelection?.student ?? "—"
           }
@@ -109,7 +132,7 @@ export function RuntimeConfigEditor({
         />
 
         <SelectionBox
-          label="Grader Resources"
+          label={`${spawnRoleLabels.grader} Resources`}
           title={graderTier?.display_name ?? resourcesSelection?.grader ?? "—"}
           description={resourceDescription(graderTier)}
           onChangeClick={() => setOpenDialog("grader")}
@@ -124,6 +147,7 @@ export function RuntimeConfigEditor({
           onClose={() => setOpenDialog(null)}
           imageSelection={imageSelection ?? null}
           imageCatalog={imageCatalog}
+          showTag={showTag}
           onConfirm={(sel) => {
             onImageConfirm(sel);
             setOpenDialog(null);

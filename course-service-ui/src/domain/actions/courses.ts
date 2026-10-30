@@ -95,3 +95,6 @@ export const courseActionText = {
     courseOwners: memberListText(MembershipRole.CourseOwner),
   },
 } satisfies ActionTextMap<CourseActions>;
+
+/** Title of the card where course owners set the semester template; messages refer to it. */
+export const semesterTemplateTitle = "Current Semester Template";

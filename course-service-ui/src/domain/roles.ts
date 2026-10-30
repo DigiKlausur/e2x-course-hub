@@ -1,3 +1,5 @@
+import type { SpawnRole } from "@api/types";
+
 export const MembershipRole = {
   Admin: "lms-admin",
   CourseOwner: "course-owner",
@@ -37,3 +39,9 @@ export const memberLabels = {
   [MembershipRole.Student]: { singular: "Student", plural: "Students" },
   [MembershipRole.Observer]: { singular: "Observer", plural: "Observers" },
 } satisfies Record<MembershipRole, MemberLabels>;
+
+/** Display names of the spawn roles, e.g. in "Student Resources". */
+export const spawnRoleLabels = {
+  student: "Student",
+  grader: "Grader",
+} satisfies Record<SpawnRole, string>;

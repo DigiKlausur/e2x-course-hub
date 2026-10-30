@@ -1,7 +1,13 @@
 import { useMemo, useState } from "react";
 import { Modal } from "@components/ui/Modal";
 import { Button } from "@components/ui/Button";
+import { Alert } from "@components/ui/Alert";
 import { StudentAccessPeriodFields } from "@components/term/StudentAccessPeriodFields";
+import { getErrorMessage } from "@/lib/errorMessage";
+import { semesterTemplateTitle } from "@domain/actions";
+import { describeUnavailable, isChangeableInUi } from "@domain/unavailable";
+import type { ApiError } from "@api/client";
+import type { SpawnRole, UnavailableSelection } from "@api/types";
 import {
   accessPeriodDraftError,
   fromAccessPeriodDraft,
@@ -19,6 +25,53 @@ interface Props {
     accessPeriod: StudentAccessPeriod | null,
   ) => Promise<void>;
   isSubmitting: boolean;
+  /** The error of the last failed create, shown at the top of the dialog. */
+  error?: unknown;
+}
+
+/** The kind of selection and the `extra` key of its name, per not-found error type. */
+const UNAVAILABLE_ERRORS = {
+  "urn:e2x-course-hub:image-family-not-found": ["image_family", "family_name"],
+  "urn:e2x-course-hub:resource-tier-not-found": ["resource_tier", "tier_name"],
+  "urn:e2x-course-hub:profile-not-found": ["profile", "profile_name"],
+} as const;
+
+/** The template selection a failed create names as missing from the catalog, if any. */
+function unavailableFromError(error: unknown): UnavailableSelection | null {
+  const response = (error as ApiError).response;
+  const entry =
+    UNAVAILABLE_ERRORS[response?.type as keyof typeof UNAVAILABLE_ERRORS];
+  if (!entry) return null;
+  const [kind, nameKey] = entry;
+  const extra = response?.extra ?? {};
+  return {
+    kind,
+    name: String(extra[nameKey]),
+    spawn_role: extra.spawn_role as SpawnRole | undefined,
+  };
+}
+
+/** The error of a failed create; a selection the catalog no longer has gets a message saying what to do. */
+function CreateTermErrorAlert({ error }: { error: unknown }) {
+  const item = unavailableFromError(error);
+  return (
+    <Alert className="mb-4" title="Could not create the semester">
+      {item ? (
+        <>
+          {describeUnavailable(item)}
+          {isChangeableInUi(item) && (
+            <>
+              {" "}
+              Select a new one under <strong>{semesterTemplateTitle}</strong>,
+              then try again.
+            </>
+          )}
+        </>
+      ) : (
+        getErrorMessage(error)
+      )}
+    </Alert>
+  );
 }
 
 export function CreateTermDialog({
@@ -27,6 +80,7 @@ export function CreateTermDialog({
   existingTermIds,
   onCreate,
   isSubmitting,
+  error,
 }: Props) {
   const [termId, setTermId] = useState("");
   const [accessPeriod, setAccessPeriod] = useState(undecidedAccessPeriodDraft);
@@ -52,10 +106,14 @@ export function CreateTermDialog({
 
   const handleSubmit = async () => {
     if (!isValid) return;
-    await onCreate(
-      termId.trim(),
-      accessPeriod.restricted ? fromAccessPeriodDraft(accessPeriod) : null,
-    );
+    try {
+      await onCreate(
+        termId.trim(),
+        accessPeriod.restricted ? fromAccessPeriodDraft(accessPeriod) : null,
+      );
+    } catch {
+      return; // Stay open; the error is shown through the `error` prop.
+    }
     handleClose();
   };
 
@@ -84,6 +142,8 @@ export function CreateTermDialog({
         </>
       }
     >
+      {error ? <CreateTermErrorAlert error={error} /> : null}
+
       <div>
         <label className="block text-sm font-semibold mb-1.5">
           Semester ID

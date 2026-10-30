@@ -31,8 +31,11 @@ export type PartialSpawnRoleMap<T> = Partial<Record<SpawnRole, T>>;
 
 // ── Selections ───────────────────────────────────────────────────────
 export type SpawnRole = Schemas["SpawnRole"];
-export type ImageSelection = Schemas["ImageSelection"];
+/** A course has no tag; each new semester gets the family's default tag. */
+export type ImageSelection = Schemas["PartialImageSelection"];
 export type SpawnRoleSelection = Schemas["SpawnRoleSelection"];
+/** A selection that is no longer in the catalog, so notebook servers cannot use it. */
+export type UnavailableSelection = Schemas["UnavailableSelection"];
 
 export type ResourcesSelection = PartialSpawnRoleMap<string>;
 export type ProfileSelection = PartialSpawnRoleMap<string>;

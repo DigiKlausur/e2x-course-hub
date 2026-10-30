@@ -1,5 +1,6 @@
 from e2x_hub_rbac.auth import PermissionChecker
 
+from ...schema.catalog import InfrastructureCatalogOptions, UnavailableSelection
 from ...schema.course import StudentAccessPeriod, TermConfig
 from ..actions import TermActions, term_actions, user_can
 from ..common.schemas import Environment
@@ -7,11 +8,17 @@ from .schemas import TermDetailResponse, TermSummaryResponse
 
 
 class TermAssembler:
-    def __init__(self, permission_checker: PermissionChecker):
+    def __init__(
+        self, permission_checker: PermissionChecker, catalog: InfrastructureCatalogOptions
+    ):
         self.permission_checker = permission_checker
+        self.catalog = catalog
 
     def _actions(self, course_id: str, term_id: str) -> TermActions:
         return term_actions(user_can(self.permission_checker, course_id, term_id))
+
+    def _unavailable(self, term_config: TermConfig) -> list[UnavailableSelection]:
+        return self.catalog.find_unavailable(term_config.image, term_config.spawn_role_selections)
 
     def environment(self, term_config: TermConfig) -> Environment:
         """
@@ -24,9 +31,10 @@ class TermAssembler:
                 and profiles.
         """
         return Environment(
-            image=term_config.image,
+            image=term_config.image.model_dump(),
             resources=term_config.get_resource_selections(),
             profiles=term_config.get_profile_selections(),
+            unavailable=self._unavailable(term_config),
         )
 
     def access_period(self, term_config: TermConfig) -> StudentAccessPeriod:
@@ -60,6 +68,7 @@ class TermAssembler:
             term_id=term_id,
             created_at=term_config.created_at,
             actions=self._actions(course_id, term_id),
+            unavailable=self._unavailable(term_config),
         )
 
     def detail(self, course_id: str, term_id: str, term_config: TermConfig) -> TermDetailResponse:

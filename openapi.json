@@ -1506,10 +1506,6 @@
       },
       "CourseConfig": {
         "properties": {
-          "image": {
-            "$ref": "#/components/schemas/ImageSelection",
-            "description": "Image configuration."
-          },
           "spawn_role_selections": {
             "additionalProperties": {
               "$ref": "#/components/schemas/SpawnRoleSelection"
@@ -1525,6 +1521,12 @@
             "$ref": "#/components/schemas/CourseMetadata",
             "description": "Metadata information about the course."
           },
+          "image_family": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Image Family",
+            "description": "Image family for new terms; each gets the family's default tag."
+          },
           "terms": {
             "additionalProperties": {
               "$ref": "#/components/schemas/TermConfig"
@@ -1536,9 +1538,9 @@
         },
         "type": "object",
         "required": [
-          "image",
           "spawn_role_selections",
-          "metadata"
+          "metadata",
+          "image_family"
         ],
         "title": "CourseConfig"
       },
@@ -1752,16 +1754,6 @@
       },
       "CreateTermRequest": {
         "properties": {
-          "term": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TermConfig"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "access_period": {
             "anyOf": [
               {
@@ -1775,12 +1767,12 @@
         },
         "type": "object",
         "title": "CreateTermRequest",
-        "description": "Request body for creating a term."
+        "description": "Request body for creating a term. The term's environment comes from the course."
       },
       "Environment": {
         "properties": {
           "image": {
-            "$ref": "#/components/schemas/ImageSelection"
+            "$ref": "#/components/schemas/PartialImageSelection"
           },
           "resources": {
             "additionalProperties": {
@@ -1803,6 +1795,14 @@
             "type": "object",
             "title": "Profiles",
             "default": {}
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/components/schemas/UnavailableSelection"
+            },
+            "type": "array",
+            "title": "Unavailable",
+            "default": []
           }
         },
         "type": "object",
@@ -1810,14 +1810,14 @@
           "image"
         ],
         "title": "Environment",
-        "description": "Response body containing the environment configuration of a course or term."
+        "description": "Response body containing the environment configuration of a course or term.\n\nA course has no image tag; each new term gets the family's default tag."
       },
       "EnvironmentUpdate": {
         "properties": {
           "image": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ImageSelection"
+                "$ref": "#/components/schemas/PartialImageSelection"
               },
               {
                 "type": "null"
@@ -1861,7 +1861,7 @@
         },
         "type": "object",
         "title": "EnvironmentUpdate",
-        "description": "Request body for updating the environment configuration of a course or term."
+        "description": "Request body for updating the environment configuration of a course or term.\n\nA course ignores the image tag; a term without one gets the family's default tag."
       },
       "HTTPValidationError": {
         "properties": {
@@ -2129,6 +2129,34 @@
         "type": "object",
         "title": "MembershipPatch",
         "description": "Request body for add/remove membership operations."
+      },
+      "PartialImageSelection": {
+        "properties": {
+          "family": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Family"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tag"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "family"
+        ],
+        "title": "PartialImageSelection",
+        "description": "A partial selection of an image family and an optional tag."
       },
       "ProfileCatalogResponse": {
         "properties": {
@@ -2473,10 +2501,6 @@
             "title": "Student Access End",
             "description": "Until when students may spawn the term. Empty means indefinitely."
           },
-          "image": {
-            "$ref": "#/components/schemas/ImageSelection",
-            "description": "Image configuration."
-          },
           "spawn_role_selections": {
             "additionalProperties": {
               "$ref": "#/components/schemas/SpawnRoleSelection"
@@ -2487,12 +2511,16 @@
             "type": "object",
             "title": "Spawn Role Selections",
             "description": "Per-spawn role selection configuration."
+          },
+          "image": {
+            "$ref": "#/components/schemas/ImageSelection",
+            "description": "Image configuration."
           }
         },
         "type": "object",
         "required": [
-          "image",
-          "spawn_role_selections"
+          "spawn_role_selections",
+          "image"
         ],
         "title": "TermConfig",
         "description": "Configuration for a specific term."
@@ -2624,6 +2652,14 @@
           },
           "actions": {
             "$ref": "#/components/schemas/TermActions"
+          },
+          "unavailable": {
+            "items": {
+              "$ref": "#/components/schemas/UnavailableSelection"
+            },
+            "type": "array",
+            "title": "Unavailable",
+            "default": []
           }
         },
         "type": "object",
@@ -2634,6 +2670,42 @@
           "actions"
         ],
         "title": "TermSummaryResponse"
+      },
+      "UnavailableSelection": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "image_family",
+              "image_tag",
+              "resource_tier",
+              "profile"
+            ],
+            "title": "Kind"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "spawn_role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpawnRole"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set for resource tiers and profiles."
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "name"
+        ],
+        "title": "UnavailableSelection",
+        "description": "A selected image family, image tag, resource tier or profile that is not in the catalog."
       },
       "UserResponse": {
         "properties": {

@@ -98,10 +98,7 @@ class CourseRepository:
                 description=row.description,
                 created_at=row.created_at,
             ),
-            image=ImageSelection(
-                family=row.image_family,
-                tag=row.image_tag,
-            ),
+            image_family=row.image_family,
             spawn_role_selections=spawn_role_selections,
             terms=terms,
         )
@@ -143,8 +140,7 @@ class CourseRepository:
             course_id=config.metadata.course_id,
             course_name=config.metadata.course_name,
             description=config.metadata.description,
-            image_family=config.image.family,
-            image_tag=config.image.tag,
+            image_family=config.image_family,
             created_at=datetime.now(timezone.utc),
             spawn_configs=CourseRepository._build_course_spawn_configs(config),
         )
@@ -273,8 +269,7 @@ class CourseRepository:
             # Update scalar fields.
             row.course_name = config.metadata.course_name
             row.description = config.metadata.description
-            row.image_family = config.image.family
-            row.image_tag = config.image.tag
+            row.image_family = config.image_family
 
             # Sync course-level spawn-role configuration in place.
             self._sync_spawn_configs(row, course_id, config)

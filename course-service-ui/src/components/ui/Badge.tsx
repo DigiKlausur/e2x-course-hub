@@ -1,11 +1,12 @@
 interface BadgeProps {
-  variant?: "active" | "archived" | "default";
+  variant?: "active" | "archived" | "warning" | "default";
   children: string;
 }
 
 const variantClasses: Record<NonNullable<BadgeProps["variant"]>, string> = {
   active: "bg-green-100 text-green-800",
   archived: "bg-gray-100 text-gray-600",
+  warning: "bg-amber-100 text-amber-800",
   default: "bg-blue-100 text-blue-800",
 };
 

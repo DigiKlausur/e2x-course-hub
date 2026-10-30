@@ -50,7 +50,7 @@ The semester template has three parts:
 
 | Setting               | Meaning                                                           |
 | --------------------- | ----------------------------------------------------------------- |
-| **Notebook Image**    | The image notebook servers start from, such as a data science image. |
+| **Notebook Image**    | The image family notebook servers start from, such as a data science image. |
 | **Student Resources** | The resource tier (CPU, memory, …) of the student environment.    |
 | **Grader Resources**  | The resource tier of the grader environment.                      |
 
@@ -74,6 +74,8 @@ service.
 
 ```{note}
 The semester template is only copied into a semester when the semester is created.
+The template has no image version: a new semester gets the current default version of
+the template's image family, so it never starts with an outdated version.
 Changing the template does not change existing semesters. To change a running
 semester, change its own runtime (see {doc}`semesters`).
 ```

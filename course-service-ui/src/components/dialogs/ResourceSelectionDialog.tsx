@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Modal } from "@components/ui/Modal";
 import { Button } from "@components/ui/Button";
+import { spawnRoleLabels } from "@domain/roles";
 import type { ResourceCatalog, SpawnRole } from "@api/types";
 
 interface Props {
@@ -35,7 +36,7 @@ export function ResourceSelectionDialog({
     <Modal
       open={open}
       onClose={onClose}
-      title={`Select ${role === "student" ? "Student" : "Grader"} Resources`}
+      title={`Select ${spawnRoleLabels[role]} Resources`}
       description="Choose a resource tier for this configuration."
       footer={
         <>

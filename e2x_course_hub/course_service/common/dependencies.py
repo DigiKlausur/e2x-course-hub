@@ -10,6 +10,7 @@ from ...api.course_api import CourseAPI
 from ...api.infrastructure_api import InfrastructureAPI
 from ...api.membership_api import MembershipAPI
 from ...api.role_permissions import ROLE_PERMISSIONS
+from ...schema.catalog import InfrastructureCatalogOptions
 
 
 # ── API layer dependencies ──────────────────────────────────────────
@@ -44,6 +45,11 @@ def get_membership_api(api: API = Depends(get_api)) -> MembershipAPI:
 
 def get_infrastructure_api(api: API = Depends(get_api)) -> InfrastructureAPI:
     return api.infrastructure
+
+
+def get_catalog(api: API = Depends(get_api)) -> InfrastructureCatalogOptions:
+    """The infrastructure catalog, for marking selections that are no longer in it."""
+    return api.infrastructure.infrastructure_options
 
 
 # ── Actions ─────────────────────────────────────────────────────────

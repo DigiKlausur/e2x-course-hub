@@ -8,6 +8,8 @@ interface Props {
   onClose: () => void;
   imageSelection: ImageSelection | null;
   imageCatalog: ImageCatalog;
+  /** When false only the family is chosen, e.g. for a course, whose semesters get the default tag. */
+  showTag?: boolean;
   onConfirm: (selection: ImageSelection) => void;
 }
 
@@ -16,6 +18,7 @@ export function ImageSelectionDialog({
   onClose,
   imageSelection,
   imageCatalog,
+  showTag = true,
   onConfirm,
 }: Props) {
   const initialFamily = imageSelection?.family || imageCatalog.default_family;
@@ -34,9 +37,15 @@ export function ImageSelectionDialog({
     }
   };
 
+  const canConfirm = Boolean(selectedFamily && (selectedTag || !showTag));
+
   const handleConfirm = () => {
-    if (selectedFamily && selectedTag) {
-      onConfirm({ family: selectedFamily, tag: selectedTag });
+    if (canConfirm) {
+      onConfirm(
+        showTag
+          ? { family: selectedFamily, tag: selectedTag }
+          : { family: selectedFamily },
+      );
       onClose();
     }
   };
@@ -46,7 +55,11 @@ export function ImageSelectionDialog({
       open={open}
       onClose={onClose}
       title="Select Notebook Image"
-      description="Choose the image family and version for this configuration."
+      description={
+        showTag
+          ? "Choose the image family and version for this configuration."
+          : "Choose the image family. Each new semester gets its current default version."
+      }
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>
@@ -55,7 +68,7 @@ export function ImageSelectionDialog({
           <Button
             variant="primary"
             onClick={handleConfirm}
-            disabled={!selectedFamily || !selectedTag}
+            disabled={!canConfirm}
           >
             Save Changes
           </Button>
@@ -82,7 +95,7 @@ export function ImageSelectionDialog({
                 {family.description}
               </div>
 
-              {isSelected && (
+              {isSelected && showTag && (
                 <div className="mt-3">
                   <label className="block text-xs font-semibold mb-1 text-gray-600">
                     Version

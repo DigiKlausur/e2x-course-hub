@@ -40,9 +40,8 @@ class CourseRow(Base):
     course_name: Mapped[str]
     description: Mapped[Optional[str]]
 
-    # Default image selection
+    # Image family for new terms; each term gets the family's default tag when created.
     image_family: Mapped[str]
-    image_tag: Mapped[str]
 
     # Set by the repository; empty for courses created before this column existed.
     created_at: Mapped[Optional[datetime]] = mapped_column(UTCDateTime)

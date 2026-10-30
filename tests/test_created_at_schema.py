@@ -18,7 +18,7 @@ def test_course_metadata_response_keeps_created_at():
     created_at = datetime(2026, 10, 27, 12, 0, tzinfo=timezone.utc)
     metadata = CourseMetadata(course_id="c1", course_name="Course", created_at=created_at)
 
-    # The assembler's metadata() does not use its permission checker or term assembler.
-    response = CourseAssembler(None, None).metadata(metadata)
+    # The assembler's metadata() does not use its permission checker, term assembler or catalog.
+    response = CourseAssembler(None, None, None).metadata(metadata)
 
     assert response.created_at == created_at

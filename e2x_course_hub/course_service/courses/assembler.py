@@ -1,6 +1,8 @@
 from e2x_hub_rbac.auth import PermissionChecker
 
+from ...schema.catalog import InfrastructureCatalogOptions
 from ...schema.course import CourseConfig, CourseMetadata
+from ...schema.selection import PartialImageSelection
 from ..actions import CourseActions, LmsActions, course_actions, lms_actions, user_can
 from ..common.schemas import Environment
 from ..terms.assembler import TermAssembler
@@ -17,9 +19,11 @@ class CourseAssembler:
         self,
         permission_checker: PermissionChecker,
         term_assembler: TermAssembler,
+        catalog: InfrastructureCatalogOptions,
     ):
         self.permission_checker = permission_checker
         self.term_assembler = term_assembler
+        self.catalog = catalog
 
     def _actions(self, course_id: str) -> CourseActions:
         return course_actions(user_can(self.permission_checker, course_id))
@@ -33,10 +37,12 @@ class CourseAssembler:
         Returns:
             Environment: The assembled environment response containing image and resources.
         """
+        image = PartialImageSelection(family=course_config.image_family)
         return Environment(
-            image=course_config.image,
+            image=image,
             resources=course_config.get_resource_selections(),
             profiles=course_config.get_profile_selections(),
+            unavailable=self.catalog.find_unavailable(image, course_config.spawn_role_selections),
         )
 
     def metadata(self, course_metadata: CourseMetadata) -> CourseMetadataResponse:

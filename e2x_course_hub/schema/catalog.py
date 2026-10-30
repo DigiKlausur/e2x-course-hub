@@ -1,8 +1,8 @@
-from typing import Self
+from typing import Callable, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from .selection import ImageSelection, SpawnSelection
+from .selection import ImageSelection, PartialImageSelection, SpawnRoleSelection, SpawnSelection
 from .types import SpawnRole
 
 
@@ -43,6 +43,24 @@ class UnknownImageTagError(CatalogError):
 
     def __init__(self, family_name: str, tag: str):
         super().__init__(f"Image tag '{tag}' not found for family '{family_name}' in the catalog.")
+
+
+class UnavailableSelection(BaseModel):
+    """A selected image family, image tag, resource tier or profile that is not in the catalog."""
+
+    kind: Literal["image_family", "image_tag", "resource_tier", "profile"]
+    name: str
+    spawn_role: SpawnRole | None = Field(
+        default=None, description="Set for resource tiers and profiles."
+    )
+
+
+def _fails(check: Callable[[], None]) -> bool:
+    try:
+        check()
+    except CatalogError:
+        return True
+    return False
 
 
 class ProfileOption(BaseModel):
@@ -190,6 +208,32 @@ class InfrastructureCatalogOptions(BaseModel):
         if spawn_role not in self.spawn_role_options:
             raise UnknownSpawnRoleError(spawn_role)
         self.spawn_role_options[spawn_role].resource_tier_options.assert_tier_exists(tier_name)
+
+    def find_unavailable(
+        self,
+        image: ImageSelection | PartialImageSelection,
+        spawn_role_selections: dict[SpawnRole, SpawnRoleSelection],
+    ) -> list[UnavailableSelection]:
+        """List what is missing from the catalog; a tag is only checked if its family exists."""
+        images = self.image_family_options
+        unavailable = []
+        if _fails(lambda: images.assert_family_and_tag_exists(image.family, tag=None)):
+            unavailable.append(UnavailableSelection(kind="image_family", name=image.family))
+        elif image.tag is not None and _fails(
+            lambda: images.assert_family_and_tag_exists(image.family, image.tag)
+        ):
+            unavailable.append(UnavailableSelection(kind="image_tag", name=image.tag))
+        for role, selection in spawn_role_selections.items():
+            tier, profile = selection.resource_tier_name, selection.profile_name
+            if _fails(lambda: self.assert_resource_tier_exists(role, tier)):
+                unavailable.append(
+                    UnavailableSelection(kind="resource_tier", name=tier, spawn_role=role)
+                )
+            if _fails(lambda: self.assert_profile_exists(role, profile)):
+                unavailable.append(
+                    UnavailableSelection(kind="profile", name=profile, spawn_role=role)
+                )
+        return unavailable
 
     def get_default_image_selection(self) -> ImageSelection:
         return ImageSelection(

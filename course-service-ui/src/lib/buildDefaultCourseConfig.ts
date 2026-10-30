@@ -29,10 +29,7 @@ export function buildDefaultCourseConfig({
   const fallbackImageFamily = Object.keys(imageCatalog.families)[0];
   const selectedImageFamily =
     imageCatalog.default_family || fallbackImageFamily;
-  const selectedFamily = imageCatalog.families[selectedImageFamily];
-  if (!selectedFamily) return null;
-
-  const fallbackTag = Object.keys(selectedFamily.tags)[0];
+  if (!imageCatalog.families[selectedImageFamily]) return null;
 
   return {
     metadata: {
@@ -40,10 +37,7 @@ export function buildDefaultCourseConfig({
       course_name: courseName,
       description: description || undefined,
     },
-    image: {
-      family: selectedImageFamily,
-      tag: selectedFamily.default_tag || fallbackTag,
-    },
+    image_family: selectedImageFamily,
     spawn_role_selections: {
       student: {
         resource_tier_name: resourceCatalog.student.default_tier,

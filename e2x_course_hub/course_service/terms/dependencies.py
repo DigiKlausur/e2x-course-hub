@@ -5,6 +5,7 @@ from fastapi import Depends
 from ...errors import CourseNotFoundError, TermNotFoundError
 from ...schema.course import TermConfig
 from ..common.dependency_types import (
+    CatalogDep,
     CourseAPIDep,
     CurrentUser,
     DBSession,
@@ -13,8 +14,11 @@ from ..common.dependency_types import (
 from .assembler import TermAssembler
 
 
-def get_term_assembler(permission_checker: PermissionCheckerDep) -> TermAssembler:
-    return TermAssembler(permission_checker=permission_checker)
+def get_term_assembler(
+    permission_checker: PermissionCheckerDep,
+    catalog: CatalogDep,
+) -> TermAssembler:
+    return TermAssembler(permission_checker=permission_checker, catalog=catalog)
 
 
 def load_term(
