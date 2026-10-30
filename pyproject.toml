@@ -81,7 +81,7 @@ path = "course-service-ui"
 github_url = "https://github.com/Digiklausur/e2x-course-hub"
 
 [tool.tbump.version]
-current = "0.2.0"
+current = "0.3.0-rc0"
 # Release candidates are written "0.3.0-rc0": valid semver for package.json, and
 # Python packaging normalises it to "0.3.0rc0".
 regex = '''
