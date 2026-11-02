@@ -18,6 +18,8 @@ It ships as a FastAPI backend (REST API under `/v1/...`) plus a React single-pag
 (`course-service-ui`) for course and membership management, both served from the same
 process.
 
+![The course list in the course service](https://raw.githubusercontent.com/Digiklausur/e2x-course-hub/main/docs/source/images/course_service_courses.png)
+
 ## What it does
 
 - **Course & term management** — courses and their terms are stored in a database
@@ -39,6 +41,10 @@ process.
     can only ever offer valid choices.
 - **A management UI** — `course-service-ui`, a React SPA served by the same FastAPI app,
   for browsing courses and managing membership in the browser.
+
+| Semesters and their environment template | What a role may do, right next to its members |
+|---|---|
+| ![A course with its semesters and environment template](https://raw.githubusercontent.com/Digiklausur/e2x-course-hub/main/docs/source/images/course_overview.png) | ![What a student can do in a semester](https://raw.githubusercontent.com/Digiklausur/e2x-course-hub/main/docs/source/images/term_what_can_a_student_do.png) |
 
 |            | Course hub (this repo)                                              | Infrastructure spawner                            |
 |------------|-----------------------------------------------------------------------|----------------------------------------------------|
