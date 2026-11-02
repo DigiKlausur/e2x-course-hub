@@ -107,6 +107,24 @@ class RoleNotFoundError(APIError):
         super().__init__(detail=detail, role_id=role_id)
 
 
+class InvalidUsernamesError(APIError):
+    """
+    Error raised when usernames match none of the configured username formats.
+    """
+
+    status_code: int = 422
+    type_uri: str = "urn:e2x-course-hub:invalid-usernames"
+    title: str = "Invalid Usernames"
+
+    def __init__(self, usernames: list[str], hints: list[str]):
+        """
+        :param usernames: The usernames that match none of the formats.
+        :param hints: The hints of the configured username formats.
+        """
+        detail = f"Usernames match none of the accepted formats: {', '.join(usernames)}."
+        super().__init__(detail=detail, usernames=usernames, hints=hints)
+
+
 class ImageFamilyNotFoundError(APIError):
     """
     Error raised when a specified image family is not found in the infrastructure catalog.

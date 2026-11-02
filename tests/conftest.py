@@ -1,4 +1,12 @@
+import os
+
 import pytest
+
+# The JupyterHub auth dependencies read these when their module is imported.
+# The values are irrelevant because the tests never talk to a hub.
+os.environ.setdefault("JUPYTERHUB_API_URL", "http://localhost:8081/hub/api")
+os.environ.setdefault("JUPYTERHUB_API_TOKEN", "")
+os.environ.setdefault("JUPYTERHUB_SERVICE_PREFIX", "/")
 
 from e2x_course_hub.db.repository import CourseRepository, get_course_repository_from_db_url
 from e2x_course_hub.schema.catalog import InfrastructureCatalogOptions
