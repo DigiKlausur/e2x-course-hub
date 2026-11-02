@@ -37,7 +37,7 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/Digiklausur/e2x-course-hub#readme"
+Documentation = "https://e2x-course-hub.readthedocs.io/en/latest/"
 Issues = "https://github.com/Digiklausur/e2x-course-hub/issues"
 Source = "https://github.com/Digiklausur/e2x-course-hub"
 
