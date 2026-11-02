@@ -5,7 +5,7 @@ import { RoleInfoLink } from "@components/actions/RoleInfoLink";
 import type { RoleContext } from "@components/actions/RoleActionsModal";
 import type { MembershipRole } from "@domain/roles";
 import { invalidUsernames } from "@domain/usernames";
-import { config } from "../../config";
+import { config } from "@config";
 
 const { usernameFormats } = config;
 

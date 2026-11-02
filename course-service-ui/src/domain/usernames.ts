@@ -1,4 +1,4 @@
-import type { UsernameFormat } from "../config";
+import type { UsernameFormat } from "@config";
 
 /** Whether the username matches the whole pattern, like Python's `re.fullmatch`. */
 const matches = (format: UsernameFormat, username: string): boolean =>

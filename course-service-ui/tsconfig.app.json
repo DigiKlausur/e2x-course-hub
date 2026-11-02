@@ -32,6 +32,7 @@
       "@domain/*": ["./src/domain/*"],
       "@components/*": ["./src/components/*"],
       "@hooks/*": ["./src/hooks/*"],
+      "@config": ["./src/config"],
       "@types": ["./src/types"]
     }
   },
