@@ -32,6 +32,9 @@ Usernames are JupyterHub usernames. Whether a username that has never logged in 
 JupyterHub can be added depends on the deployment (see `E2X_ADD_USERS_TO_HUB` in
 {doc}`../reference/configuration`).
 
+Your deployment may define which username formats are accepted. The dialog then lists
+them and refuses usernames that match none of them, naming the ones to fix.
+
 ## Remove members
 
 Select one or more members in the table and remove them with the button above the
