@@ -4,7 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/e2x-course-hub)](https://pypi.org/project/e2x-course-hub/)
 [![Python versions](https://img.shields.io/pypi/pyversions/e2x-course-hub)](https://pypi.org/project/e2x-course-hub/)
 [![Documentation Status](https://readthedocs.org/projects/e2x-course-hub/badge/?version=latest)](https://e2x-course-hub.readthedocs.io/en/latest/index.html)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/Digiklausur/e2x-course-hub/blob/main/LICENSE)
 
 **Documentation:** <https://e2x-course-hub.readthedocs.io/en/latest/index.html> ·
 **PyPI:** <https://pypi.org/project/e2x-course-hub/>
@@ -17,6 +17,8 @@ hardware itself.
 It ships as a FastAPI backend (REST API under `/v1/...`) plus a React single-page app
 (`course-service-ui`) for course and membership management, both served from the same
 process.
+
+![The course list in the course service](https://raw.githubusercontent.com/Digiklausur/e2x-course-hub/main/docs/source/images/course_service_courses.png)
 
 ## What it does
 
@@ -40,11 +42,70 @@ process.
 - **A management UI** — `course-service-ui`, a React SPA served by the same FastAPI app,
   for browsing courses and managing membership in the browser.
 
-See [`e2x_course_hub/contract/README.md`](e2x_course_hub/contract/README.md) for the
-full contract reference, including the catalog/selection data model and how a spawn
-plays out end to end.
+| Semesters and their environment template | What a role may do, right next to its members |
+|---|---|
+| ![A course with its semesters and environment template](https://raw.githubusercontent.com/Digiklausur/e2x-course-hub/main/docs/source/images/course_overview.png) | ![What a student can do in a semester](https://raw.githubusercontent.com/Digiklausur/e2x-course-hub/main/docs/source/images/term_what_can_a_student_do.png) |
 
-## Architecture
+|            | Course hub (this repo)                                              | Infrastructure spawner                            |
+|------------|-----------------------------------------------------------------------|----------------------------------------------------|
+| Knows      | courses, terms, users, roles (via `e2x-hub-rbac`), permissions        | what can actually be run: image families/tags, resource tiers, profiles |
+| Implements | `SpawnOfferingProvider`                                                | `InfrastructureCatalogProvider`                     |
+| Consumes   | `InfrastructureCatalogProvider`                                        | `SpawnOfferingProvider`                             |
+| Never does | translates a selection to hardware                                    | decides who is allowed to do what                   |
+
+The spawner is a separate, pluggable package, discovered at startup through an entry
+point. See [`e2x-course-hub-kubespawner`](https://github.com/DigiKlausur/e2x-course-hub-kubespawner)
+for an example implementation based on KubeSpawner, and the
+[spawner contract](https://e2x-course-hub.readthedocs.io/en/latest/spawner/contract.html)
+for how to write your own.
+
+## Installation
+
+```bash
+pip install e2x-course-hub
+```
+
+To install the latest development version from GitHub instead:
+
+```bash
+pip install git+https://github.com/Digiklausur/e2x-course-hub.git
+```
+
+## Getting started
+
+The course service runs as a
+[JupyterHub managed service](https://jupyterhub.readthedocs.io/en/stable/reference/services.html).
+The [course service guide](https://e2x-course-hub.readthedocs.io/en/latest/course_service/overview.html)
+shows the `jupyterhub_config.py` entries, how to choose an infrastructure provider and
+how to create the first LMS admin.
+
+## Documentation
+
+- [User guide](https://e2x-course-hub.readthedocs.io/en/latest/user_guide/courses.html) — managing courses, semesters and members in the UI
+- [Configuration](https://e2x-course-hub.readthedocs.io/en/latest/reference/configuration.html) — all environment variables
+- [REST API](https://e2x-course-hub.readthedocs.io/en/latest/reference/rest_api.html) — routes, actions and errors
+- [Roles](https://e2x-course-hub.readthedocs.io/en/latest/reference/roles.html) — what each role may do, and the groups behind them
+- [Spawner contract](https://e2x-course-hub.readthedocs.io/en/latest/spawner/contract.html) — for writing an infrastructure spawner
+
+## Development
+
+```bash
+git clone https://github.com/Digiklausur/e2x-course-hub
+cd e2x-course-hub
+pip install -e ".[dev]"
+```
+
+Building the package (`pip install .` or `python -m build`) also builds
+`course-service-ui` via `hatch-jupyter-builder` and bundles the result into the wheel.
+For frontend-only iteration:
+
+```bash
+cd course-service-ui
+npm install
+npm run dev
+```
+
+### Architecture
 
 ```
 e2x_course_hub/
@@ -68,160 +129,14 @@ e2x_course_hub/
 │   ├── fastapi_app.py       # App wiring: routers, auth, static files, SPA route
 │   ├── settings.py          # ServiceSettings (extends settings.CoreSettings)
 │   ├── whoami.py            # Minimal standalone service: returns the caller's identity
-│   └── {courses,terms,infrastructure,membership,me}/  # One router + schemas per resource
+│   └── {courses,terms,infrastructure,membership,me,roles}/  # One router + schemas per resource
 ├── loader.py            # Composition root: settings → concrete API objects
-└── settings.py          # CoreSettings: hub API, DB, membership, infrastructure provider
+└── settings.py          # CoreSettings: hub API, DB, membership, usernames, infrastructure provider
 
 course-service-ui/       # React 19 + TypeScript SPA, built with Vite
 ```
 
-### The two sides
-
-|            | Course hub (this repo)                                              | Infrastructure spawner                            |
-|------------|-----------------------------------------------------------------------|----------------------------------------------------|
-| Knows      | courses, terms, users, roles (via `e2x-hub-rbac`), permissions        | what can actually be run: image families/tags, resource tiers, profiles |
-| Implements | `SpawnOfferingProvider`                                                | `InfrastructureCatalogProvider`                     |
-| Consumes   | `InfrastructureCatalogProvider`                                        | `SpawnOfferingProvider`                             |
-| Never does | translates a selection to hardware                                    | decides who is allowed to do what                   |
-
-The spawner is a separate, pluggable package. The course hub discovers it at startup through
-the `e2x_course_hub.infrastructure_catalog_providers` entry-point group, selected by
-name via the `E2X_INFRASTRUCTURE_PROVIDER` setting — the hub never imports it directly.
-See [`e2x-course-hub-kubespawner`](https://github.com/DigiKlausur/e2x-course-hub-kubespawner)
-for an example implementation based on KubeSpawner.
-
-## Installation
-
-```bash
-pip install e2x-course-hub
-```
-
-To install the latest development version from GitHub instead:
-
-```bash
-pip install git+https://github.com/Digiklausur/e2x-course-hub.git
-```
-
-For development:
-
-```bash
-git clone https://github.com/Digiklausur/e2x-course-hub
-cd e2x-course-hub
-pip install -e ".[dev]"
-```
-
-Building the package (`pip install .` or `python -m build`) also builds
-`course-service-ui` via `hatch-jupyter-builder` and bundles the result into the wheel.
-For frontend-only iteration:
-
-```bash
-cd course-service-ui
-npm install
-npm run dev
-```
-
-## Running it
-
-The service is a standard [JupyterHub managed service](https://jupyterhub.readthedocs.io/en/stable/reference/services.html),
-run with `uvicorn`:
-
-```python
-# jupyterhub_config.py
-c.JupyterHub.services = [
-    {
-        "name": "course-service",
-        "url": "http://127.0.0.1:10105",
-        "command": ["uvicorn", "e2x_course_hub.course_service.fastapi_app:app"],
-        "environment": {
-            "UVICORN_HOST": "0.0.0.0",
-            "UVICORN_PORT": "10105",
-            "E2X_INFRASTRUCTURE_PROVIDER": "k8s_catalog",
-            "E2X_ADD_USERS_TO_HUB": "true",
-            "E2X_DELETE_EMPTY_GROUPS": "true",
-            "E2X_COURSE_DB_URL": "sqlite:////srv/jupyterhub/courses.db",
-        },
-    }
-]
-
-c.JupyterHub.load_roles = [
-    {
-        "name": "course-service",
-        "services": ["course-service"],
-        "scopes": [
-            "access:services!service=course-service",
-            "admin:users",
-            "list:users",
-            "delete:users",
-            "admin:groups",
-        ],
-    }
-]
-```
-
-`JUPYTERHUB_API_URL`, `JUPYTERHUB_API_TOKEN`, and `JUPYTERHUB_SERVICE_PREFIX` are
-injected automatically by JupyterHub for a managed service and don't need to be set
-explicitly.
-
-### Configuration
-
-All settings are read from the environment (via `pydantic-settings`):
-
-| Variable                     | Default                    | Purpose                                                        |
-|-------------------------------|-----------------------------|-----------------------------------------------------------------|
-| `JUPYTERHUB_API_URL`          | —                            | JupyterHub Hub API URL, used to manage users and groups         |
-| `JUPYTERHUB_API_TOKEN`        | —                            | API token for the above                                         |
-| `JUPYTERHUB_SERVICE_PREFIX`   | `/`                          | URL prefix the service is mounted under                         |
-| `E2X_COURSE_DB_URL`           | `sqlite:///courses.db`      | SQLAlchemy URL for the course/term database                     |
-| `E2X_INFRASTRUCTURE_PROVIDER` | `default`                    | Entry-point name of the `InfrastructureCatalogProvider` to load |
-| `E2X_ADD_USERS_TO_HUB`        | `false`                      | Create JupyterHub users automatically on membership changes     |
-| `E2X_DELETE_EMPTY_GROUPS`     | `false`                      | Delete a course/term's JupyterHub group once it has no members  |
-
-### Optional: `whoami` service
-
-`e2x_course_hub.course_service.whoami:app` is a minimal standalone FastAPI service that
-returns the authenticated caller's identity — handy for verifying JupyterHub OAuth is
-wired up correctly before debugging the full course service.
-
-## REST API
-
-All routes are served under `{service_prefix}/v1`. Interactive docs (Swagger UI) are
-available at `{service_prefix}/docs` once the service is running, and the schema can be
-exported standalone with `python scripts/export_openapi.py`.
-
-| Resource            | Routes                                                                                                   |
-|----------------------|------------------------------------------------------------------------------------------------------------|
-| Courses              | `GET/POST /courses`, `GET/DELETE /courses/{course_id}`, `GET/PATCH /courses/{course_id}/metadata`, `GET/PATCH /courses/{course_id}/environment`, `GET /courses/{course_id}/terms` |
-| Terms                | `POST/GET/DELETE /courses/{course_id}/terms/{term_id}`, `GET/PATCH /courses/{course_id}/terms/{term_id}/environment` |
-| Infrastructure       | `GET /catalogs/image-catalog`, `GET /catalogs/resource-tiers`, `GET /catalogs/profile-catalog`             |
-| Membership           | `GET/PATCH /lms/admins`, `GET/PATCH /lms/course-creators`, `GET/PATCH /courses/{course_id}/owners`, `GET/PATCH /courses/{course_id}/terms/{term_id}/{instructors,teaching-assistants,students,observers}` |
-| Roles                | `GET /roles/{role}/actions`                                                                                |
-| Current user         | `GET /me`                                                                                                  |
-
-`course-service-ui` consumes this API with types generated from the OpenAPI schema
-(`npm run generate:api-types` in `course-service-ui/`); CI fails if the committed types
-drift from the schema.
-
-## Roles & permissions
-
-Roles are defined by `e2x-hub-rbac` and scoped to the LMS, a course, or a term. Default
-permissions for course/term management (`e2x_course_hub/api/course_permissions.py`):
-
-| Role                | Scope  | Default permissions                                                                 |
-|---------------------|--------|----------------------------------------------------------------------------------------|
-| LMS admin           | LMS    | Everything                                                                              |
-| Course creator      | LMS    | Create courses, view courses                                                            |
-| Course owner        | Course | Manage the course (metadata, environment, remove) and its terms (add/remove, environment) |
-| Instructor          | Term   | View the course, manage the term (environment, remove)                                  |
-| Teaching assistant  | Term   | View the course and term                                                                |
-| Observer            | Term   | View the course and term                                                                |
-| Student             | Term   | (none — spawns only, no management permissions)                                        |
-
-Membership itself (who holds which role, per course/term) is managed separately through
-the membership API, backed by JupyterHub groups. The membership, infrastructure catalog
-and spawn permission tables, and the group names behind each role, are in
-[`docs/source/reference/roles.md`](docs/source/reference/roles.md).
-
-## Development
+### Linting and checks
 
 ```bash
 ruff check .
@@ -234,10 +149,11 @@ npm run lint
 npm run format
 ```
 
-CI (`.github/workflows/ci.yml`) runs Python linting, frontend linting/formatting, and
-checks that the generated OpenAPI schema and TypeScript types are committed and in
-sync with the routers.
+`course-service-ui` consumes the REST API with types generated from the OpenAPI schema
+(`npm run generate:api-types` in `course-service-ui/`). CI (`.github/workflows/ci.yml`)
+runs Python linting, frontend linting/formatting, and checks that the generated OpenAPI
+schema and TypeScript types are committed and in sync with the routers.
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](https://github.com/Digiklausur/e2x-course-hub/blob/main/LICENSE) for details.
