@@ -1,6 +1,6 @@
 import { requests } from "./client";
 import { urlJoin } from "./http";
-import { config } from "../config";
+import { config } from "@config";
 import type {
   ImageCatalogResponse,
   ResourceCatalogResponse,

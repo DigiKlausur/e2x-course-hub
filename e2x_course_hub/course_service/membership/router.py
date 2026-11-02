@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 
 from ..common.dependency_types import CurrentUser, MembershipAPIDep
-from .schemas import MembershipCollectionResponse, MembershipPatch
+from .dependencies import ValidatedMembershipPatch
+from .schemas import MembershipCollectionResponse
 
 router = APIRouter(
     prefix="/v1",
@@ -23,7 +24,7 @@ async def list_lms_admins(
 
 @router.patch(lms_prefix + "/admins", status_code=204)
 async def patch_lms_admins(
-    body: MembershipPatch,
+    body: ValidatedMembershipPatch,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
 ):
@@ -43,7 +44,7 @@ async def list_lms_course_creators(
 
 @router.patch(lms_prefix + "/course-creators", status_code=204)
 async def patch_lms_course_creators(
-    body: MembershipPatch,
+    body: ValidatedMembershipPatch,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
 ):
@@ -67,7 +68,7 @@ async def list_course_owners(
 @router.patch(course_prefix + "/owners", status_code=204)
 async def patch_course_owners(
     course_id: str,
-    body: MembershipPatch,
+    body: ValidatedMembershipPatch,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
 ):
@@ -93,7 +94,7 @@ async def list_term_instructors(
 async def patch_term_instructors(
     course_id: str,
     term_id: str,
-    body: MembershipPatch,
+    body: ValidatedMembershipPatch,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
 ):
@@ -122,7 +123,7 @@ async def list_term_teaching_assistants(
 async def patch_term_teaching_assistants(
     course_id: str,
     term_id: str,
-    body: MembershipPatch,
+    body: ValidatedMembershipPatch,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
 ):
@@ -148,7 +149,7 @@ async def list_term_students(
 async def patch_term_students(
     course_id: str,
     term_id: str,
-    body: MembershipPatch,
+    body: ValidatedMembershipPatch,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
 ):
@@ -174,7 +175,7 @@ async def list_term_observers(
 async def patch_term_observers(
     course_id: str,
     term_id: str,
-    body: MembershipPatch,
+    body: ValidatedMembershipPatch,
     user: CurrentUser,
     membership_api: MembershipAPIDep,
 ):

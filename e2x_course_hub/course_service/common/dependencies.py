@@ -11,12 +11,18 @@ from ...api.infrastructure_api import InfrastructureAPI
 from ...api.membership_api import MembershipAPI
 from ...api.role_permissions import ROLE_PERMISSIONS
 from ...schema.catalog import InfrastructureCatalogOptions
+from ...settings import UsernameSettings
 
 
 # ── API layer dependencies ──────────────────────────────────────────
 def get_api(request: Request) -> API:
     """Retrieve the shared API instance from the app state."""
     return request.app.state.api
+
+
+def get_username_settings(request: Request) -> UsernameSettings:
+    """Retrieve the username settings from the app state."""
+    return request.app.state.username_settings
 
 
 def get_db_session(api: API = Depends(get_api)) -> Generator[Session, None, None]:

@@ -4,6 +4,10 @@ import { Modal } from "@components/ui/Modal";
 import { RoleInfoLink } from "@components/actions/RoleInfoLink";
 import type { RoleContext } from "@components/actions/RoleActionsModal";
 import type { MembershipRole } from "@domain/roles";
+import { invalidUsernames } from "@domain/usernames";
+import { config } from "@config";
+
+const { usernameFormats } = config;
 
 interface AddMembersDialogProps {
   open: boolean;
@@ -43,6 +47,13 @@ export function AddMembersDialog({
       setError("Please enter at least one username.");
       return;
     }
+    const invalid = invalidUsernames(usernames, usernameFormats);
+    if (invalid.length > 0) {
+      setError(
+        `These usernames match none of the accepted formats: ${invalid.join(", ")}`,
+      );
+      return;
+    }
     onConfirm(usernames);
     setInput("");
     setError("");
@@ -71,13 +82,25 @@ export function AddMembersDialog({
         </>
       }
     >
+      {usernameFormats.length > 0 && (
+        <div className="mb-3 text-sm text-gray-600">
+          <p className="font-medium text-gray-700">Accepted formats</p>
+          <ul className="mt-1 list-disc pl-5">
+            {usernameFormats.map((format) => (
+              <li key={format.pattern}>{format.hint}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <textarea
         value={input}
         onChange={(e) => {
           setInput(e.target.value);
           if (error) setError("");
         }}
-        placeholder={"alice\nbob\ncharlie"}
+        placeholder={
+          usernameFormats.length > 0 ? undefined : "alice\nbob\ncharlie"
+        }
         rows={8}
         autoFocus
         className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-hbrs-dark-blue focus:outline-none resize-none font-mono"

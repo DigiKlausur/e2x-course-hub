@@ -9,6 +9,7 @@ from ...api.course_api import CourseAPI
 from ...api.infrastructure_api import InfrastructureAPI
 from ...api.membership_api import MembershipAPI
 from ...schema.catalog import InfrastructureCatalogOptions
+from ...settings import UsernameSettings
 from .dependencies import (
     get_catalog,
     get_course_api,
@@ -16,6 +17,7 @@ from .dependencies import (
     get_infrastructure_api,
     get_membership_api,
     get_permission_checker,
+    get_username_settings,
 )
 
 CurrentUser = Annotated[User, Depends(require_authenticated_user)]
@@ -25,3 +27,4 @@ MembershipAPIDep = Annotated[MembershipAPI, Depends(get_membership_api)]
 InfrastructureAPIDep = Annotated[InfrastructureAPI, Depends(get_infrastructure_api)]
 PermissionCheckerDep = Annotated[PermissionChecker, Depends(get_permission_checker)]
 CatalogDep = Annotated[InfrastructureCatalogOptions, Depends(get_catalog)]
+UsernameSettingsDep = Annotated[UsernameSettings, Depends(get_username_settings)]

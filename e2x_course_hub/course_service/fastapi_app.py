@@ -54,8 +54,9 @@ app.exception_handler(AuthenticationRequired)(authentication_required_handler)
 # Register OAuth callback route
 app.get(url_path_join(service_prefix, "oauth_callback"))(oauth_callback)
 
-# Store the API instance on app state so dependencies can access it
+# Store the API instance and username settings on app state so dependencies can access them
 app.state.api = api
+app.state.username_settings = settings.usernames
 
 # ── Exception handlers ───────────────────────────────────────────────
 app.add_exception_handler(APIError, api_error_handler)
@@ -95,6 +96,7 @@ async def spa(user: CurrentUser, path: str = ""):
     html = template.render(
         service_prefix=service_prefix,
         api_url=f"{service_prefix}/v1",
+        username_formats=[f.model_dump(mode="json") for f in settings.usernames.formats],
         user=user,
     )
     return HTMLResponse(content=html)
