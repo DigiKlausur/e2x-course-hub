@@ -8,7 +8,8 @@
       // Inject server-side configuration into the client
       window.__APP_CONFIG__ = {
         baseUrl: "{{ service_prefix }}/app",
-        apiUrl: "{{ api_url }}"
+        apiUrl: "{{ api_url }}",
+        usernameFormats: {{ username_formats | tojson }}
       };
     </script>
     <link rel="stylesheet" href="{{ service_prefix }}/static/course-service-ui/assets/main.css" />

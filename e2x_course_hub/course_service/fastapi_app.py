@@ -96,6 +96,7 @@ async def spa(user: CurrentUser, path: str = ""):
     html = template.render(
         service_prefix=service_prefix,
         api_url=f"{service_prefix}/v1",
+        username_formats=[f.model_dump(mode="json") for f in settings.usernames.formats],
         user=user,
     )
     return HTMLResponse(content=html)
