@@ -71,6 +71,10 @@ export function StudentJoinLinkCard({ courseId, termId, accessEnd }: Props) {
   return (
     <Card>
       <CardTitle>{termActionText.studentJoinLink.title}</CardTitle>
+      <p className="mb-4 text-sm text-gray-500">
+        With a join link, students join this semester themselves, so you don't
+        have to add them by username.
+      </p>
 
       {mutationError && (
         <Alert className="mb-4" title="Could not change the join link">
@@ -86,9 +90,7 @@ export function StudentJoinLinkCard({ courseId, termId, accessEnd }: Props) {
         </Alert>
       ) : !link || !url ? (
         <>
-          <p className="mb-4 text-sm text-gray-500">
-            Students can't join this semester with a link.
-          </p>
+          <p className="mb-4 text-sm text-gray-500">The link is turned off.</p>
           <Button
             type="button"
             variant="primary"
