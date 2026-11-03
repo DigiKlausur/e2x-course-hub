@@ -99,6 +99,11 @@ class TermRow(Base):
     # Set by the repository; empty for terms created before this column existed.
     created_at: Mapped[Optional[datetime]] = mapped_column(UTCDateTime)
 
+    # Token of the student join link; empty means the link is off.
+    join_token: Mapped[Optional[str]] = mapped_column(index=True, unique=True)
+    # When the join link stops working; empty means it works until turned off.
+    join_token_expires_at: Mapped[Optional[datetime]] = mapped_column(UTCDateTime)
+
     spawn_configs: Mapped[List["TermSpawnConfigRow"]] = relationship(
         back_populates="term",
         cascade="all, delete-orphan",
