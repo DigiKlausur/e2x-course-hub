@@ -110,6 +110,10 @@ export type CreateTermRequest = Omit<Schemas["CreateTermRequest"], "term"> & {
   term?: TermConfig | null;
 };
 
+// ── Student join ─────────────────────────────────────────────────────
+export type StudentJoinInfo = Schemas["StudentJoinInfo"];
+export type StudentJoinStatus = Schemas["StudentJoinStatus"];
+
 // ── Membership ───────────────────────────────────────────────────────
 export type MemberListActions = Schemas["MemberListActions"];
 
