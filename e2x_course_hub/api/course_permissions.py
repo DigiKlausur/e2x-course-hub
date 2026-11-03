@@ -21,6 +21,7 @@ class CoursePermission(PermissionEnum):
     TERM_SELECT_RESOURCES = ("term.select_resources", Scope.TERM)
     TERM_SELECT_PROFILES = ("term.select_profiles", Scope.TERM)
     TERM_EDIT_ACCESS_PERIOD = ("term.edit_access_period", Scope.TERM)
+    TERM_MANAGE_STUDENT_JOIN_LINK = ("term.manage_student_join_link", Scope.TERM)
 
 
 class CoursePermissionSets:
@@ -43,6 +44,7 @@ class CoursePermissionSets:
             CoursePermission.TERM_SELECT_RESOURCES,
             CoursePermission.TERM_SELECT_PROFILES,
             CoursePermission.TERM_EDIT_ACCESS_PERIOD,
+            CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK,
         ]
     )
 
@@ -74,6 +76,7 @@ class CoursePermissionSets:
             CoursePermission.TERM_SELECT_RESOURCES,
             CoursePermission.TERM_SELECT_PROFILES,
             CoursePermission.TERM_EDIT_ACCESS_PERIOD,
+            CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK,
         ]
     )
 

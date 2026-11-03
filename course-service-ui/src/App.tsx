@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { CoursesPage } from "./components/courses/CoursesPage";
 import { CoursePage } from "./components/course/CoursePage";
 import { TermPage } from "./components/term/TermPage";
+import { JoinPage } from "./components/join/JoinPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/*" element={<CoursesPage />} />
         <Route path="/course/:courseId/*" element={<CoursePage />} />
         <Route path="/course/:courseId/term/:termId/*" element={<TermPage />} />
+        <Route path="/join/:token" element={<JoinPage />} />
       </Routes>
     </div>
   );

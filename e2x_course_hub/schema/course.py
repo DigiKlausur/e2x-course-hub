@@ -53,6 +53,27 @@ class StudentAccessPeriod(BaseModel):
         return True
 
 
+class StudentJoinLink(BaseModel):
+    """The link with which students join a term themselves."""
+
+    token: str | None = Field(
+        default=None,
+        description="Token identifying the term in the link. Empty means the link is off.",
+    )
+    expires_at: AwareDatetime | None = Field(
+        default=None,
+        description="When the link stops working. Empty means it works until turned off.",
+    )
+
+
+class StudentJoinTarget(StudentAccessPeriod):
+    """The term a student join link leads to, with only what the join page shows."""
+
+    course_id: str
+    course_name: str
+    term_id: str
+
+
 class TermConfig(SpawnRoleConfigMixin, StudentAccessPeriod):
     """Configuration for a specific term."""
 

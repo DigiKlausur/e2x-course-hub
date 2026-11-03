@@ -35,6 +35,9 @@ JupyterHub can be added depends on the deployment (see `E2X_ADD_USERS_TO_HUB` in
 Your deployment may define which username formats are accepted. The dialog then lists
 them and refuses usernames that match none of them, naming the ones to fix.
 
+Students can also join a semester themselves with a join link, so you don't need
+their usernames (see {doc}`semesters`).
+
 ## Remove members
 
 Select one or more members in the table and remove them with the button above the

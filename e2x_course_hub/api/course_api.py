@@ -1,3 +1,5 @@
+import secrets
+from datetime import datetime
 from logging import Logger
 from typing import List, Optional
 
@@ -14,11 +16,19 @@ from ..errors import (
     ImageFamilyNotFoundError,
     ProfileNotFoundError,
     ResourceTierNotFoundError,
+    StudentJoinLinkInvalidError,
     TermExistsError,
     TermNotFoundError,
 )
 from ..schema.catalog import InfrastructureCatalogOptions
-from ..schema.course import CourseConfig, CourseMetadata, StudentAccessPeriod, TermConfig
+from ..schema.course import (
+    CourseConfig,
+    CourseMetadata,
+    StudentAccessPeriod,
+    StudentJoinLink,
+    StudentJoinTarget,
+    TermConfig,
+)
 from ..schema.selection import (
     ImageSelection,
     PartialImageSelection,
@@ -532,3 +542,118 @@ class CourseAPI(BaseAPI):
         term.student_access_start = access_period.student_access_start
         term.student_access_end = access_period.student_access_end
         self.course_repository.update_course(course_id, course, session=session)
+
+    @require_permission(CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK)
+    def get_term_student_join_link(
+        self, user: UserLike, course_id: str, term_id: str, session: Optional[Session] = None
+    ) -> StudentJoinLink:
+        """Retrieve the student join link of the specified term.
+
+        Args:
+            user: The user requesting the join link
+            course_id: The course ID
+            term_id: The term ID
+        Returns:
+            The join link; an empty token means the link is off
+        """
+        return self.course_repository.get_student_join_link(course_id, term_id, session=session)
+
+    @require_permission(CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK)
+    def set_term_student_join_link(
+        self,
+        user: UserLike,
+        course_id: str,
+        term_id: str,
+        expires_at: Optional[datetime],
+        session: Optional[Session] = None,
+    ) -> StudentJoinLink:
+        """Turn the student join link on, or change when it expires.
+
+        A link that is already on keeps its token, so links already shared keep working.
+
+        Args:
+            user: The user managing the join link
+            course_id: The course ID
+            term_id: The term ID
+            expires_at: When the link stops working; empty means it works until turned off
+        Returns:
+            The updated join link
+        """
+        current = self.course_repository.get_student_join_link(course_id, term_id, session=session)
+        join_link = StudentJoinLink(token=current.token or _new_join_token(), expires_at=expires_at)
+        self.course_repository.set_student_join_link(course_id, term_id, join_link, session=session)
+        return join_link
+
+    @require_permission(CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK)
+    def regenerate_term_student_join_link(
+        self, user: UserLike, course_id: str, term_id: str, session: Optional[Session] = None
+    ) -> StudentJoinLink:
+        """Replace the token of the student join link, which invalidates the old link.
+
+        The expiry is kept.
+
+        Args:
+            user: The user managing the join link
+            course_id: The course ID
+            term_id: The term ID
+        Returns:
+            The join link with its new token
+        """
+        current = self.course_repository.get_student_join_link(course_id, term_id, session=session)
+        join_link = StudentJoinLink(token=_new_join_token(), expires_at=current.expires_at)
+        self.course_repository.set_student_join_link(course_id, term_id, join_link, session=session)
+        return join_link
+
+    @require_permission(CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK)
+    def disable_term_student_join_link(
+        self, user: UserLike, course_id: str, term_id: str, session: Optional[Session] = None
+    ) -> None:
+        """Turn the student join link off.
+
+        Args:
+            user: The user managing the join link
+            course_id: The course ID
+            term_id: The term ID
+        """
+        self.course_repository.set_student_join_link(
+            course_id, term_id, StudentJoinLink(), session=session
+        )
+
+    # No permission check: holding a valid token is what allows a user to join.
+    def resolve_student_join_link(
+        self, token: str, now: datetime, session: Optional[Session] = None
+    ) -> StudentJoinTarget:
+        """Find the term a student join link leads to.
+
+        Args:
+            token: The token from the join link
+            now: The current (timezone-aware) time, to check the expiry against
+        Returns:
+            The term the link leads to, with only what the join page shows
+        Raises:
+            StudentJoinLinkInvalidError: If no term has the token, or the link has expired
+        """
+        found = self.course_repository.find_term_by_join_token(token, session=session)
+        if found is None:
+            raise StudentJoinLinkInvalidError()
+        course_id, term_id = found
+
+        join_link = self.course_repository.get_student_join_link(
+            course_id, term_id, session=session
+        )
+        if join_link.expires_at is not None and now >= join_link.expires_at:
+            raise StudentJoinLinkInvalidError()
+
+        course, term = self._get_course_and_term(course_id, term_id, session=session)
+        return StudentJoinTarget(
+            course_id=course_id,
+            course_name=course.metadata.course_name,
+            term_id=term_id,
+            student_access_start=term.student_access_start,
+            student_access_end=term.student_access_end,
+        )
+
+
+def _new_join_token() -> str:
+    """A random, URL-safe token that cannot be guessed."""
+    return secrets.token_urlsafe(32)

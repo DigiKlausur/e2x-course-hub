@@ -65,3 +65,19 @@ export function useTermEnvironment(courseId: string, termId: string) {
     select: (term) => term.environment,
   });
 }
+
+/**
+ * Fetching the link without permission answers 403, so callers pass `enabled`
+ * from the term's `actions.studentJoinLink.manage`.
+ */
+export function useTermStudentJoinLink(
+  courseId: string,
+  termId: string,
+  enabled: boolean,
+) {
+  return useQuery({
+    queryKey: courseKeys.terms.studentJoinLink(courseId, termId),
+    queryFn: () => courseAPI.fetchTermStudentJoinLink(courseId, termId),
+    enabled: enabled && !!courseId && !!termId,
+  });
+}

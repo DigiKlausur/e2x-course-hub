@@ -21,6 +21,7 @@ from .common.dependency_types import CurrentUser
 from .courses.router import router as courses_router
 from .exception_handlers import api_error_handler
 from .infrastructure.router import router as infrastructure_router
+from .join.router import router as join_router
 from .me.router import router as me_router
 from .membership.router import router as membership_router
 from .roles.router import router as roles_router
@@ -71,6 +72,7 @@ app.include_router(infrastructure_router, prefix=service_prefix)
 app.include_router(membership_router, prefix=service_prefix)
 app.include_router(me_router, prefix=service_prefix)
 app.include_router(roles_router, prefix=service_prefix)
+app.include_router(join_router, prefix=service_prefix)
 
 # ── Static files ─────────────────────────────────────────────────────
 app.mount(
@@ -96,6 +98,7 @@ async def spa(user: CurrentUser, path: str = ""):
     html = template.render(
         service_prefix=service_prefix,
         api_url=f"{service_prefix}/v1",
+        spawn_url=url_path_join(settings.hub_base_url, "hub/spawn"),
         username_formats=[f.model_dump(mode="json") for f in settings.usernames.formats],
         user=user,
     )

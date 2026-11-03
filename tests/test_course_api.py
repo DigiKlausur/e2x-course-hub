@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from types import SimpleNamespace
 
 import pytest
-from conftest import CATALOG, make_course
+from conftest import StubCatalogProvider, make_course
 
 from e2x_course_hub.api.course_api import CourseAPI
 from e2x_course_hub.errors import (
@@ -20,8 +20,7 @@ OWNER = SimpleNamespace(username="owner", groups=["lms.course.c1.course-owner"])
 
 
 def _course_api(repository) -> CourseAPI:
-    catalog_provider = SimpleNamespace(get_infrastructure_catalog=lambda: CATALOG)
-    return CourseAPI(repository, catalog_provider)
+    return CourseAPI(repository, StubCatalogProvider())
 
 
 def test_add_term_gets_the_default_tag_of_the_course_image_family(repository):

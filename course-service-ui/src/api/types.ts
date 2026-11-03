@@ -95,6 +95,8 @@ export type TermConfig = Omit<
 
 export type TermActions = Schemas["TermActions"];
 export type StudentAccessPeriod = Schemas["StudentAccessPeriod"];
+export type StudentJoinLink = Schemas["StudentJoinLink"];
+export type StudentJoinLinkUpdate = Schemas["StudentJoinLinkUpdate"];
 export type TermSummaryResponse = Schemas["TermSummaryResponse"];
 
 export type TermDetailResponse = Omit<
@@ -107,6 +109,10 @@ export type TermDetailResponse = Omit<
 export type CreateTermRequest = Omit<Schemas["CreateTermRequest"], "term"> & {
   term?: TermConfig | null;
 };
+
+// ── Student join ─────────────────────────────────────────────────────
+export type StudentJoinInfo = Schemas["StudentJoinInfo"];
+export type StudentJoinStatus = Schemas["StudentJoinStatus"];
 
 // ── Membership ───────────────────────────────────────────────────────
 export type MemberListActions = Schemas["MemberListActions"];

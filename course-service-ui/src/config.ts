@@ -8,6 +8,8 @@ export interface UsernameFormat {
 export interface AppConfig {
   baseUrl: string;
   apiUrl: string;
+  /** The hub's spawn page, where students go after joining a semester. */
+  spawnUrl: string;
   /** Without formats, every username is accepted. */
   usernameFormats: UsernameFormat[];
 }
@@ -29,6 +31,7 @@ export function getConfig(): AppConfig {
   return {
     baseUrl: import.meta.env.VITE_BASE_URL || "",
     apiUrl: import.meta.env.VITE_API_URL || "/api",
+    spawnUrl: import.meta.env.VITE_SPAWN_URL || "/hub/spawn",
     usernameFormats: [],
   };
 }

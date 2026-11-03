@@ -13,6 +13,8 @@ import type {
   EnvironmentUpdate,
   CreateTermRequest,
   StudentAccessPeriod,
+  StudentJoinLink,
+  StudentJoinLinkUpdate,
 } from "./types";
 
 const base_url = config.apiUrl;
@@ -98,6 +100,48 @@ export const courseAPI = {
     return requests.put<StudentAccessPeriod>(
       urlJoin(courses_url, courseId, "terms", termId, "access-period"),
       accessPeriod,
+    );
+  },
+  fetchTermStudentJoinLink: async (
+    courseId: string,
+    termId: string,
+  ): Promise<StudentJoinLink> => {
+    return requests.get<StudentJoinLink>(
+      urlJoin(courses_url, courseId, "terms", termId, "student-join-link"),
+    );
+  },
+  updateTermStudentJoinLink: async (
+    courseId: string,
+    termId: string,
+    update: StudentJoinLinkUpdate,
+  ): Promise<StudentJoinLink> => {
+    return requests.put<StudentJoinLink>(
+      urlJoin(courses_url, courseId, "terms", termId, "student-join-link"),
+      update,
+    );
+  },
+  regenerateTermStudentJoinLink: async (
+    courseId: string,
+    termId: string,
+  ): Promise<StudentJoinLink> => {
+    return requests.post<StudentJoinLink>(
+      urlJoin(
+        courses_url,
+        courseId,
+        "terms",
+        termId,
+        "student-join-link",
+        "regenerate",
+      ),
+      {},
+    );
+  },
+  deleteTermStudentJoinLink: async (
+    courseId: string,
+    termId: string,
+  ): Promise<void> => {
+    return requests.delete(
+      urlJoin(courses_url, courseId, "terms", termId, "student-join-link"),
     );
   },
   createTerm: async (

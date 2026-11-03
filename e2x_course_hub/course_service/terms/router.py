@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from ...schema.course import StudentAccessPeriod
+from ...schema.course import StudentAccessPeriod, StudentJoinLink
 from ..common.dependency_types import (
     CourseAPIDep,
     CurrentUser,
@@ -9,7 +9,7 @@ from ..common.dependency_types import (
 )
 from ..common.schemas import Environment, EnvironmentUpdate
 from .dependencies import LoadedTerm, TermAssemblerDep
-from .schemas import CreateTermRequest, TermDetailResponse
+from .schemas import CreateTermRequest, StudentJoinLinkUpdate, TermDetailResponse
 
 router = APIRouter(
     prefix="/v1/courses/{course_id}/terms/{term_id}",
@@ -101,3 +101,51 @@ async def put_term_access_period(
     return term_assembler.access_period(
         course_api.get_term(user=user, course_id=course_id, term_id=term_id, session=session)
     )
+
+
+@router.get("/student-join-link", response_model=StudentJoinLink)
+async def get_term_student_join_link(
+    course_id: str,
+    term_id: str,
+    user: CurrentUser,
+    course_api: CourseAPIDep,
+    session: DBSession,
+) -> StudentJoinLink:
+    return course_api.get_term_student_join_link(user, course_id, term_id, session=session)
+
+
+# PUT, not PATCH: an empty expiry means "no expiry", so it is always replaced.
+@router.put("/student-join-link", response_model=StudentJoinLink)
+async def put_term_student_join_link(
+    course_id: str,
+    term_id: str,
+    update: StudentJoinLinkUpdate,
+    user: CurrentUser,
+    course_api: CourseAPIDep,
+    session: DBSession,
+) -> StudentJoinLink:
+    return course_api.set_term_student_join_link(
+        user, course_id, term_id, update.expires_at, session=session
+    )
+
+
+@router.post("/student-join-link/regenerate", response_model=StudentJoinLink)
+async def regenerate_term_student_join_link(
+    course_id: str,
+    term_id: str,
+    user: CurrentUser,
+    course_api: CourseAPIDep,
+    session: DBSession,
+) -> StudentJoinLink:
+    return course_api.regenerate_term_student_join_link(user, course_id, term_id, session=session)
+
+
+@router.delete("/student-join-link", status_code=204)
+async def delete_term_student_join_link(
+    course_id: str,
+    term_id: str,
+    user: CurrentUser,
+    course_api: CourseAPIDep,
+    session: DBSession,
+):
+    course_api.disable_term_student_join_link(user, course_id, term_id, session=session)

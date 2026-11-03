@@ -51,6 +51,14 @@ CATALOG = InfrastructureCatalogOptions.model_validate(
 )
 
 
+class StubCatalogProvider:
+    """Provides the test catalog in place of the infrastructure spawner."""
+
+    @classmethod
+    def get_infrastructure_catalog(cls) -> InfrastructureCatalogOptions:
+        return CATALOG
+
+
 def make_term(**fields) -> TermConfig:
     return TermConfig(image=IMAGE, spawn_role_selections=SELECTIONS, **fields)
 

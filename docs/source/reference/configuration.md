@@ -9,6 +9,7 @@ JupyterHub deployment, set them in the `environment` of the service (see
 | `JUPYTERHUB_API_URL`          | —                      | JupyterHub API URL, used to manage users and groups. Set by JupyterHub. |
 | `JUPYTERHUB_API_TOKEN`        | —                      | API token for the above. Set by JupyterHub.                      |
 | `JUPYTERHUB_SERVICE_PREFIX`   | `/`                    | URL prefix the service is mounted under. Set by JupyterHub.      |
+| `JUPYTERHUB_BASE_URL`         | `/`                    | Base URL of JupyterHub, used to send students to the spawn page after they join a semester. Set by JupyterHub for managed services; set it yourself for an external service. |
 | `E2X_COURSE_DB_URL`           | `sqlite:///courses.db` | SQLAlchemy URL of the course and term database.                  |
 | `E2X_INFRASTRUCTURE_PROVIDER` | `default`              | Entry-point name of the infrastructure catalog provider to load. |
 | `E2X_ADD_USERS_TO_HUB`        | `false`                | Create JupyterHub users that don't exist yet when they are added to a role. Without it, adding an unknown username fails. |

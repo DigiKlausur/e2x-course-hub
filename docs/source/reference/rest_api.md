@@ -16,11 +16,18 @@ python scripts/export_openapi.py
 | Resource       | Routes                                                                     |
 | -------------- | -------------------------------------------------------------------------- |
 | Courses        | `GET/POST /courses`, `GET/DELETE /courses/{course_id}`, `GET/PATCH /courses/{course_id}/metadata`, `GET/PATCH /courses/{course_id}/environment`, `GET /courses/{course_id}/terms` |
-| Terms          | `POST/GET/DELETE /courses/{course_id}/terms/{term_id}`, `GET/PATCH /courses/{course_id}/terms/{term_id}/environment` |
+| Terms          | `POST/GET/DELETE /courses/{course_id}/terms/{term_id}`, `GET/PATCH /courses/{course_id}/terms/{term_id}/environment`, `GET/PUT/DELETE /courses/{course_id}/terms/{term_id}/student-join-link`, `POST /courses/{course_id}/terms/{term_id}/student-join-link/regenerate` |
+| Student join   | `GET/POST /student-join/{token}`                                           |
 | Infrastructure | `GET /catalogs/image-catalog`, `GET /catalogs/resource-tiers`, `GET /catalogs/profile-catalog` |
 | Membership     | `GET/PATCH /lms/admins`, `GET/PATCH /lms/course-creators`, `GET/PATCH /courses/{course_id}/owners`, `GET/PATCH /courses/{course_id}/terms/{term_id}/{instructors,teaching-assistants,students,observers}` |
 | Roles          | `GET /roles/{role}/actions`                                                |
 | Current user   | `GET /me`                                                                  |
+
+The student join routes are the exception to the role check: any logged-in user may
+call them, because the token in the link is what allows joining. `GET` returns only
+the course name, the semester ID, its student access period and whether the caller
+can join. `POST` adds the caller as a student. An unknown, expired or replaced token
+always gets the same `404` response.
 
 ## Actions
 
