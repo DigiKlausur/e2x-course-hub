@@ -147,6 +147,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/courses/{course_id}/terms/{term_id}/student-join-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Term Student Join Link */
+        get: operations["get_term_student_join_link_v1_courses__course_id__terms__term_id__student_join_link_get"];
+        /** Put Term Student Join Link */
+        put: operations["put_term_student_join_link_v1_courses__course_id__terms__term_id__student_join_link_put"];
+        post?: never;
+        /** Delete Term Student Join Link */
+        delete: operations["delete_term_student_join_link_v1_courses__course_id__terms__term_id__student_join_link_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/courses/{course_id}/terms/{term_id}/student-join-link/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Regenerate Term Student Join Link */
+        post: operations["regenerate_term_student_join_link_v1_courses__course_id__terms__term_id__student_join_link_regenerate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/catalogs/image-catalog": {
         parameters: {
             query?: never;
@@ -791,6 +827,35 @@ export interface components {
              */
             student_access_end?: string | null;
         };
+        /**
+         * StudentJoinLink
+         * @description The link with which students join a term themselves.
+         */
+        StudentJoinLink: {
+            /**
+             * Token
+             * @description Token identifying the term in the link. Empty means the link is off.
+             */
+            token?: string | null;
+            /**
+             * Expires At
+             * @description When the link stops working. Empty means it works until turned off.
+             */
+            expires_at?: string | null;
+        };
+        /**
+         * StudentJoinLinkUpdate
+         * @description Request body for turning the student join link on or changing its expiry.
+         *
+         *     The token is never sent by the client; the server creates it.
+         */
+        StudentJoinLinkUpdate: {
+            /**
+             * Expires At
+             * @description When the link stops working. Empty means it works until turned off.
+             */
+            expires_at?: string | null;
+        };
         /** TermAccessPeriodActions */
         TermAccessPeriodActions: {
             /** Edit */
@@ -1387,6 +1452,136 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StudentAccessPeriod"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_term_student_join_link_v1_courses__course_id__terms__term_id__student_join_link_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                term_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentJoinLink"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_term_student_join_link_v1_courses__course_id__terms__term_id__student_join_link_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                term_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudentJoinLinkUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentJoinLink"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_term_student_join_link_v1_courses__course_id__terms__term_id__student_join_link_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                term_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    regenerate_term_student_join_link_v1_courses__course_id__terms__term_id__student_join_link_regenerate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                term_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentJoinLink"];
                 };
             };
             /** @description Validation Error */

@@ -1,3 +1,5 @@
+import secrets
+from datetime import datetime
 from logging import Logger
 from typing import List, Optional
 
@@ -18,7 +20,13 @@ from ..errors import (
     TermNotFoundError,
 )
 from ..schema.catalog import InfrastructureCatalogOptions
-from ..schema.course import CourseConfig, CourseMetadata, StudentAccessPeriod, TermConfig
+from ..schema.course import (
+    CourseConfig,
+    CourseMetadata,
+    StudentAccessPeriod,
+    StudentJoinLink,
+    TermConfig,
+)
 from ..schema.selection import (
     ImageSelection,
     PartialImageSelection,
@@ -532,3 +540,84 @@ class CourseAPI(BaseAPI):
         term.student_access_start = access_period.student_access_start
         term.student_access_end = access_period.student_access_end
         self.course_repository.update_course(course_id, course, session=session)
+
+    @require_permission(CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK)
+    def get_term_student_join_link(
+        self, user: UserLike, course_id: str, term_id: str, session: Optional[Session] = None
+    ) -> StudentJoinLink:
+        """Retrieve the student join link of the specified term.
+
+        Args:
+            user: The user requesting the join link
+            course_id: The course ID
+            term_id: The term ID
+        Returns:
+            The join link; an empty token means the link is off
+        """
+        return self.course_repository.get_student_join_link(course_id, term_id, session=session)
+
+    @require_permission(CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK)
+    def set_term_student_join_link(
+        self,
+        user: UserLike,
+        course_id: str,
+        term_id: str,
+        expires_at: Optional[datetime],
+        session: Optional[Session] = None,
+    ) -> StudentJoinLink:
+        """Turn the student join link on, or change when it expires.
+
+        A link that is already on keeps its token, so links already shared keep working.
+
+        Args:
+            user: The user managing the join link
+            course_id: The course ID
+            term_id: The term ID
+            expires_at: When the link stops working; empty means it works until turned off
+        Returns:
+            The updated join link
+        """
+        current = self.course_repository.get_student_join_link(course_id, term_id, session=session)
+        join_link = StudentJoinLink(token=current.token or _new_join_token(), expires_at=expires_at)
+        self.course_repository.set_student_join_link(course_id, term_id, join_link, session=session)
+        return join_link
+
+    @require_permission(CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK)
+    def regenerate_term_student_join_link(
+        self, user: UserLike, course_id: str, term_id: str, session: Optional[Session] = None
+    ) -> StudentJoinLink:
+        """Replace the token of the student join link, which invalidates the old link.
+
+        The expiry is kept.
+
+        Args:
+            user: The user managing the join link
+            course_id: The course ID
+            term_id: The term ID
+        Returns:
+            The join link with its new token
+        """
+        current = self.course_repository.get_student_join_link(course_id, term_id, session=session)
+        join_link = StudentJoinLink(token=_new_join_token(), expires_at=current.expires_at)
+        self.course_repository.set_student_join_link(course_id, term_id, join_link, session=session)
+        return join_link
+
+    @require_permission(CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK)
+    def disable_term_student_join_link(
+        self, user: UserLike, course_id: str, term_id: str, session: Optional[Session] = None
+    ) -> None:
+        """Turn the student join link off.
+
+        Args:
+            user: The user managing the join link
+            course_id: The course ID
+            term_id: The term ID
+        """
+        self.course_repository.set_student_join_link(
+            course_id, term_id, StudentJoinLink(), session=session
+        )
+
+
+def _new_join_token() -> str:
+    """A random, URL-safe token that cannot be guessed."""
+    return secrets.token_urlsafe(32)

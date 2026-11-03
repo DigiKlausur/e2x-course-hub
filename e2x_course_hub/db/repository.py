@@ -11,7 +11,7 @@ from ..errors import (
     TermExistsError,
     TermNotFoundError,
 )
-from ..schema.course import CourseConfig, CourseMetadata, TermConfig
+from ..schema.course import CourseConfig, CourseMetadata, StudentJoinLink, TermConfig
 from ..schema.selection import ImageSelection, SpawnRoleSelection
 from ..schema.types import SpawnRole
 from .database import init_db
@@ -276,14 +276,22 @@ class CourseRepository:
 
             # Rebuild terms (flush deletes before inserts to avoid
             # UNIQUE constraint violations from INSERT-before-DELETE ordering).
-            # The rebuilt rows keep the creation date of the terms they replace.
-            created_at = {term.term_id: term.created_at for term in row.terms}
+            # The rebuilt rows keep the creation date and the student join link of the
+            # terms they replace, since neither is part of the course configuration.
+            kept = {
+                term.term_id: (term.created_at, term.join_token, term.join_token_expires_at)
+                for term in row.terms
+            }
             row.terms.clear()
             s.flush()
             for term_id, term_config in config.terms.items():
                 term_row = self._config_to_term_row(course_id, term_id, term_config)
-                if term_id in created_at:
-                    term_row.created_at = created_at[term_id]
+                if term_id in kept:
+                    (
+                        term_row.created_at,
+                        term_row.join_token,
+                        term_row.join_token_expires_at,
+                    ) = kept[term_id]
                 row.terms.append(term_row)
 
             s.flush()
@@ -412,6 +420,42 @@ class CourseRepository:
                     return self._course_row_to_config(row)
 
             raise TermNotFoundError(course_id, term_id)
+
+    # ── Student join link ───────────────────────────────────────────
+
+    @staticmethod
+    def _get_term_row(s: Session, course_id: str, term_id: str) -> TermRow:
+        course_row = s.get(CourseRow, course_id)
+        if course_row is None:
+            raise CourseNotFoundError(course_id)
+        for term_row in course_row.terms:
+            if term_row.term_id == term_id:
+                return term_row
+        raise TermNotFoundError(course_id, term_id)
+
+    def get_student_join_link(
+        self,
+        course_id: str,
+        term_id: str,
+        session: Optional[Session] = None,
+    ) -> StudentJoinLink:
+        with self._session(session) as s:
+            term_row = self._get_term_row(s, course_id, term_id)
+            return StudentJoinLink(
+                token=term_row.join_token, expires_at=term_row.join_token_expires_at
+            )
+
+    def set_student_join_link(
+        self,
+        course_id: str,
+        term_id: str,
+        join_link: StudentJoinLink,
+        session: Optional[Session] = None,
+    ) -> None:
+        with self._session(session) as s:
+            term_row = self._get_term_row(s, course_id, term_id)
+            term_row.join_token = join_link.token
+            term_row.join_token_expires_at = join_link.expires_at
 
     def list_course_ids(
         self,
