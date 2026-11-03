@@ -29,6 +29,9 @@ The **Overview** tab shows:
   Assistants**, **Instructors** and **Observers** (see {doc}`members`).
 - **General Information**: the course, the semester, when it was created and, under
   **Student access**, whether and until when students can start notebook servers.
+- **Student join link**: the link with which students join the semester themselves
+  (see **Invite students with a join link** below). Only course owners and
+  instructors see it.
 - **Semester Runtime**: the notebook image, student resources and grader resources of
   this semester.
 
@@ -77,6 +80,39 @@ A student who started a server before the closing time keeps it until it is stop
 for example by JupyterHub's idle culler. Running servers are not stopped when the
 access period closes.
 ```
+
+## Invite students with a join link
+
+Instead of adding students by username, course owners and instructors can share a
+link with which students join the semester themselves. Each semester has at most one
+link, and it only ever makes people students. The link contains a random token
+instead of the course or semester name.
+
+The link is managed in the **Student join link** card on the semester's **Overview**
+tab:
+
+- **Turn on link** creates the link. Choose when it expires, or leave **Expires**
+  empty to keep it working until you turn it off. The expiry starts out as the closing
+  time of the student access period, if there is one.
+- **Copy** copies the link, for example to post it in your learning platform.
+- **Change** next to the expiry sets a new expiry. The link itself stays the same.
+- **Regenerate** replaces the link with a new one. The old link stops working
+  immediately, so use this if the link reached people it was not meant for.
+- **Turn off** stops the link from working. Turning it on again creates a new link.
+
+A student who opens the link logs in to JupyterHub if needed and is then asked
+whether to join the semester. Nobody is added just by opening the link, so link
+previews in chat or mail programs cannot join anyone. After clicking **Join**:
+
+- if students can start notebook servers right now, the student is taken to the
+  spawn page.
+- if the student access period has not opened yet, the page says from when they can
+  start notebook servers. They are already a member and do not need the link again.
+
+The link cannot be used once the student access period has closed. Users who already
+have a role in the semester or course, such as instructors, are told so and are not
+added as students. An expired, regenerated, turned-off or mistyped link shows the same
+message, which does not reveal whether the link ever existed.
 
 ## Delete a semester
 
