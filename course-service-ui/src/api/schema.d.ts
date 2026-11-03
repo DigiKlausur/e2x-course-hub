@@ -399,6 +399,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/student-join/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Student Join Info */
+        get: operations["get_student_join_info_v1_student_join__token__get"];
+        put?: never;
+        /** Join As Student */
+        post: operations["join_as_student_v1_student_join__token__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -828,6 +846,29 @@ export interface components {
             student_access_end?: string | null;
         };
         /**
+         * StudentJoinInfo
+         * @description What the join page shows before the user joins.
+         */
+        StudentJoinInfo: {
+            /**
+             * Student Access Start
+             * @description From when students may spawn the term. Empty means immediately.
+             */
+            student_access_start?: string | null;
+            /**
+             * Student Access End
+             * @description Until when students may spawn the term. Empty means indefinitely.
+             */
+            student_access_end?: string | null;
+            /** Course Id */
+            course_id: string;
+            /** Course Name */
+            course_name: string;
+            /** Term Id */
+            term_id: string;
+            status: components["schemas"]["StudentJoinStatus"];
+        };
+        /**
          * StudentJoinLink
          * @description The link with which students join a term themselves.
          */
@@ -856,6 +897,12 @@ export interface components {
              */
             expires_at?: string | null;
         };
+        /**
+         * StudentJoinStatus
+         * @description Whether, and how, the current user can join a term with a student join link.
+         * @enum {string}
+         */
+        StudentJoinStatus: "open" | "not_yet_open" | "ended" | "already_member";
         /** TermAccessPeriodActions */
         TermAccessPeriodActions: {
             /** Edit */
@@ -2124,6 +2171,66 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["RoleActionsResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_student_join_info_v1_student_join__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentJoinInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    join_as_student_v1_student_join__token__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

@@ -32,6 +32,7 @@ from e2x_course_hub.course_service.courses.router import router as courses_route
 from e2x_course_hub.course_service.infrastructure.router import (  # noqa: E402
     router as infrastructure_router,
 )
+from e2x_course_hub.course_service.join.router import router as join_router  # noqa: E402
 from e2x_course_hub.course_service.me.router import router as me_router  # noqa: E402
 from e2x_course_hub.course_service.membership.router import (  # noqa: E402
     router as membership_router,
@@ -49,6 +50,7 @@ ROUTERS = (
     membership_router,
     me_router,
     roles_router,
+    join_router,
 )
 
 

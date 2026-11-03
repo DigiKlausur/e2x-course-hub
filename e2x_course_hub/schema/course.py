@@ -66,6 +66,14 @@ class StudentJoinLink(BaseModel):
     )
 
 
+class StudentJoinTarget(StudentAccessPeriod):
+    """The term a student join link leads to, with only what the join page shows."""
+
+    course_id: str
+    course_name: str
+    term_id: str
+
+
 class TermConfig(SpawnRoleConfigMixin, StudentAccessPeriod):
     """Configuration for a specific term."""
 

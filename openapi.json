@@ -1631,6 +1631,81 @@
           }
         }
       }
+    },
+    "/v1/student-join/{token}": {
+      "get": {
+        "tags": [
+          "Student join"
+        ],
+        "summary": "Get Student Join Info",
+        "operationId": "get_student_join_info_v1_student_join__token__get",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentJoinInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Student join"
+        ],
+        "summary": "Join As Student",
+        "operationId": "join_as_student_v1_student_join__token__post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2629,6 +2704,60 @@
         "title": "StudentAccessPeriod",
         "description": "The period in which students may spawn a term. Staff are not restricted."
       },
+      "StudentJoinInfo": {
+        "properties": {
+          "student_access_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Access Start",
+            "description": "From when students may spawn the term. Empty means immediately."
+          },
+          "student_access_end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Access End",
+            "description": "Until when students may spawn the term. Empty means indefinitely."
+          },
+          "course_id": {
+            "type": "string",
+            "title": "Course Id"
+          },
+          "course_name": {
+            "type": "string",
+            "title": "Course Name"
+          },
+          "term_id": {
+            "type": "string",
+            "title": "Term Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StudentJoinStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "course_id",
+          "course_name",
+          "term_id",
+          "status"
+        ],
+        "title": "StudentJoinInfo",
+        "description": "What the join page shows before the user joins."
+      },
       "StudentJoinLink": {
         "properties": {
           "token": {
@@ -2680,6 +2809,17 @@
         "type": "object",
         "title": "StudentJoinLinkUpdate",
         "description": "Request body for turning the student join link on or changing its expiry.\n\nThe token is never sent by the client; the server creates it."
+      },
+      "StudentJoinStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "not_yet_open",
+          "ended",
+          "already_member"
+        ],
+        "title": "StudentJoinStatus",
+        "description": "Whether, and how, the current user can join a term with a student join link."
       },
       "TermAccessPeriodActions": {
         "properties": {

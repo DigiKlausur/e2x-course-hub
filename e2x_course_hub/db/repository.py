@@ -457,6 +457,18 @@ class CourseRepository:
             term_row.join_token = join_link.token
             term_row.join_token_expires_at = join_link.expires_at
 
+    def find_term_by_join_token(
+        self,
+        token: str,
+        session: Optional[Session] = None,
+    ) -> Optional[tuple[str, str]]:
+        """Return the course and term ID the token belongs to, or None if no term has it."""
+        with self._session(session) as s:
+            term_row = s.query(TermRow).filter_by(join_token=token).one_or_none()
+            if term_row is None:
+                return None
+            return term_row.course_id, term_row.term_id
+
     def list_course_ids(
         self,
         session: Optional[Session] = None,

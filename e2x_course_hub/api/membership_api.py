@@ -23,6 +23,19 @@ class MembershipAPI(BaseMembershipAPI):
         )
         await self.__add_role_assignment(role_assignment, [username])
 
+    async def join_term_as_student(self, course_id: str, term_id: str, username: str) -> None:
+        """Add the user as a student of the term, without a permission check.
+
+        Only call this after a valid student join link has been resolved; the link is
+        what allows the user to join.
+        """
+        role_assignment = RoleAssignment.term(
+            role=Role.STUDENT,
+            course_id=course_id,
+            term_id=term_id,
+        )
+        await self.__add_role_assignment(role_assignment, [username])
+
     async def remove_term_members(self, course_id: str, term_id: str) -> None:
         """Remove all members from a term-level role assignment."""
         term_roles = [role for role in Role if role.scope is Scope.TERM]

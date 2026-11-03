@@ -90,6 +90,44 @@ class TermNotFoundError(APIError):
         super().__init__(detail=detail, course_id=course_id, term_id=term_id)
 
 
+class StudentJoinLinkInvalidError(APIError):
+    """
+    Error raised when a student join link does not lead to a term.
+
+    Unknown, expired, replaced and turned-off links all raise this same error, so the
+    response does not reveal whether a link ever existed.
+    """
+
+    status_code: int = 404
+    type_uri: str = "urn:e2x-course-hub:student-join-link-invalid"
+    title: str = "Join Link Not Valid"
+
+    def __init__(self):
+        detail = (
+            "This join link doesn't work. It may be mistyped, expired or replaced. "
+            "Ask your course staff for a current link."
+        )
+        super().__init__(detail=detail)
+
+
+class StudentAccessEndedError(APIError):
+    """
+    Error raised when a student tries to join a term whose student access period has ended.
+    """
+
+    status_code: int = 409
+    type_uri: str = "urn:e2x-course-hub:student-access-ended"
+    title: str = "Semester Has Ended"
+
+    def __init__(self, course_id: str, term_id: str):
+        """
+        :param course_id: The ID of the course.
+        :param term_id: The ID of the term that has ended.
+        """
+        detail = "This semester has ended, so it can no longer be joined."
+        super().__init__(detail=detail, course_id=course_id, term_id=term_id)
+
+
 class RoleNotFoundError(APIError):
     """
     Error raised when a specified role is not found.

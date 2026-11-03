@@ -16,6 +16,7 @@ from ..errors import (
     ImageFamilyNotFoundError,
     ProfileNotFoundError,
     ResourceTierNotFoundError,
+    StudentJoinLinkInvalidError,
     TermExistsError,
     TermNotFoundError,
 )
@@ -25,6 +26,7 @@ from ..schema.course import (
     CourseMetadata,
     StudentAccessPeriod,
     StudentJoinLink,
+    StudentJoinTarget,
     TermConfig,
 )
 from ..schema.selection import (
@@ -615,6 +617,40 @@ class CourseAPI(BaseAPI):
         """
         self.course_repository.set_student_join_link(
             course_id, term_id, StudentJoinLink(), session=session
+        )
+
+    # No permission check: holding a valid token is what allows a user to join.
+    def resolve_student_join_link(
+        self, token: str, now: datetime, session: Optional[Session] = None
+    ) -> StudentJoinTarget:
+        """Find the term a student join link leads to.
+
+        Args:
+            token: The token from the join link
+            now: The current (timezone-aware) time, to check the expiry against
+        Returns:
+            The term the link leads to, with only what the join page shows
+        Raises:
+            StudentJoinLinkInvalidError: If no term has the token, or the link has expired
+        """
+        found = self.course_repository.find_term_by_join_token(token, session=session)
+        if found is None:
+            raise StudentJoinLinkInvalidError()
+        course_id, term_id = found
+
+        join_link = self.course_repository.get_student_join_link(
+            course_id, term_id, session=session
+        )
+        if join_link.expires_at is not None and now >= join_link.expires_at:
+            raise StudentJoinLinkInvalidError()
+
+        course, term = self._get_course_and_term(course_id, term_id, session=session)
+        return StudentJoinTarget(
+            course_id=course_id,
+            course_name=course.metadata.course_name,
+            term_id=term_id,
+            student_access_start=term.student_access_start,
+            student_access_end=term.student_access_end,
         )
 
 
