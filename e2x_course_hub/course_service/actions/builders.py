@@ -28,6 +28,7 @@ from .models import (
     TermEnvironmentActions,
     TermMembersActions,
     TermSpawnActions,
+    TermStudentJoinLinkActions,
 )
 
 
@@ -118,6 +119,9 @@ def term_actions(can: Can) -> TermActions:
         ),
         accessPeriod=TermAccessPeriodActions(
             edit=can(CoursePermission.TERM_EDIT_ACCESS_PERIOD),
+        ),
+        studentJoinLink=TermStudentJoinLinkActions(
+            manage=can(CoursePermission.TERM_MANAGE_STUDENT_JOIN_LINK),
         ),
         spawn=TermSpawnActions(
             student=can(SpawnPermission.SPAWN_STUDENT_PROFILE),

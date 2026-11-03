@@ -29,6 +29,14 @@ export const termActionText = {
         "Choose when students can start notebook servers for this semester. Staff are not restricted.",
     },
   },
+  studentJoinLink: {
+    title: "Student join link",
+    manage: {
+      label: "Manage student join link",
+      description:
+        "Turn on, copy, regenerate or turn off the link with which students join this semester themselves.",
+    },
+  },
   spawn: {
     title: "Start environments",
     student: {

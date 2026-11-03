@@ -89,10 +89,15 @@ class TermAccessPeriodActions(BaseModel):
     edit: bool
 
 
+class TermStudentJoinLinkActions(BaseModel):
+    manage: bool
+
+
 class TermActions(BaseModel):
     view: bool
     remove: bool
     environment: TermEnvironmentActions
     accessPeriod: TermAccessPeriodActions
+    studentJoinLink: TermStudentJoinLinkActions
     spawn: TermSpawnActions
     members: TermMembersActions

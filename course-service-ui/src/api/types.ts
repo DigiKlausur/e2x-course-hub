@@ -95,6 +95,8 @@ export type TermConfig = Omit<
 
 export type TermActions = Schemas["TermActions"];
 export type StudentAccessPeriod = Schemas["StudentAccessPeriod"];
+export type StudentJoinLink = Schemas["StudentJoinLink"];
+export type StudentJoinLinkUpdate = Schemas["StudentJoinLinkUpdate"];
 export type TermSummaryResponse = Schemas["TermSummaryResponse"];
 
 export type TermDetailResponse = Omit<

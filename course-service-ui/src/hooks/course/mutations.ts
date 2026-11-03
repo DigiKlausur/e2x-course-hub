@@ -10,6 +10,7 @@ import type {
   EnvironmentUpdate,
   CreateTermRequest,
   StudentAccessPeriod,
+  StudentJoinLinkUpdate,
 } from "@api/types";
 
 import { courseKeys } from "./keys";
@@ -136,5 +137,43 @@ export function useUpdateTermAccessPeriod(courseId: string, termId: string) {
     mutationFn: (accessPeriod: StudentAccessPeriod) =>
       courseAPI.updateTermAccessPeriod(courseId, termId, accessPeriod),
     onSuccess: () => invalidateTerm(queryClient, courseId, termId),
+  });
+}
+
+const invalidateStudentJoinLink = (
+  queryClient: QueryClient,
+  courseId: string,
+  termId: string,
+) =>
+  queryClient.invalidateQueries({
+    queryKey: courseKeys.terms.studentJoinLink(courseId, termId),
+  });
+
+/** Turns the link on, or changes its expiry; a link that is on keeps its token. */
+export function useUpdateTermStudentJoinLink(courseId: string, termId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (update: StudentJoinLinkUpdate) =>
+      courseAPI.updateTermStudentJoinLink(courseId, termId, update),
+    onSuccess: () => invalidateStudentJoinLink(queryClient, courseId, termId),
+  });
+}
+
+export function useRegenerateTermStudentJoinLink(
+  courseId: string,
+  termId: string,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => courseAPI.regenerateTermStudentJoinLink(courseId, termId),
+    onSuccess: () => invalidateStudentJoinLink(queryClient, courseId, termId),
+  });
+}
+
+export function useDeleteTermStudentJoinLink(courseId: string, termId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => courseAPI.deleteTermStudentJoinLink(courseId, termId),
+    onSuccess: () => invalidateStudentJoinLink(queryClient, courseId, termId),
   });
 }

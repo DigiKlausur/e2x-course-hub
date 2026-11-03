@@ -4,6 +4,7 @@ import { Row } from "@components/ui/Row";
 import { Alert } from "@components/ui/Alert";
 import { SelectionBox } from "@components/ui/SelectionBox";
 import { StudentAccessPeriodDialog } from "@components/dialogs/StudentAccessPeriodDialog";
+import { StudentJoinLinkCard } from "@components/term/StudentJoinLinkCard";
 import { RuntimeConfigEditor } from "@components/infrastructure/RuntimeConfigEditor";
 import { AddMembersDialog } from "@components/membership/AddMembersDialog";
 import { TabbedMemberDataTableWithCurrentUser } from "@components/membership/TabbedMemberDataTableWithCurrentUser";
@@ -254,6 +255,14 @@ export function TermOverviewTab({ courseId, termId }: Props) {
             termId={termId}
             accessPeriod={term.access_period}
             onClose={() => setAccessPeriodDialogOpen(false)}
+          />
+        )}
+
+        {term?.actions.studentJoinLink.manage && (
+          <StudentJoinLinkCard
+            courseId={courseId}
+            termId={termId}
+            accessEnd={term.access_period.student_access_end ?? null}
           />
         )}
 

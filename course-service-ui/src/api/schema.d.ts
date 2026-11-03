@@ -916,6 +916,7 @@ export interface components {
             remove: boolean;
             environment: components["schemas"]["TermEnvironmentActions"];
             accessPeriod: components["schemas"]["TermAccessPeriodActions"];
+            studentJoinLink: components["schemas"]["TermStudentJoinLinkActions"];
             spawn: components["schemas"]["TermSpawnActions"];
             members: components["schemas"]["TermMembersActions"];
         };
@@ -976,6 +977,11 @@ export interface components {
             grader: boolean;
             /** Readonlygrader */
             readonlyGrader: boolean;
+        };
+        /** TermStudentJoinLinkActions */
+        TermStudentJoinLinkActions: {
+            /** Manage */
+            manage: boolean;
         };
         /** TermSummaryResponse */
         TermSummaryResponse: {

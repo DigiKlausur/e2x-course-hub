@@ -2850,6 +2850,9 @@
           "accessPeriod": {
             "$ref": "#/components/schemas/TermAccessPeriodActions"
           },
+          "studentJoinLink": {
+            "$ref": "#/components/schemas/TermStudentJoinLinkActions"
+          },
           "spawn": {
             "$ref": "#/components/schemas/TermSpawnActions"
           },
@@ -2863,6 +2866,7 @@
           "remove",
           "environment",
           "accessPeriod",
+          "studentJoinLink",
           "spawn",
           "members"
         ],
@@ -3022,6 +3026,19 @@
           "readonlyGrader"
         ],
         "title": "TermSpawnActions"
+      },
+      "TermStudentJoinLinkActions": {
+        "properties": {
+          "manage": {
+            "type": "boolean",
+            "title": "Manage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "manage"
+        ],
+        "title": "TermStudentJoinLinkActions"
       },
       "TermSummaryResponse": {
         "properties": {
