@@ -52,9 +52,10 @@ async def create_course(
     membership_api: MembershipAPIDep,
     session: DBSession,
 ):
-    course_api.add_course(user, course, session=session)
+    added_course = course_api.add_course(user, course, session=session)
     await membership_api.bootstrap_course_owner(course.metadata.course_id, user.username)
-    return course_api.get_course_metadata(user, course.metadata.course_id, session=session)
+    # `user` was loaded before it became a course owner, so it may not read the course yet.
+    return added_course.metadata
 
 
 @router.delete("/{course_id}", status_code=204)

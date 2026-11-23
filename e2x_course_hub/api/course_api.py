@@ -181,7 +181,9 @@ class CourseAPI(BaseAPI):
         self.course_repository.update_course(course_id, course, session=session)
 
     @require_permission(CoursePermission.ADD_COURSE)
-    def add_course(self, user: UserLike, course: CourseConfig, session: Optional[Session] = None):
+    def add_course(
+        self, user: UserLike, course: CourseConfig, session: Optional[Session] = None
+    ) -> CourseConfig:
         """Add a new course with the specified ID and name.
 
         Args:
@@ -189,11 +191,13 @@ class CourseAPI(BaseAPI):
             course: The CourseConfig object containing the course configuration
         Raises:
             CourseExistsError: If a course with the same ID already exists
+        Returns:
+            The CourseConfig object for the newly added course
         """
         if self.course_repository.get_course(course.metadata.course_id, session=session):
             raise CourseExistsError(course.metadata.course_id)
         self.assert_infrastructure_options_exist(course)
-        self.course_repository.create_course(course, session=session)
+        return self.course_repository.create_course(course, session=session)
 
     @require_permission(CoursePermission.COURSE_REMOVE)
     def remove_course(self, user: UserLike, course_id: str, session: Optional[Session] = None):
